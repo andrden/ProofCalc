@@ -1,0 +1,4 @@
+$a real 3
+
+$e real x
+$p x + 0 = x
