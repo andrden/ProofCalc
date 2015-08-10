@@ -13,7 +13,7 @@ import java.util.List;
  * Created by denny on 8/6/15.
  */
 public class Parser {
-    void parseMathDoc(BufferedReader br) throws IOException{
+    List<Rule> parseMathDoc(BufferedReader br) throws IOException{
         String line;
         List<String> lines = new ArrayList<>();
         List<Rule> rules = new ArrayList<>();
@@ -32,18 +32,25 @@ public class Parser {
         if( ! lines.isEmpty() ) {
             rules.add(ruleFromLines(lines));
         }
-        System.out.println("Rules="+rules);
+        return rules;
     }
 
     Rule ruleFromLines(List<String> lines){
+        List<Expr> cond = new ArrayList<>();
         for( String l : lines ){
             LinkedList<String> line = new LinkedList<>(Util.splitLine(l));
             if( line.get(0).equals("$e") ){
-                //cond.add(line.subList(1, line.size()));
+                line.remove(0);
+                Expr e = parse(line);
+                cond.add(e);
             } else if( line.get(0).equals("$a") ){
                 line.remove(0);
                 Expr assertion = parse(line);
-                return new Rule(assertion);
+                return new Rule(false, assertion, cond);
+            } else if( line.get(0).equals("$?") ){
+                line.remove(0);
+                Expr assertion = parse(line);
+                return new Rule(true, assertion, cond);
             }
         }
         return null;
@@ -58,20 +65,68 @@ public class Parser {
 
     Expr parseByOps(LinkedList<String> line){
         List list = new ArrayList(line);
+        parseAtoms(list);
         while( infixOp(list, "*") );
         while( infixOp(list, "+","-") );
-        return (Expr)list.get(0);
+        while( parseBrackets(list) );
+        while( infixOp(list, "=") );
+        prefixOp(list, "real");
+        if(list.size()==1 && list.get(0) instanceof Expr) {
+            return (Expr) list.get(0);
+        }
+        throw new RuntimeException(""+list);
+    }
+
+    void parseAtoms(List list){
+        for( int i = 0; i<list.size(); i++ ) {
+            String s = (String)list.get(i);
+            if( (s.charAt(0)>='0' && s.charAt(0)<='9') || s.charAt(0)=='x' ){
+                list.set(i, new Expr(s));
+            }
+        }
+    }
+
+    boolean parseBrackets(List list){
+        for( int i = 1; i<list.size()-1; i++ ) {
+            if( list.get(i) instanceof Expr && "(".equals(list.get(i-1)) && ")".equals(list.get(i+1)) ){
+                list.remove(i+1);
+                list.remove(i-1);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean prefixOp(List list, String ...  ops){
+        for( int i = 0; i<list.size()-1; i++ ){
+            Object op = list.get(i);
+            if( Arrays.asList(ops).contains(list.get(i))) {
+                Object right = list.get(i+1);
+                if( right instanceof Expr ) {
+                    Expr comb = new Expr((String) op, (Expr)right);
+                    list.set(i, comb);
+                    list.remove(i + 1);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     boolean infixOp(List list, String ...  ops){
         for( int i = 1; i<list.size()-1; i++ ){
             Object op = list.get(i);
             if( Arrays.asList(ops).contains(list.get(i))) {
-                Expr comb = new Expr((String)op, wrap(list.get(i-1)), wrap(list.get(i+1)));
-                list.set(i, comb);
-                list.remove(i+1);
-                list.remove(i-1);
-                return true;
+                Object left = list.get(i-1);
+                Object right = list.get(i+1);
+                if( left instanceof Expr && right instanceof Expr ) {
+                    Expr comb = new Expr((String) op, (Expr)left, (Expr)right);
+                    list.set(i, comb);
+                    list.remove(i + 1);
+                    list.remove(i - 1);
+                    parseBrackets(list);
+                    return true;
+                }
             }
         }
         return false;
@@ -83,7 +138,7 @@ public class Parser {
         }
         return new Expr((String)o);
     }
-
+/*
     private Expr parseSequential(LinkedList<String> line) {
         Expr arg=null;
         while( ! line.isEmpty() ){
@@ -99,4 +154,5 @@ public class Parser {
         }
         return null;
     }
+    */
 }

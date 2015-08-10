@@ -13,6 +13,13 @@ public class Expr {
     public Expr(String node) {
         this.node = node;
     }
+
+    public Expr(String node, Expr a1) {
+        this.node = node;
+        sub = new ArrayList<>();
+        sub.add(a1);
+    }
+
     public Expr(String node, Expr a1, Expr a2) {
         this.node = node;
         sub = new ArrayList<>();
@@ -27,5 +34,10 @@ public class Expr {
             ret += " " + e.toLispString();
         }
         return ret + ")";
+    }
+
+    @Override
+    public String toString() {
+        return toLispString();
     }
 }
