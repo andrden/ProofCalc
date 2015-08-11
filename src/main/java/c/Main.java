@@ -17,6 +17,11 @@ public class Main {
 
         List<Rule> rules = parser.parseMathDoc(br);
         System.out.println("Rules="+rules);
+        for( Rule r : rules ){
+            if( r.quest ){
+                new Calc(rules).quest(r);
+            }
+        }
 
     }
 

@@ -80,7 +80,7 @@ public class Parser {
     void parseAtoms(List list){
         for( int i = 0; i<list.size(); i++ ) {
             String s = (String)list.get(i);
-            if( (s.charAt(0)>='0' && s.charAt(0)<='9') || s.charAt(0)=='x' ){
+            if( (s.charAt(0)>='0' && s.charAt(0)<='9') || Type.isVar(s) ){
                 list.set(i, new Expr(s));
             }
         }
