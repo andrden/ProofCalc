@@ -34,6 +34,11 @@ public class Main {
         chk(parser, "3 * 2 + 1", "(+ (* 3 2) 1)");
         chk(parser, "3 + 2 * 1", "(+ 3 (* 2 1))");
         chk(parser, "3 = 2 + 1", "(= 3 (+ 2 1))");
+        chk(parser, "f x", "(apply f x)");
+        chk(parser, "f ( x )", "(apply f x)");
+        chk(parser, "f ( x + 1 )", "(apply f (+ x 1))");
+        chk(parser, "g ( f ( x + 1 ) )", "(apply g (apply f (+ x 1)))");
+        chk(parser, "5 - f ( x + 1 )", "(- 5 (apply f (+ x 1)))");
     }
 
     static void chk(Parser parser, String expr, String lisp){

@@ -66,9 +66,9 @@ public class Parser {
     Expr parseByOps(LinkedList<String> line){
         List list = new ArrayList(line);
         parseAtoms(list);
+        parseBracketsAndApply(list);
         while( infixOp(list, "*") );
-        while( infixOp(list, "+","-") );
-        while( parseBrackets(list) );
+        while( infixOp(list, "+", "-") );
         while( infixOp(list, "=") );
         prefixOp(list, "real");
         if(list.size()==1 && list.get(0) instanceof Expr) {
@@ -86,11 +86,34 @@ public class Parser {
         }
     }
 
+    void parseBracketsAndApply(List list){
+        boolean change;
+        do {
+            change = false;
+            while (parseBrackets(list)) change = true;
+            while (parseApply(list)) change = true;
+        }while(change);
+    }
+
     boolean parseBrackets(List list){
+        // ( vvv ) => vvv
         for( int i = 1; i<list.size()-1; i++ ) {
             if( list.get(i) instanceof Expr && "(".equals(list.get(i-1)) && ")".equals(list.get(i+1)) ){
                 list.remove(i+1);
                 list.remove(i-1);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean parseApply(List list){
+        // fff xxx => apply(fff,xxx)
+        for( int i=list.size()-1; i>=1; i-- ){ // associative right to left
+            if( list.get(i) instanceof Expr && list.get(i-1) instanceof Expr ){
+                Expr apply = new Expr("apply", (Expr)list.get(i-1), (Expr)list.get(i));
+                list.set(i-1, apply);
+                list.remove(i);
                 return true;
             }
         }
@@ -124,7 +147,7 @@ public class Parser {
                     list.set(i, comb);
                     list.remove(i + 1);
                     list.remove(i - 1);
-                    parseBrackets(list);
+                    parseBracketsAndApply(list);
                     return true;
                 }
             }
