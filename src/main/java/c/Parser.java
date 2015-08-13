@@ -60,13 +60,44 @@ public class Parser {
 
     Expr parse(LinkedList<String> line){
         //return parseSequential(line);
+        //return parseByOps(line);
+        ArrayList lineCopy = new ArrayList<>(line);
+        parseAtoms(lineCopy);
+        return parseByBrackets(new ArrayList<>(lineCopy));
+    }
+
+    Expr parseByBrackets(List line){
+        for( int i=0; i<line.size(); i++ ){
+            if( "(".equals(line.get(i)) ){
+                boolean parsed=false;
+                int depth=1;
+                for( int j=i+1; j<line.size(); j++ ){
+                    if( "(".equals(line.get(j)) ) depth++;
+                    if( ")".equals(line.get(j)) ) depth--;
+                    if( depth==0 ){
+                        List before = line.subList(0, i);
+                        List after = line.subList(j+1, line.size());
+                        Expr inBrackets = parseByBrackets(line.subList(i + 1, j));
+                        line = new ArrayList<>();
+                        line.addAll(before);
+                        line.add(inBrackets);
+                        line.addAll(after);
+                        parsed = true;
+                        break;
+                    }
+                }
+                if( ! parsed ){
+                    throw new RuntimeException("i="+i+" line="+line);
+                }
+            }
+        }
+
         return parseByOps(line);
     }
 
-    Expr parseByOps(LinkedList<String> line){
+    Expr parseByOps(List<String> line){
         List list = new ArrayList(line);
-        parseAtoms(list);
-        parseBracketsAndApply(list);
+        while( parseApply(list) );
         while( infixOp(list, "*") );
         while( infixOp(list, "+", "-") );
         while( infixOp(list, "=") );
@@ -80,32 +111,32 @@ public class Parser {
     void parseAtoms(List list){
         for( int i = 0; i<list.size(); i++ ) {
             String s = (String)list.get(i);
-            if( (s.charAt(0)>='0' && s.charAt(0)<='9') || Type.isVar(s) ){
+            if( (s.charAt(0)>='0' && s.charAt(0)<='9') || Type.isVarOrConst(s) ){
                 list.set(i, new Expr(s));
             }
         }
     }
 
-    void parseBracketsAndApply(List list){
-        boolean change;
-        do {
-            change = false;
-            while (parseBrackets(list)) change = true;
-            while (parseApply(list)) change = true;
-        }while(change);
-    }
+//    void parseBracketsAndApply(List list){
+//        boolean change;
+//        do {
+//            change = false;
+//            while (parseBrackets(list)) change = true;
+//            while (parseApply(list)) change = true;
+//        }while(change);
+//    }
 
-    boolean parseBrackets(List list){
-        // ( vvv ) => vvv
-        for( int i = 1; i<list.size()-1; i++ ) {
-            if( list.get(i) instanceof Expr && "(".equals(list.get(i-1)) && ")".equals(list.get(i+1)) ){
-                list.remove(i+1);
-                list.remove(i-1);
-                return true;
-            }
-        }
-        return false;
-    }
+//    boolean parseBrackets(List list){
+//        // ( vvv ) => vvv
+//        for( int i = 1; i<list.size()-1; i++ ) {
+//            if( list.get(i) instanceof Expr && "(".equals(list.get(i-1)) && ")".equals(list.get(i+1)) ){
+//                list.remove(i+1);
+//                list.remove(i-1);
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
     boolean parseApply(List list){
         // fff xxx => apply(fff,xxx)
@@ -147,7 +178,7 @@ public class Parser {
                     list.set(i, comb);
                     list.remove(i + 1);
                     list.remove(i - 1);
-                    parseBracketsAndApply(list);
+                    //parseBracketsAndApply(list);
                     return true;
                 }
             }
@@ -155,12 +186,12 @@ public class Parser {
         return false;
     }
 
-    Expr wrap(Object o){
-        if( o instanceof Expr ){
-            return (Expr)o;
-        }
-        return new Expr((String)o);
-    }
+//    Expr wrap(Object o){
+//        if( o instanceof Expr ){
+//            return (Expr)o;
+//        }
+//        return new Expr((String)o);
+//    }
 /*
     private Expr parseSequential(LinkedList<String> line) {
         Expr arg=null;
