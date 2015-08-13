@@ -56,11 +56,7 @@ public class Parser {
         return null;
     }
 
-    List<String> ops = Arrays.asList("*","+","=");
-
     Expr parse(LinkedList<String> line){
-        //return parseSequential(line);
-        //return parseByOps(line);
         ArrayList lineCopy = new ArrayList<>(line);
         parseAtoms(lineCopy);
         return parseByBrackets(new ArrayList<>(lineCopy));
@@ -117,27 +113,6 @@ public class Parser {
         }
     }
 
-//    void parseBracketsAndApply(List list){
-//        boolean change;
-//        do {
-//            change = false;
-//            while (parseBrackets(list)) change = true;
-//            while (parseApply(list)) change = true;
-//        }while(change);
-//    }
-
-//    boolean parseBrackets(List list){
-//        // ( vvv ) => vvv
-//        for( int i = 1; i<list.size()-1; i++ ) {
-//            if( list.get(i) instanceof Expr && "(".equals(list.get(i-1)) && ")".equals(list.get(i+1)) ){
-//                list.remove(i+1);
-//                list.remove(i-1);
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-
     boolean parseApply(List list){
         // fff xxx => apply(fff,xxx)
         for( int i=list.size()-1; i>=1; i-- ){ // associative right to left
@@ -178,7 +153,6 @@ public class Parser {
                     list.set(i, comb);
                     list.remove(i + 1);
                     list.remove(i - 1);
-                    //parseBracketsAndApply(list);
                     return true;
                 }
             }
@@ -186,27 +160,4 @@ public class Parser {
         return false;
     }
 
-//    Expr wrap(Object o){
-//        if( o instanceof Expr ){
-//            return (Expr)o;
-//        }
-//        return new Expr((String)o);
-//    }
-/*
-    private Expr parseSequential(LinkedList<String> line) {
-        Expr arg=null;
-        while( ! line.isEmpty() ){
-            String el = line.remove(0);
-            if( line.isEmpty() ){
-                return new Expr(el);
-            }
-            if( arg==null ){
-                arg = new Expr(el);
-            }else if( ops.contains(el) ){
-                return new Expr(el, arg, parse(line));
-            }
-        }
-        return null;
-    }
-    */
 }
