@@ -3,8 +3,16 @@ $a real 3
 $e real x
 $a x + 0 = x
 
+$a sin ( π / 2 ) = 1
+
+$a cos ( x ) = √ ( 1 - sin x * sin x )
+
+
+
 $? 3 + 0
 
 $? ( 3 + 0 )
 
 $? 3 + 0 + 0
+
+$? cos ( π / 2 )

@@ -12,6 +12,7 @@ import java.util.List;
 /**
  * Created by denny on 8/6/15.
  */
+@SuppressWarnings("unchecked")
 public class Parser {
     List<Rule> parseMathDoc(BufferedReader br) throws IOException{
         String line;
@@ -94,7 +95,7 @@ public class Parser {
     Expr parseByOps(List<String> line){
         List list = new ArrayList(line);
         while( parseApply(list) );
-        while( infixOp(list, "*") );
+        while( infixOp(list, "*", "/") );
         while( infixOp(list, "+", "-") );
         while( infixOp(list, "=") );
         prefixOp(list, "real");
