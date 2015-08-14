@@ -3,6 +3,12 @@ $a real 3
 $e real x
 $a x + 0 = x
 
+$a 1 * 1 = 1
+
+$a 1 - 1 = 0
+
+$a √ 0 = 0
+
 $a sin ( π / 2 ) = 1
 
 $a cos ( x ) = √ ( 1 - sin x * sin x )
