@@ -2,8 +2,10 @@ package c;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by denny on 8/6/15.
@@ -15,11 +17,25 @@ public class Main {
         Parser parser = new Parser();
         testParseLine(parser);
 
-        List<Rule> rules = parser.parseMathDoc(br);
+        List<Rule> rulesAndQuests = parser.parseMathDoc(br);
+
+        List<Rule> rules = rulesAndQuests.stream()
+                .filter(r -> !(r instanceof QuestRule))
+                .collect(Collectors.toCollection(ArrayList::new));
+
         System.out.println("Rules="+rules);
-        for( Rule r : rules ){
-            if( r.quest ){
-                new Calc(rules).quest(r);
+        for( Rule r : rulesAndQuests ){
+            if( r instanceof QuestRule ){
+                List<Rule> allRules = new ArrayList<>();
+                allRules.addAll(rules);
+                QuestRule qrule = (QuestRule) r;
+                allRules.addAll(qrule.localConditionsAsRules());
+                Expr ret = new Calc(allRules).quest(r);
+                if( qrule.answer==null ){
+                    System.out.println("Correct answer was not specified!");
+                }else if( ! ret.toLispString().equals(qrule.answer.toLispString()) ){
+                    throw new IllegalStateException("Not reached answer="+qrule.answer);
+                }
             }
         }
 

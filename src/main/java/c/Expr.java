@@ -1,9 +1,6 @@
 package c;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by denny on 8/10/15.
@@ -62,7 +59,13 @@ public class Expr {
     }
 
     Map<String,Expr> unify(Expr concrete){
-       if( ! node.equals(concrete.node) || sub.size()!=concrete.sub.size() ){
+        if( ! node.equals(concrete.node) ){
+            return null;
+        }
+        if( sub==null && concrete.sub==null ){
+            return Collections.singletonMap(node, this); // same variable
+        }
+       if( sub.size()!=concrete.sub.size() ){
            return null;
        }
        Map<String,Expr> map = new HashMap<>();

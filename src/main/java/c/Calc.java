@@ -13,7 +13,7 @@ public class Calc {
         this.rules = rules;
     }
 
-    void quest(Rule q){
+    Expr quest(Rule q){
         System.out.println("\nQUEST:\n"+q+"\n");
 
         Expr expr = q.assertion;
@@ -26,6 +26,7 @@ public class Calc {
                 System.out.println("QUEST res: "+expr);
             }
         }
+        return expr;
     }
 
     Expr exprSimplifyDeep(Expr expr) {
@@ -50,7 +51,8 @@ public class Calc {
     Expr exprSimplify(Expr expr) {
         for (Rule r : rules) {
             if (r.assertion.node.equals("=")) {
-                Map<String, Expr> unifMap = r.assertion.sub.get(0).unify(expr);
+                Expr template = r.assertion.sub.get(0);
+                Map<String, Expr> unifMap = template.unify(expr);
                 if( unifMap!=null ) {
                     //System.out.println("unify with " + r + " results in " + unifMap);
                     Expr exprNew = r.assertion.sub.get(1).substitute(unifMap);

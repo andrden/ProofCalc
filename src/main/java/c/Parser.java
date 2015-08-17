@@ -38,6 +38,14 @@ public class Parser {
 
     Rule ruleFromLines(List<String> lines){
         List<Expr> cond = new ArrayList<>();
+        Expr answer = null;
+        for( String l : lines ) {
+            LinkedList<String> line = new LinkedList<>(Util.splitLine(l));
+            if (line.get(0).equals("$=")) {
+                line.remove(0);
+                answer = parse(line);
+            }
+        }
         for( String l : lines ){
             LinkedList<String> line = new LinkedList<>(Util.splitLine(l));
             if( line.get(0).equals("$e") ){
@@ -47,14 +55,21 @@ public class Parser {
             } else if( line.get(0).equals("$a") ){
                 line.remove(0);
                 Expr assertion = parse(line);
-                return new Rule(false, assertion, cond);
+                if( answer!=null ){
+                    throw new IllegalStateException();
+                }
+                return new Rule(assertion, cond);
             } else if( line.get(0).equals("$?") ){
                 line.remove(0);
                 Expr assertion = parse(line);
-                return new Rule(true, assertion, cond);
+                QuestRule qr = new QuestRule(assertion, cond, answer);
+                if( answer==null ){
+                    System.out.println("No answer given for: "+qr);
+                }
+                return qr;
             }
         }
-        return null;
+        throw new IllegalArgumentException(""+lines);
     }
 
     Expr parse(LinkedList<String> line){
