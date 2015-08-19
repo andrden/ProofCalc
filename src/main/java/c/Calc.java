@@ -1,5 +1,6 @@
 package c;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -18,37 +19,45 @@ public class Calc {
 
         Expr expr = q.assertion;
         for(;;) {
-            Expr exprNew = exprSimplifyDeep(expr);
-            if( exprNew==null ){
+            List<Expr> exprNew = exprSimplifyDeep(expr);
+            if( exprNew.isEmpty() ){
                 break;
             }else{
-                expr = exprNew;
+                //expr = exprNew.get(0);
+                expr = shortest(exprNew);
                 System.out.println("QUEST res: "+expr.toMathString());
             }
         }
         return expr;
     }
 
-    Expr exprSimplifyDeep(Expr expr) {
-        //System.out.println("Try simplify: "+expr);
-        Expr enew = exprSimplify(expr);
-        if( enew!=null ){
-            return enew;
-        }
-        if( expr.sub==null ){
-            return null;
-        }
-        for( int i=0; i<expr.sub.size(); i++ ){
-            Expr e = exprSimplifyDeep(expr.sub.get(i));
-            if( e!=null ){
-                expr.sub.set(i, e);
-                return expr;
+    Expr shortest(List<Expr> exprNew){
+        Expr sh=null;
+        for( Expr e : exprNew ){
+            if( sh==null || sh.toLispString().length()>e.toLispString().length() ){
+                sh = e;
             }
         }
-        return null;
+        return sh;
     }
 
-    Expr exprSimplify(Expr expr) {
+    List<Expr> exprSimplifyDeep(Expr expr) {
+        List<Expr> ways = exprSimplify(expr);
+        if( expr.sub!=null ) {
+            for (int i = 0; i < expr.sub.size(); i++) {
+                List<Expr> elist = exprSimplifyDeep(expr.sub.get(i));
+                for( Expr e : elist ){
+                    Expr clone = expr.shallowClone();
+                    clone.sub.set(i, e);
+                    ways.add(clone);
+                }
+            }
+        }
+        return ways;
+    }
+
+    List<Expr> exprSimplify(Expr expr) {
+        List<Expr> ways = new ArrayList<>();
         for (Rule r : rules) {
             if (r.assertion.node.equals("=")) {
                 Expr template = r.assertion.sub.get(0);
@@ -57,10 +66,10 @@ public class Calc {
                     //System.out.println("unify with " + r + " results in " + unifMap);
                     Expr exprNew = r.assertion.sub.get(1).substitute(unifMap);
                     //System.out.println(expr + " ==simplified==> " + exprNew);
-                    return exprNew;
+                    ways.add(exprNew);
                 }
             }
         }
-        return null;
+        return ways;
     }
 }

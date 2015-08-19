@@ -30,6 +30,12 @@ public class Expr {
         return sub==null && Type.isVar(node);
     }
 
+    Expr shallowClone(){
+        Expr ret = new Expr(node);
+        ret.sub = new ArrayList<>(sub);
+        return ret;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

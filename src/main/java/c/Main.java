@@ -23,7 +23,7 @@ public class Main {
                 .filter(r -> !(r instanceof QuestRule))
                 .collect(Collectors.toCollection(ArrayList::new));
 
-        System.out.println("Rules="+rules);
+        //System.out.println("Rules="+rules);
         for( Rule r : rulesAndQuests ){
             if( r instanceof QuestRule ){
                 List<Rule> allRules = new ArrayList<>();
