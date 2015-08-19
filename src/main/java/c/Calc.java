@@ -23,7 +23,7 @@ public class Calc {
                 break;
             }else{
                 expr = exprNew;
-                System.out.println("QUEST res: "+expr);
+                System.out.println("QUEST res: "+expr.toMathString());
             }
         }
         return expr;

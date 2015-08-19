@@ -92,6 +92,32 @@ public class Expr {
         return ret + ")";
     }
 
+    public String toMathString() {
+        if( sub==null ) return node;
+        if( Type.infixOps.contains(node) && sub.size()>1 ){
+            String ret = "(";
+            int i=0;
+            for (Expr e : sub) {
+                ret += e.toMathString();
+                if( i<sub.size()-1 ){
+                    ret += " " + node + " ";
+                }
+                i++;
+            }
+            return ret + ")";
+        }else if( node.equals("apply") && sub.size()==2 ) {
+            String ret = "(" ;
+            ret += sub.get(0).toMathString() + " " + sub.get(1).toMathString();
+            return ret + ")";
+        } else {
+            String ret = "(" + node;
+            for (Expr e : sub) {
+                ret += " " + e.toMathString();
+            }
+            return ret + ")";
+        }
+    }
+
     @Override
     public String toString() {
         return toLispString();

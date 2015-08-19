@@ -28,7 +28,7 @@ public class Parser {
             }else{
                 lines.add(line);
             }
-            System.out.println(line);
+            //System.out.println(line);
         }
         if( ! lines.isEmpty() ) {
             rules.add(ruleFromLines(lines));
