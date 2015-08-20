@@ -65,28 +65,38 @@ public class Expr {
     }
 
     Map<String,Expr> unify(Expr concrete){
+        Map<String,Expr> map = new HashMap<>();
+        if( unify(concrete, map) ){
+            return map;
+        }
+        return null;
+    }
+
+    boolean unify(Expr concrete, Map<String,Expr> vars){
+        if( isVar() ){
+            Expr val = vars.get(node);
+            if( val==null ){
+                vars.put(node, concrete);
+                return true;
+            }
+            return val.equals(concrete);
+        }
+
         if( ! node.equals(concrete.node) ){
-            return null;
+            return false;
         }
         if( sub==null && concrete.sub==null ){
-            return Collections.singletonMap(node, this); // same variable
+            return true;
         }
        if( sub.size()!=concrete.sub.size() ){
-           return null;
+           return false;
        }
-       Map<String,Expr> map = new HashMap<>();
        for( int i=0; i<sub.size(); i++ ){
-         if( ! sub.get(i).equals(concrete.sub.get(i)) ){
-             if( !sub.get(i).isVar() ){
-                 return null;
-             }
-             if( map.containsKey(sub.get(i).node) ){
-                 throw new IllegalStateException();
-             }
-             map.put(sub.get(i).node, concrete.sub.get(i));
+         if( ! sub.get(i).unify(concrete.sub.get(i), vars) ){
+             return false;
          }
        }
-       return map;
+       return true;
     }
 
     public String toLispString() {

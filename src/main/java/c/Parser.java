@@ -72,6 +72,11 @@ public class Parser {
         throw new IllegalArgumentException(""+lines);
     }
 
+    Expr parse(String line) {
+        return parse(new LinkedList<>(Util.splitLine(line)));
+    }
+
+
     Expr parse(LinkedList<String> line){
         ArrayList lineCopy = new ArrayList<>(line);
         parseAtoms(lineCopy);

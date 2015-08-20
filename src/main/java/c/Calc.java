@@ -23,8 +23,11 @@ public class Calc {
             if( exprNew.isEmpty() ){
                 break;
             }else{
-                //expr = exprNew.get(0);
-                expr = shortest(exprNew);
+                Expr exprSh = shortest(exprNew);
+                if( exprSh.equals(expr) ){
+                    break;
+                }
+                expr = exprSh;
                 System.out.println("QUEST res: "+expr.toMathString());
             }
         }
@@ -63,13 +66,36 @@ public class Calc {
                 Expr template = r.assertion.sub.get(0);
                 Map<String, Expr> unifMap = template.unify(expr);
                 if( unifMap!=null ) {
-                    //System.out.println("unify with " + r + " results in " + unifMap);
-                    Expr exprNew = r.assertion.sub.get(1).substitute(unifMap);
-                    //System.out.println(expr + " ==simplified==> " + exprNew);
-                    ways.add(exprNew);
+                    boolean canUseRule = true;
+                    for( Expr cond : r.cond ){
+                        Expr condSubs = cond.substitute(unifMap);
+                        Map<String, Expr> unifMapCond = checkIfTrue(condSubs);
+                        if( unifMapCond==null ){
+                            canUseRule = false;
+                            break;
+                        }else{
+                            unifMap.putAll(unifMapCond);
+                        }
+                    }
+                    if( canUseRule ) {
+                        //System.out.println("unify with " + r + " results in " + unifMap);
+                        Expr exprNew = r.assertion.sub.get(1).substitute(unifMap);
+                        //System.out.println(expr + " ==simplified==> " + exprNew);
+                        ways.add(exprNew);
+                    }
                 }
             }
         }
         return ways;
+    }
+
+    Map<String, Expr> checkIfTrue(Expr expr){
+        for (Rule r : rules) {
+            Map<String, Expr> unifMap = expr.unify(r.assertion);
+            if( unifMap!=null ){
+                return unifMap;
+            }
+        }
+        return null;
     }
 }

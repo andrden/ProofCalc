@@ -14,9 +14,11 @@ public class Main {
     public static void main(String[] args) throws Exception{
         BufferedReader br =
                 new BufferedReader(new InputStreamReader(Main.class.getClassLoader().getResourceAsStream("math.txt")));
-        Parser parser = new Parser();
-        testParseLine(parser);
 
+        testParseLine();
+        testUnify();
+
+        Parser parser = new Parser();
         List<Rule> rulesAndQuests = parser.parseMathDoc(br);
 
         List<Rule> rules = rulesAndQuests.stream()
@@ -41,7 +43,14 @@ public class Main {
 
     }
 
-    static void testParseLine(Parser parser){
+    static void testUnify(){
+        Parser parser = new Parser();
+        chkUnify(parser, "x + 5", "7 + 5", "{x=7}");
+        chkUnify(parser, "x + 1 = 5", "4 + 1 = 5", "{x=4}");
+    }
+
+    static void testParseLine(){
+        Parser parser = new Parser();
         chk(parser, "3 + 2 + 1", "(+ (+ 3 2) 1)");
         chk(parser, "3 - 2 + 1", "(+ (- 3 2) 1)");
         chk(parser, "3 - ( 2 + 1 )", "(- 3 (+ 2 1))");
@@ -58,8 +67,15 @@ public class Main {
         chk(parser, "5 - f ( x + 1 )", "(- 5 (apply f (+ x 1)))");
     }
 
+    static void chkUnify(Parser parser, String template, String concrete, String resMap){
+        String res = parser.parse(template).unify(parser.parse(concrete)).toString();
+        if( ! res.equals(resMap) ){
+            throw new RuntimeException(res + " NOT " + resMap);
+        }
+    }
+
     static void chk(Parser parser, String expr, String lisp){
-        Expr e = parser.parse(new LinkedList<>(Util.splitLine(expr)));
+        Expr e = parser.parse(expr);
         String lispGen = e.toLispString();
         if( ! lispGen.equals(lisp) ){
             throw new RuntimeException(expr+ " => " + lispGen + " NOT " + lisp);
