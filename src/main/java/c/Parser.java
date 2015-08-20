@@ -117,7 +117,7 @@ public class Parser {
         while( parseApply(list) );
         while( infixOp(list, "*", "/") );
         while( infixOp(list, "+", "-") );
-        while( infixOp(list, "=") );
+        while( infixOp(list, "=","≥","≤") );
         prefixOp(list, "real");
         if(list.size()==1 && list.get(0) instanceof Expr) {
             return (Expr) list.get(0);

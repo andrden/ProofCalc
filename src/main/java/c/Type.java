@@ -9,7 +9,7 @@ public class Type {
     static Set<String> vars = new HashSet<>(Arrays.asList("n", "x", "y", "f", "g"));
     static Set<String> consts = new HashSet<>(Arrays.asList("sin", "cos", "π", "√", "xx", "yy"));
 
-    static Set<String> infixOps = new HashSet<>(Arrays.asList("+", "-", "*", "/"));
+    static Set<String> infixOps = new HashSet<>(Arrays.asList("+", "-", "*", "/", "≤","≥"));
 
     static boolean isVar(String s){
         return vars.contains(s);
