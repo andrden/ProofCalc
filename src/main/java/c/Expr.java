@@ -26,6 +26,11 @@ public class Expr {
         sub.add(a2);
     }
 
+    public Expr(String node, List<Expr> sub) {
+        this.node = node;
+        this.sub = sub;
+    }
+
     boolean isVar(){
         return sub==null && Type.isVar(node);
     }

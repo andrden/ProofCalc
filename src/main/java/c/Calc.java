@@ -18,6 +18,10 @@ public class Calc {
         System.out.println("\nQUEST:\n"+q+"\n");
 
         Expr expr = q.assertion;
+        expr = PlusMinusRule.optimize(expr);
+        if( ! expr.equals(q.assertion) ){
+            System.out.println("QUEST res: "+expr.toMathString());
+        }
         for(;;) {
             List<Expr> exprNew = exprSimplifyDeep(expr);
             if( exprNew.isEmpty() ){
@@ -28,6 +32,7 @@ public class Calc {
                     break;
                 }
                 expr = exprSh;
+                expr = PlusMinusRule.optimize(expr);
                 System.out.println("QUEST res: "+expr.toMathString());
             }
         }
