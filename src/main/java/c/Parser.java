@@ -115,6 +115,7 @@ public class Parser {
     Expr parseByOps(List<String> line){
         List list = new ArrayList(line);
         while( parseApply(list) );
+        while( infixOp(list, "^") );
         while( infixOp(list, "*", "/") );
         while( infixOp(list, "+", "-") );
         while( infixOp(list, "=","≥","≤") );
