@@ -17,8 +17,11 @@ public class Calc {
     Expr quest(Rule q){
         System.out.println("\nQUEST:\n"+q+"\n");
 
+        AssocCommutCancelRule plusMinus = new AssocCommutCancelRule("+","-","0");
+        AssocCommutCancelRule multDiv = new AssocCommutCancelRule("*","/","1");
+
         Expr expr = q.assertion;
-        expr = PlusMinusRule.optimize(expr);
+        expr = multDiv.optimizeDeep(plusMinus.optimizeDeep(expr));
         if( ! expr.equals(q.assertion) ){
             System.out.println("QUEST res: "+expr.toMathString());
         }
@@ -32,8 +35,9 @@ public class Calc {
                     break;
                 }
                 expr = exprSh;
-                expr = PlusMinusRule.optimize(expr);
+                expr = multDiv.optimizeDeep(plusMinus.optimizeDeep(expr));
                 System.out.println("QUEST res: "+expr.toMathString());
+                //System.out.println("QUEST res latex: "+expr.toLatexString());
             }
         }
         return expr;

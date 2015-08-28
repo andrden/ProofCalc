@@ -139,6 +139,44 @@ public class Expr {
         }
     }
 
+    /*
+\begin{math}
+x^2
+\end{math}
+     */
+    public String toLatexString() {
+        if( sub==null ) return node;
+        if( "/".equals(node) && sub.size()==2 ) {
+            return "\\frac{"+sub.get(0).toLatexString()+"}{"+sub.get(1).toLatexString()+"}";
+        } else if( Type.infixOps.contains(node) && sub.size()>1 ){
+            String ret = "(";
+            int i=0;
+            for (Expr e : sub) {
+                ret += e.toLatexString();
+                if( i<sub.size()-1 ){
+                    ret += " " + node + " ";
+                }
+                i++;
+            }
+            return ret + ")";
+        }else if( node.equals("apply") && sub.size()==2 ) {
+            String func = sub.get(0).toLatexString();
+            if( "exp".equals(func) ){
+                return "e^{"+sub.get(1).toLatexString()+"}";
+            }else {
+                String ret = "(";
+                ret += func + " " + sub.get(1).toLatexString();
+                return ret + ")";
+            }
+        } else {
+            String ret = "(" + node;
+            for (Expr e : sub) {
+                ret += " " + e.toLatexString();
+            }
+            return ret + ")";
+        }
+    }
+
     @Override
     public String toString() {
         return toLispString();
