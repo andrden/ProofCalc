@@ -1,8 +1,6 @@
 package c;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by denny on 8/11/15.
@@ -14,6 +12,31 @@ public class Calc {
         this.rules = rules;
     }
 
+    static class FringeEl{
+        Expr expr;
+
+        FringeEl(Expr expr) {
+            this.expr = expr;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof FringeEl)) return false;
+
+            FringeEl fringeEl = (FringeEl) o;
+
+            if (expr != null ? !expr.equals(fringeEl.expr) : fringeEl.expr != null) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            return expr != null ? expr.toLispString().hashCode() : 0;
+        }
+    }
+
     Expr quest(Rule q){
         System.out.println("\nQUEST:\n"+q+"\n");
 
@@ -22,36 +45,57 @@ public class Calc {
 
         Expr expr = q.assertion;
         expr = multDiv.optimizeDeep(plusMinus.optimizeDeep(expr));
-        if( ! expr.equals(q.assertion) ){
-            System.out.println("QUEST res: "+expr.toMathString());
-        }
-        for(;;) {
-            List<Expr> exprNew = exprSimplifyDeep(expr);
-            if( exprNew.isEmpty() ){
-                break;
-            }else{
-                Expr exprSh = shortest(exprNew);
-                if( exprSh.equals(expr) ){
-                    break;
+//        if( ! expr.equals(q.assertion) ){
+//            System.out.println("QUEST try: "+expr.toMathString());
+//        }
+
+        Set<FringeEl> fringe = new HashSet<>();
+        fringe.add(new FringeEl(expr));
+
+        Set<FringeEl> visited = new HashSet<>(); // for avoiding loops
+        visited.addAll(fringe);
+
+        while (! fringe.isEmpty() ) {
+            FringeEl el = shortest(fringe);
+            if( el.expr.sub==null ){
+                break; // single term cannot be simplified
+            }
+            fringe.remove(el);
+            System.out.println("QUEST try: "+el.expr.toMathString());
+            List<Expr> exprNew = exprSimplifyDeep(el.expr);
+            for( Expr e : exprNew ){
+                e = multDiv.optimizeDeep(plusMinus.optimizeDeep(e));
+                FringeEl fe = new FringeEl(e);
+                if( ! visited.contains(fe) ){
+                    visited.add(fe);
+                    fringe.add(fe);
                 }
-                expr = exprSh;
-                expr = multDiv.optimizeDeep(plusMinus.optimizeDeep(expr));
-                System.out.println("QUEST res: "+expr.toMathString());
-                //System.out.println("QUEST res latex: "+expr.toLatexString());
             }
         }
-        return expr;
+        Expr res = shortest(visited).expr;
+        System.out.println("QUEST res: "+res.toMathString());
+        return res;
     }
 
-    Expr shortest(List<Expr> exprNew){
-        Expr sh=null;
-        for( Expr e : exprNew ){
-            if( sh==null || sh.toLispString().length()>e.toLispString().length() ){
+    FringeEl shortest(Collection<FringeEl> fringe){
+        FringeEl sh=null;
+        for( FringeEl e : fringe ){
+            if( sh==null || sh.expr.toLispString().length()>e.expr.toLispString().length() ){
                 sh = e;
             }
         }
         return sh;
     }
+
+//    Expr shortest(List<Expr> exprNew){
+//        Expr sh=null;
+//        for( Expr e : exprNew ){
+//            if( sh==null || sh.toLispString().length()>e.toLispString().length() ){
+//                sh = e;
+//            }
+//        }
+//        return sh;
+//    }
 
     List<Expr> exprSimplifyDeep(Expr expr) {
         List<Expr> ways = exprSimplify(expr);
