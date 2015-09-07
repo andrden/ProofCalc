@@ -44,15 +44,15 @@ $a ( x - y ) ^ 2 = x ^ 2 - 2 * x * y + y ^ 2
 
 $a ( x / 2 ) ^ 2 = x ^ 2 / 4
 
-$a ch x = ( exp x + 1 / exp x ) / 2
-
-$a sh x = ( exp x - 1 / exp x ) / 2
 
 $a sin ( π / 2 ) = 1
 
 $a cos ( x ) = √ ( 1 - sin x * sin x )
 
 
+$? x * ( ch ψ ) ^ 2 - x * ( sh ψ ) ^ 2
+
+$? ( x * sh ψ + c * t * ch ψ ) ^ 2 - ( x * ch ψ + c * t * sh ψ ) ^ 2
 
 
 $? 4 + 5 - 4
@@ -107,4 +107,3 @@ $? f ( n ) ≤ 1
 $? ( ch x ) ^ 2 - ( sh x ) ^ 2
 $= 1
 
-$? ( x * sh ψ + c * t * ch ψ ) ^ 2 - ( x * ch ψ + c * t * sh ψ ) ^ 2

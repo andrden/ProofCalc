@@ -1,8 +1,6 @@
 package c;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by denny on 8/21/15.
@@ -35,31 +33,41 @@ public class AssocCommutCancelRule {
             List<Expr> plusList = new ArrayList<>();
             List<Expr> minusList = new ArrayList<>();
             scan(1, e, plusList, minusList);
-            boolean removed = false;
+            //boolean removed = false;
             for( Iterator<Expr> it = plusList.iterator(); it.hasNext(); ){
                 Expr i = it.next();
                 int idx = minusList.indexOf(i);
                 if( idx != -1 ){
                     minusList.remove(idx);
                     it.remove();
-                    removed = true;
+              //      removed = true;
                 }
             }
-            if( removed ){
+            Comparator<Expr> normExprComparator = (o1, o2) -> o1.toLispString().compareTo(o2.toLispString());
+            Collections.sort(plusList, normExprComparator);
+            Collections.sort(minusList, normExprComparator);
+            //if( removed ){
                 if( minusList.isEmpty() ){
-                    if( plusList.size()==0 ){
-                        return new Expr(roleNeutral);
-                    }else if( plusList.size()==1 ){
-                        return plusList.get(0);
-                    }else{
-                        return new Expr(rolePlus, plusList);
-                    }
+                    return normalize(plusList);
+                }else if( ! plusList.isEmpty() ){
+                    return new Expr(roleMinus, normalize(plusList), normalize(minusList));
+                } else {
+                    return new Expr(roleMinus, new Expr(roleNeutral), normalize(minusList));
                 }
-                throw new UnsupportedOperationException();
-            }
-            return e;
+            //}
+            //return e;
         }else {
             return e;
+        }
+    }
+
+    Expr normalize( List<Expr> plusList ){
+        if( plusList.size()==0 ){
+            return new Expr(roleNeutral);
+        }else if( plusList.size()==1 ){
+            return plusList.get(0);
+        }else{
+            return new Expr(rolePlus, plusList);
         }
     }
 
