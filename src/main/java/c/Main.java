@@ -1,6 +1,7 @@
 package c;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -12,8 +13,13 @@ import java.util.stream.Collectors;
  */
 public class Main {
     public static void main(String[] args) throws Exception{
-        BufferedReader br =
-                new BufferedReader(new InputStreamReader(Main.class.getClassLoader().getResourceAsStream("math.txt")));
+        InputStream streamMath = Main.class.getClassLoader().getResourceAsStream("math.txt");
+        InputStream streamMathOverwrite = Main.class.getClassLoader().getResourceAsStream("mathOverwrite.txt");
+        if( streamMathOverwrite!=null && streamMathOverwrite.available()<1 ){
+            streamMathOverwrite=null;
+        }
+        BufferedReader br = new BufferedReader(new InputStreamReader(
+                streamMathOverwrite==null ? streamMath : streamMathOverwrite));
 
         testParseLine();
         testUnify();
