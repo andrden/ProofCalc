@@ -57,6 +57,7 @@ public class Main {
 
     static void testParseLine(){
         Parser parser = new Parser();
+        chk(parser, "- ( c ^ 2 )", "(- (^ c 2))");
         chk(parser, "3 + 2 + 1", "(+ (+ 3 2) 1)");
         chk(parser, "3 - 2 + 1", "(+ (+ 3 (- 2)) 1)");
         chk(parser, "3 - ( 2 + 1 )", "(+ 3 (- (+ 2 1)))");

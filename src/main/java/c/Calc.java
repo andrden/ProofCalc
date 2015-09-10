@@ -8,6 +8,9 @@ import java.util.*;
 public class Calc {
     List<Rule> rules;
 
+    AssocCommutCancelRule plusMinus = new AssocCommutCancelRule("+","-","0");
+    AssocCommutCancelRule multDiv = new AssocCommutCancelRule("*","/","1");
+
     public Calc(List<Rule> rules) {
         this.rules = rules;
     }
@@ -40,8 +43,6 @@ public class Calc {
     Expr quest(Rule q){
         System.out.println("\nQUEST:\n"+q+"\n");
 
-        AssocCommutCancelRule plusMinus = new AssocCommutCancelRule("+","-","0");
-        AssocCommutCancelRule multDiv = new AssocCommutCancelRule("*","/","1");
 
         Expr expr = q.assertion;
         expr = plusMinus.optimizeDeep(multDiv.optimizeDeep(plusMinus.optimizeDeep(expr)));
@@ -62,32 +63,7 @@ public class Calc {
             }
             fringe.remove(el);
             System.out.println("QUEST try: "+el.expr.toMathString());
-            List<Expr> splitPairs = plusMinus.separateAllPossiblePairs(el.expr);
-            System.out.println("split pairs size="+splitPairs.size());
-            for( Expr esplitPair : splitPairs ){
-
-                Expr pair = esplitPair.sub.get(0);
-                System.out.println("pair="+pair.toMathString());
-                if( pair.toMathString().contains("((sh ψ) ^ 2) * (x ^ 2)) + (- (((ch ψ) ^ 2) * (x ^ 2)") ){
-                    System.out.println();
-                }
-                Expr e1 = plusMinus.optimizeDeep(pair);
-                pair = plusMinus.optimizeDeep(multDiv.optimizeDeep(e1));
-                List<Expr> exprNew = exprSimplifyDeep(pair);
-                System.out.println("   split pair: simplNew.size="+exprNew.size()+" "+esplitPair.toMathString());
-                for( Expr e : exprNew ){
-                    if( e.toLispString().length()<pair.toLispString().length() ){
-                        System.out.println(""+e+" "+pair);
-                    }
-                }
-
-
-//                FringeEl fe = new FringeEl(esplitPair);
-//                if( ! visited.contains(fe) ){
-//                    visited.add(fe);
-//                    fringe.add(fe);
-//                }
-            }
+            tryByPairs(el);
             List<Expr> exprNew = exprSimplifyDeep(el.expr);
             for( Expr e : exprNew ){
                 e = plusMinus.optimizeDeep(multDiv.optimizeDeep(plusMinus.optimizeDeep(e)));
@@ -101,6 +77,38 @@ public class Calc {
         Expr res = shortest(visited).expr;
         System.out.println("QUEST res: "+res.toMathString());
         return res;
+    }
+
+    private void tryByPairs(FringeEl el) {
+        List<Expr> splitPairs = plusMinus.separateAllPossiblePairs(el.expr);
+        //System.out.println("split pairs size="+splitPairs.size());
+        for( Expr esplitPair : splitPairs ){
+
+            Expr pair = esplitPair.sub.get(0);
+            //System.out.println("pair="+pair.toMathString());
+//            if( pair.toMathString().contains("((sh ψ) ^ 2) * (x ^ 2)) + (- (((ch ψ) ^ 2) * (x ^ 2)") ){
+//                System.out.println();
+//            }
+            Expr e1 = plusMinus.optimizeDeep(pair);
+            pair = plusMinus.optimizeDeep(multDiv.optimizeDeep(e1));
+            List<Expr> exprNew = exprSimplifyDeep(pair);
+            //System.out.println("   split pair: simplNew.size="+exprNew.size()+" "+esplitPair.toMathString());
+            for( Expr e : exprNew ){
+                if( e.toLispString().length()<pair.toLispString().length() ){
+                    //System.out.println(""+e+" "+pair);
+                    el.expr = new Expr("+",e,esplitPair.sub.get(1));
+                    el.expr = plusMinus.optimizeDeep(multDiv.optimizeDeep(plusMinus.optimizeDeep(el.expr)));
+                    return;
+                }
+            }
+
+
+//                FringeEl fe = new FringeEl(esplitPair);
+//                if( ! visited.contains(fe) ){
+//                    visited.add(fe);
+//                    fringe.add(fe);
+//                }
+        }
     }
 
     FringeEl shortest(Collection<FringeEl> fringe){

@@ -51,7 +51,12 @@ $a cos ( x ) = √ ( 1 - sin x * sin x )
 
 $a ( sh ψ ) ^ 2 * x - ( ch ψ ) ^ 2 * x = - x
 
+$a ( ch ψ ) ^ 2 * x - ( sh ψ ) ^ 2 * x = x
+
 $? ( sh ψ ) ^ 2 * c ^ 2 - ( ch ψ ) ^ 2 * c ^ 2
+$= - ( c ^ 2 )
 
 $? ( x * sh ψ + c * ch ψ ) ^ 2 - ( x * ch ψ + c * sh ψ ) ^ 2
+$= c ^ 2 - x ^ 2
+
 

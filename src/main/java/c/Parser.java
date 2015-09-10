@@ -166,7 +166,7 @@ public class Parser {
         return false;
     }
     void unaryMinus(List list){
-        for( int i = 1; i<list.size()-1; i++ ){
+        for( int i = 0; i<list.size(); i++ ){
             Object op = list.get(i);
             if( "-".equals(op) ){
                 list.set(i, "+");
@@ -176,7 +176,7 @@ public class Parser {
     }
 
     void unaryPlus(List list){
-        for( int i = 1; i<list.size()-1; i++ ){
+        for( int i = 0; i<list.size(); i++ ){
             Object op = list.get(i);
             if( "+".equals(op) ){
                 list.remove(i);

@@ -124,7 +124,9 @@ public class Expr {
 
     public String toMathString() {
         if( sub==null ) return node;
-        if( Type.infixOps.contains(node) && sub.size()>1 ){
+        if( node.equals("-") ) {
+            return "-" + sub.get(0).toMathString();
+        } if( Type.infixOps.contains(node) && sub.size()>1 ){
             String ret = "(";
             int i=0;
             for (Expr e : sub) {
