@@ -17,6 +17,7 @@ public class Expr {
         this.node = node;
         sub = new ArrayList<>();
         sub.add(a1);
+        validate();
     }
 
     public Expr(String node, Expr a1, Expr a2) {
@@ -24,11 +25,19 @@ public class Expr {
         sub = new ArrayList<>();
         sub.add(a1);
         sub.add(a2);
+        validate();
     }
 
     public Expr(String node, List<Expr> sub) {
         this.node = node;
         this.sub = sub;
+        validate();
+    }
+
+    void validate(){
+        if( node.equals("-") && sub.size()!=1 ){
+            throw new IllegalStateException("Only unary minus allowed in internal representations");
+        }
     }
 
     boolean isVar(){

@@ -117,7 +117,9 @@ public class Parser {
         while( parseApply(list) );
         while( infixOp(list, "^") );
         while( infixOp(list, "*", "/") );
-        while( infixOp(list, "+", "-") );
+        unaryMinus(list);
+        while( infixOp(list, "+"/*, "-"*/) );
+        unaryPlus(list);
         while( infixOp(list, "=","≥","≤") );
         prefixOp(list, "real");
         if(list.size()==1 && list.get(0) instanceof Expr) {
@@ -163,6 +165,25 @@ public class Parser {
         }
         return false;
     }
+    void unaryMinus(List list){
+        for( int i = 1; i<list.size()-1; i++ ){
+            Object op = list.get(i);
+            if( "-".equals(op) ){
+                list.set(i, "+");
+                list.set(i+1, new Expr("-", (Expr)list.get(i+1)));
+            }
+        }
+    }
+
+    void unaryPlus(List list){
+        for( int i = 1; i<list.size()-1; i++ ){
+            Object op = list.get(i);
+            if( "+".equals(op) ){
+                list.remove(i);
+            }
+        }
+    }
+
 
     boolean infixOp(List list, String ...  ops){
         for( int i = 1; i<list.size()-1; i++ ){

@@ -44,7 +44,7 @@ public class Calc {
         AssocCommutCancelRule multDiv = new AssocCommutCancelRule("*","/","1");
 
         Expr expr = q.assertion;
-        expr = multDiv.optimizeDeep(plusMinus.optimizeDeep(expr));
+        expr = plusMinus.optimizeDeep(multDiv.optimizeDeep(plusMinus.optimizeDeep(expr)));
 //        if( ! expr.equals(q.assertion) ){
 //            System.out.println("QUEST try: "+expr.toMathString());
 //        }
@@ -62,9 +62,35 @@ public class Calc {
             }
             fringe.remove(el);
             System.out.println("QUEST try: "+el.expr.toMathString());
+            List<Expr> splitPairs = plusMinus.separateAllPossiblePairs(el.expr);
+            System.out.println("split pairs size="+splitPairs.size());
+            for( Expr esplitPair : splitPairs ){
+
+                Expr pair = esplitPair.sub.get(0);
+                System.out.println("pair="+pair.toMathString());
+                if( pair.toMathString().contains("((sh ψ) ^ 2) * (x ^ 2)) + (- (((ch ψ) ^ 2) * (x ^ 2)") ){
+                    System.out.println();
+                }
+                Expr e1 = plusMinus.optimizeDeep(pair);
+                pair = plusMinus.optimizeDeep(multDiv.optimizeDeep(e1));
+                List<Expr> exprNew = exprSimplifyDeep(pair);
+                System.out.println("   split pair: simplNew.size="+exprNew.size()+" "+esplitPair.toMathString());
+                for( Expr e : exprNew ){
+                    if( e.toLispString().length()<pair.toLispString().length() ){
+                        System.out.println(""+e+" "+pair);
+                    }
+                }
+
+
+//                FringeEl fe = new FringeEl(esplitPair);
+//                if( ! visited.contains(fe) ){
+//                    visited.add(fe);
+//                    fringe.add(fe);
+//                }
+            }
             List<Expr> exprNew = exprSimplifyDeep(el.expr);
             for( Expr e : exprNew ){
-                e = multDiv.optimizeDeep(plusMinus.optimizeDeep(e));
+                e = plusMinus.optimizeDeep(multDiv.optimizeDeep(plusMinus.optimizeDeep(e)));
                 FringeEl fe = new FringeEl(e);
                 if( ! visited.contains(fe) ){
                     visited.add(fe);

@@ -49,5 +49,9 @@ $a sin ( π / 2 ) = 1
 
 $a cos ( x ) = √ ( 1 - sin x * sin x )
 
+$a ( sh ψ ) ^ 2 * x - ( ch ψ ) ^ 2 * x = - x
 
-$? ( x * sh ψ + c * t * ch ψ ) ^ 2 - ( x * ch ψ + c * t * sh ψ ) ^ 2
+$? ( sh ψ ) ^ 2 * c ^ 2 - ( ch ψ ) ^ 2 * c ^ 2
+
+$? ( x * sh ψ + c * ch ψ ) ^ 2 - ( x * ch ψ + c * sh ψ ) ^ 2
+

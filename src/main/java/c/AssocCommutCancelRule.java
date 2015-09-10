@@ -27,6 +27,28 @@ public class AssocCommutCancelRule {
         return optimize(new Expr(e.node, newSub));
     }
 
+    List<Expr> separateAllPossiblePairs(Expr e){
+        List<Expr> variants = new ArrayList<>();
+        if( e.node.equals(rolePlus) && e.sub.size()>2 ) {
+            List<Expr> plusList = new ArrayList<>();
+            List<Expr> minusList = new ArrayList<>();
+            scan(1, e, plusList, minusList);
+            for( Expr em : minusList ){
+                plusList.add(new Expr(roleMinus, em));
+            }
+            for( int i=0; i<plusList.size(); i++ ){
+                for( int j=i+1; j<plusList.size(); j++ ){
+                    Expr pair = new Expr(rolePlus, plusList.get(i), plusList.get(j));
+                    List<Expr> rest = new ArrayList<>(plusList);
+                    rest.remove(j);
+                    rest.remove(i);
+                    variants.add(new Expr(rolePlus, pair, new Expr(rolePlus, rest)));
+                }
+            }
+        }
+        return variants;
+    }
+
     Expr optimize(Expr e){
        // if( e.toMathString().length()>)
         if( e.node.equals(rolePlus) || e.node.equals(roleMinus) ){
@@ -46,19 +68,22 @@ public class AssocCommutCancelRule {
             Comparator<Expr> normExprComparator = (o1, o2) -> o1.toLispString().compareTo(o2.toLispString());
             Collections.sort(plusList, normExprComparator);
             Collections.sort(minusList, normExprComparator);
-            //if( removed ){
-                if( minusList.isEmpty() ){
-                    return normalize(plusList);
-                }else if( ! plusList.isEmpty() ){
-                    return new Expr(roleMinus, normalize(plusList), normalize(minusList));
-                } else {
-                    return new Expr(roleMinus, new Expr(roleNeutral), normalize(minusList));
-                }
-            //}
-            //return e;
+
+            return assemble(plusList, minusList);
         }else {
             return e;
         }
+    }
+
+    Expr assemble(List<Expr> plusList, List<Expr> minusList) {
+        List<Expr> all = new ArrayList<>(plusList);
+        for( Expr e : minusList ){
+            all.add(new Expr(roleMinus, e));
+        }
+        if( all.size()==1 ){
+            return all.get(0);
+        }
+        return new Expr(rolePlus, all);
     }
 
     Expr normalize( List<Expr> plusList ){
@@ -77,11 +102,7 @@ public class AssocCommutCancelRule {
                 scan(sign, i, plusList, minusList);
             }
         } else if( e.node.equals(roleMinus) ){
-            boolean first = true;
-            for( Expr i : e.sub ){
-                scan(first ? sign : - sign, i, plusList, minusList);
-                first = false;
-            }
+             scan(- sign, e.sub.get(0), plusList, minusList);
         } else {
             if( e.node.equals(roleNeutral) && e.sub==null ){
                 // skip neutral element

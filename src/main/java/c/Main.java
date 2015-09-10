@@ -58,10 +58,10 @@ public class Main {
     static void testParseLine(){
         Parser parser = new Parser();
         chk(parser, "3 + 2 + 1", "(+ (+ 3 2) 1)");
-        chk(parser, "3 - 2 + 1", "(+ (- 3 2) 1)");
-        chk(parser, "3 - ( 2 + 1 )", "(- 3 (+ 2 1))");
-        chk(parser, "3 + 2 - 1", "(- (+ 3 2) 1)");
-        chk(parser, "3 - 2 - 1", "(- (- 3 2) 1)");
+        chk(parser, "3 - 2 + 1", "(+ (+ 3 (- 2)) 1)");
+        chk(parser, "3 - ( 2 + 1 )", "(+ 3 (- (+ 2 1)))");
+        chk(parser, "3 + 2 - 1", "(+ (+ 3 2) (- 1))");
+        chk(parser, "3 - 2 - 1", "(+ (+ 3 (- 2)) (- 1))");
         chk(parser, "3 * 2 + 1", "(+ (* 3 2) 1)");
         chk(parser, "3 + 2 * 1", "(+ 3 (* 2 1))");
         chk(parser, "3 = 2 + 1", "(= 3 (+ 2 1))");
@@ -70,7 +70,9 @@ public class Main {
         chk(parser, "f ( x )", "(apply f x)");
         chk(parser, "f ( x + 1 )", "(apply f (+ x 1))");
         chk(parser, "g ( f ( x + 1 ) )", "(apply g (apply f (+ x 1)))");
-        chk(parser, "5 - f ( x + 1 )", "(- 5 (apply f (+ x 1)))");
+        chk(parser, "5 - f ( x + 1 )", "(+ 5 (- (apply f (+ x 1))))");
+        chk(parser, "( sh ψ ) ^ 2 * x - ( ch ψ ) ^ 2 * x = - x",
+                "(= (+ (* (^ (apply sh ψ) 2) x) (- (* (^ (apply ch ψ) 2) x))) (- x))");
     }
 
     static void chkUnify(Parser parser, String template, String concrete, String resMap){
