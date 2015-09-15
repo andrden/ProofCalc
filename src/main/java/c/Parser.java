@@ -20,11 +20,13 @@ public class Parser {
         List<Rule> rules = new ArrayList<>();
 
         while( (line=br.readLine())!=null ){
-            if(StringUtils.isBlank(line)){
-                if( ! lines.isEmpty() ){
+            if(StringUtils.isBlank(line)) {
+                if (!lines.isEmpty()) {
                     rules.add(ruleFromLines(lines));
                     lines.clear();
                 }
+            } else if ( line.startsWith("#" ) ){
+                // comment line, skip
             }else{
                 lines.add(line);
             }
@@ -59,10 +61,13 @@ public class Parser {
                     throw new IllegalStateException();
                 }
                 return new Rule(assertion, cond);
-            } else if( line.get(0).equals("$?") ){
+            } else if( line.get(0).equals("$?") || line.get(0).equals("$a?") ){
                 line.remove(0);
                 Expr assertion = parse(line);
                 QuestRule qr = new QuestRule(assertion, cond, answer);
+                if( line.get(0).equals("$a?") ){
+                    qr.reusable = true;
+                }
                 if( answer==null ){
                     System.out.println("No answer given for: "+qr);
                 }
@@ -116,9 +121,10 @@ public class Parser {
         List list = new ArrayList(line);
         while( parseApply(list) );
         while( infixOp(list, "^") );
-        while( infixOp(list, "*", "/") );
-        unaryMinus(list);
-        while( infixOp(list, "+"/*, "-"*/) );
+        unaryMinus(list, "*", "/");
+        while( infixOp(list, "*") );
+        unaryMinus(list, "+", "-");
+        while( infixOp(list, "+") );
         unaryPlus(list);
         while( infixOp(list, "=","≥","≤") );
         prefixOp(list, "real");
@@ -165,12 +171,12 @@ public class Parser {
         }
         return false;
     }
-    void unaryMinus(List list){
+    void unaryMinus(List list, String rolePlus, String roleMinus){
         for( int i = 0; i<list.size(); i++ ){
             Object op = list.get(i);
-            if( "-".equals(op) ){
-                list.set(i, "+");
-                list.set(i+1, new Expr("-", (Expr)list.get(i+1)));
+            if( roleMinus.equals(op) ){
+                list.set(i, rolePlus);
+                list.set(i+1, new Expr(roleMinus, (Expr)list.get(i+1)));
             }
         }
     }

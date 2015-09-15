@@ -1,6 +1,7 @@
 package c;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * Created by denny on 8/11/15.
@@ -40,7 +41,7 @@ public class Calc {
         }
     }
 
-    Expr quest(Rule q){
+    Expr quest(Rule q, Predicate<Expr> checkIfAnswer){
         System.out.println("\nQUEST:\n"+q+"\n");
 
 
@@ -61,8 +62,14 @@ public class Calc {
             if( el.expr.sub==null ){
                 break; // single term cannot be simplified
             }
+            if( checkIfAnswer.test(el.expr) ){ // answer reached, no more work required
+                break;
+            }
+//            if( el.expr.toLispString().length()<q.assertion.toLispString().length() ){
+//                break;
+//            }
             fringe.remove(el);
-            System.out.println("QUEST try: "+el.expr.toMathString());
+            System.out.println("QUEST try: " + el.expr.toMathString());
             tryByPairs(el);
             List<Expr> exprNew = exprSimplifyDeep(el.expr);
             for( Expr e : exprNew ){

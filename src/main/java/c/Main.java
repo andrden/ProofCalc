@@ -26,10 +26,13 @@ public class Main {
 
         Parser parser = new Parser();
         List<Rule> rulesAndQuests = parser.parseMathDoc(br);
+        System.out.println("===========================================");
 
-        List<Rule> rules = rulesAndQuests.stream()
-                .filter(r -> !(r instanceof QuestRule))
-                .collect(Collectors.toCollection(ArrayList::new));
+        List<Rule> rules = new ArrayList<>();
+
+//        List<Rule> rules = rulesAndQuests.stream()
+//                .filter(r -> !(r instanceof QuestRule))
+//                .collect(Collectors.toCollection(ArrayList::new));
 
         //System.out.println("Rules="+rules);
         for( Rule r : rulesAndQuests ){
@@ -38,12 +41,20 @@ public class Main {
                 allRules.addAll(rules);
                 QuestRule qrule = (QuestRule) r;
                 allRules.addAll(qrule.localConditionsAsRules());
-                Expr ret = new Calc(allRules).quest(r);
+                Expr ret = new Calc(allRules).quest(r,
+                        e -> qrule.answer!=null && e.toLispString().equals(qrule.answer.toLispString()));
                 if( qrule.answer==null ){
                     System.out.println("Correct answer was not specified!");
                 }else if( ! ret.toLispString().equals(qrule.answer.toLispString()) ){
                     throw new IllegalStateException("Not reached answer="+qrule.answer);
                 }
+
+                if( qrule.answer!=null && qrule.reusable ){
+                    Rule provenRule = new Rule(new Expr("=", qrule.assertion, qrule.answer), qrule.cond);
+                    rules.add(provenRule);
+                }
+            }else{
+                rules.add(r); // add a new given rule to the list of all known Math
             }
         }
 
@@ -60,6 +71,7 @@ public class Main {
         chk(parser, "- ( c ^ 2 )", "(- (^ c 2))");
         chk(parser, "3 + 2 + 1", "(+ (+ 3 2) 1)");
         chk(parser, "3 - 2 + 1", "(+ (+ 3 (- 2)) 1)");
+        chk(parser, "3 / 2 * 1", "(* (* 3 (/ 2)) 1)");
         chk(parser, "3 - ( 2 + 1 )", "(+ 3 (- (+ 2 1)))");
         chk(parser, "3 + 2 - 1", "(+ (+ 3 2) (- 1))");
         chk(parser, "3 - 2 - 1", "(+ (+ 3 (- 2)) (- 1))");
