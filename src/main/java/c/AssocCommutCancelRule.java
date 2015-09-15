@@ -80,21 +80,24 @@ public class AssocCommutCancelRule {
         for( Expr e : minusList ){
             all.add(new Expr(roleMinus, e));
         }
+        if( all.size()==0 ){
+            return new Expr(roleNeutral);
+        }
         if( all.size()==1 ){
             return all.get(0);
         }
         return new Expr(rolePlus, all);
     }
 
-    Expr normalize( List<Expr> plusList ){
-        if( plusList.size()==0 ){
-            return new Expr(roleNeutral);
-        }else if( plusList.size()==1 ){
-            return plusList.get(0);
-        }else{
-            return new Expr(rolePlus, plusList);
-        }
-    }
+//    Expr normalize( List<Expr> plusList ){
+//        if( plusList.size()==0 ){
+//            return new Expr(roleNeutral);
+//        }else if( plusList.size()==1 ){
+//            return plusList.get(0);
+//        }else{
+//            return new Expr(rolePlus, plusList);
+//        }
+//    }
 
     void scan(int sign, Expr e, List<Expr> plusList, List<Expr> minusList){
         if( e.node.equals(rolePlus) ){
