@@ -8,8 +8,8 @@ import java.util.List;
  * Created by denny on 8/6/15.
  */
 public class Rule {
-    List<Expr> cond;
-    Expr assertion;
+    public List<Expr> cond;
+    public Expr assertion;
 
 
     public Rule(Expr assertion, List<Expr> cond) {

@@ -6,8 +6,8 @@ import java.util.*;
  * Created by denny on 8/10/15.
  */
 public class Expr {
-    String node;
-    List<Expr> sub;
+    public String node;
+    public List<Expr> sub;
 
     public Expr(String node) {
         this.node = node;
@@ -44,7 +44,7 @@ public class Expr {
         return sub==null && Type.isVar(node);
     }
 
-    Expr shallowClone(){
+    public Expr shallowClone(){
         Expr ret = new Expr(node);
         ret.sub = new ArrayList<>(sub);
         return ret;
@@ -63,7 +63,7 @@ public class Expr {
         return true;
     }
 
-    Expr substitute(Map<String,Expr> vars){
+    public Expr substitute(Map<String,Expr> vars){
         if( vars.containsKey(node) ){
             return vars.get(node);
         }
@@ -78,7 +78,7 @@ public class Expr {
         return n;
     }
 
-    Map<String,Expr> unify(Expr concrete){
+    public Map<String,Expr> unify(Expr concrete){
         Map<String,Expr> map = new HashMap<>();
         if( unify(concrete, map) ){
             return map;
@@ -105,12 +105,26 @@ public class Expr {
        if( sub.size()!=concrete.sub.size() ){
            return false;
        }
-       for( int i=0; i<sub.size(); i++ ){
-         if( ! sub.get(i).unify(concrete.sub.get(i), vars) ){
-             return false;
-         }
-       }
-       return true;
+        if (! subUnify(concrete, vars)){
+            if( "+".equals(node) && sub.size()==2 ){
+                // try swapping and unifying the other way
+                if (! subUnify(new Expr(concrete.node, concrete.sub.get(1), concrete.sub.get(0)), vars)){
+                    return false; // tried 2 ways and failed
+                }
+                return true; // swapped unification succeeded
+            }
+            return false;
+        }
+        return true;
+    }
+
+    boolean subUnify(Expr concrete, Map<String, Expr> vars) {
+        for( int i=0; i<sub.size(); i++ ){
+          if( ! sub.get(i).unify(concrete.sub.get(i), vars) ){
+              return false;
+          }
+        }
+        return true;
     }
 
     public String toLispString() {
