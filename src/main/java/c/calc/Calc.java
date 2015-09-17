@@ -12,8 +12,8 @@ import java.util.function.Predicate;
 public class Calc {
     List<Rule> rules;
 
-    AssocCommutCancelRule plusMinus = new AssocCommutCancelRule("+","-","0");
-    AssocCommutCancelRule multDiv = new AssocCommutCancelRule("*","/","1");
+    AssocCommutCancelRule plusMinus = new AssocCommutCancelRule("+","-","0",false);
+    AssocCommutCancelRule multDiv = new AssocCommutCancelRule("*","/","1",true);
 
     public Calc(List<Rule> rules) {
         this.rules = rules;

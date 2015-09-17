@@ -11,11 +11,13 @@ public class AssocCommutCancelRule {
     String rolePlus;
     String roleMinus;
     String roleNeutral;
+    boolean extractSign;
 
-    public AssocCommutCancelRule(String rolePlus, String roleMinus, String roleNeutral) {
+    public AssocCommutCancelRule(String rolePlus, String roleMinus, String roleNeutral, boolean extractSign) {
         this.rolePlus = rolePlus;
         this.roleMinus = roleMinus;
         this.roleNeutral = roleNeutral;
+        this.extractSign = extractSign;
     }
 
     Expr optimizeDeep(Expr e){
@@ -77,7 +79,25 @@ public class AssocCommutCancelRule {
         }
     }
 
+    int extractSign(List<Expr> list){
+        int sign=1;
+        for( ListIterator<Expr> iterator = list.listIterator(); iterator.hasNext(); ){
+            Expr expr = iterator.next();
+            if( expr.node.equals("-") ){
+                sign = - sign;
+                iterator.set(expr.singleChild());
+            }
+        }
+        return sign;
+    }
+
     Expr assemble(List<Expr> plusList, List<Expr> minusList) {
+        int sign = 1;
+        if( extractSign ) {
+            sign *= extractSign(plusList);
+            sign *= extractSign(minusList);
+        }
+
         List<Expr> all = new ArrayList<>(plusList);
         for( Expr e : minusList ){
             all.add(new Expr(roleMinus, e));
@@ -85,10 +105,16 @@ public class AssocCommutCancelRule {
         if( all.size()==0 ){
             return new Expr(roleNeutral);
         }
+        Expr res;
         if( all.size()==1 ){
-            return all.get(0);
+            res = all.get(0);
+        }else {
+            res = new Expr(rolePlus, all);
         }
-        return new Expr(rolePlus, all);
+        if( sign == -1 ){
+            res = new Expr("-", res);
+        }
+        return res;
     }
 
 //    Expr normalize( List<Expr> plusList ){

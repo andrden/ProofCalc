@@ -34,6 +34,13 @@ public class Expr {
         validate();
     }
 
+    public Expr singleChild(){
+        if( sub.size()!=1 ){
+            throw new IllegalStateException(node+" sub.size()="+sub.size());
+        }
+        return sub.get(0);
+    }
+
     void validate(){
         if( node.equals("-") && sub.size()!=1 ){
             throw new IllegalStateException("Only unary minus allowed in internal representations");
