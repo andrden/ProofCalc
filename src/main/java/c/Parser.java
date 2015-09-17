@@ -62,10 +62,11 @@ public class Parser {
                 }
                 return new Rule(assertion, cond);
             } else if( line.get(0).equals("$?") || line.get(0).equals("$a?") ){
+                boolean reusable = line.get(0).equals("$a?");
                 line.remove(0);
                 Expr assertion = parse(line);
                 QuestRule qr = new QuestRule(assertion, cond, answer);
-                if( line.get(0).equals("$a?") ){
+                if( reusable ){
                     qr.reusable = true;
                 }
                 if( answer==null ){

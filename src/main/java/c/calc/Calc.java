@@ -47,21 +47,28 @@ public class Calc {
 //                break;
 //            }
             fringe.remove(el);
-            System.out.println("QUEST try: " + el.expr.toMathString());
+            String exprString = el.expr.toMathString();
+            System.out.println("QUEST try: " + exprString);
+//            if( exprString.contains("((((ch y) ^ 2) + -((sh y) ^ 2)) * y)") ){
+//                System.out.println("breakpoint");
+//            }
             while(tryByPairs(el, plusMinus));
             while(tryByPairs(el, multDiv));
             List<FringeEl> exprNew = exprSimplifyDeep(el.expr);
             for( FringeEl feNew : exprNew ){
                 Expr e = feNew.expr;
                 e = plusMinus.optimizeDeep(multDiv.optimizeDeep(plusMinus.optimizeDeep(e)));
-                FringeEl fe = new FringeEl(e, null);
-                if( ! visited.contains(fe) ){
-                    visited.add(fe);
-                    fringe.add(fe);
+                feNew.expr = e;
+                feNew.parent = el;
+                if( ! visited.contains(feNew) ){
+                    visited.add(feNew);
+                    fringe.add(feNew);
                 }
             }
         }
-        Expr res = shortest(visited).expr;
+        FringeEl resultPath = shortest(visited);
+        Expr res = resultPath.expr;
+        resultPath.printDerivationPath();
         System.out.println("QUEST res: "+res.toMathString());
         return res;
     }
