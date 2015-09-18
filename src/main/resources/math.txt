@@ -98,9 +98,15 @@ $a 1 * x = x
 
 $a 1 * 1 = 1
 
-$a √ 0 = 0
-
 $a x / z - y / z = ( x - y ) / z
+
+$a y * x - z * x = ( y - z ) * x
+
+############### Powers and roots:
+
+$a x ^ 1 = x
+
+$a √ 0 = 0
 
 $a ( x * y ) ^  2 = x ^ 2 * y ^ 2
 
@@ -110,7 +116,6 @@ $a ( x - y ) ^ 2 = x ^ 2 - 2 * x * y + y ^ 2
 
 $a ( x / 2 ) ^ 2 = x ^ 2 / 4
 
-$a y * x - z * x = ( y - z ) * x
 
 ############### Some trigonometry:
 
@@ -154,6 +159,34 @@ $= c ^ 2 - x ^ 2
 
 $? x * ( ch ψ ) ^ 2 - x * ( sh ψ ) ^ 2
 $= x
+
+############### Derivatives:
+
+$e f ( x ) = x ^ n
+$a ( ∂ f ) ( x ) = n * x ^ ( n - 1 )
+
+$e ff ( x ) = x ^ 2
+$? ( ∂ ff ) ( x )
+$= 2 * x
+
+$e const f
+$a ( ∂ f ) ( x ) = 0
+
+$e f ( x ) = 5
+$a const f
+
+############### Verify derivatives:
+
+$e ff ( x ) = x ^ 3
+$? ( ∂ ff ) ( x )
+$= ( x ^ 2 ) * 3
+
+$e ff ( x ) = 5
+$? ( ∂ ff ) ( x )
+
+$e ff ( x ) = 4 + 1
+$? const ff
+
 
 ############### Inequalities:
 

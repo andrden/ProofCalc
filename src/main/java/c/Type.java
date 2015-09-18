@@ -7,7 +7,9 @@ import java.util.*;
  */
 public class Type {
     static Set<String> vars = new HashSet<>(Arrays.asList("c", "n", "x", "y", "z", "f", "g", "t", "ψ"));
-    static Set<String> consts = new HashSet<>(Arrays.asList("exp", "sin", "cos", "sh", "ch", "π", "√", "xx", "yy"));
+    static Set<String> consts = new HashSet<>(Arrays.asList(
+            "∂", "exp", "sin", "cos", "sh", "ch", "π", "√", "const",
+            "xx", "yy", "ff"));
 
     static Set<String> infixOps = new HashSet<>(Arrays.asList("+", "-", "*", "/", "^", "≤","≥"));
 

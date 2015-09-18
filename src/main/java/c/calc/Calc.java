@@ -49,9 +49,9 @@ public class Calc {
             fringe.remove(el);
             String exprString = el.expr.toMathString();
             System.out.println("QUEST try: " + exprString);
-//            if( exprString.contains("((((ch y) ^ 2) + -((sh y) ^ 2)) * y)") ){
-//                System.out.println("breakpoint");
-//            }
+            if( exprString.contains("((∂ f) x)") ){
+                System.out.println("breakpoint");
+            }
             while(tryByPairs(el, plusMinus));
             while(tryByPairs(el, multDiv));
             List<FringeEl> exprNew = exprSimplifyDeep(el.expr);
