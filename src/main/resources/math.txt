@@ -82,10 +82,12 @@ $= 5
 $? 1 + 1 + 1 + 2
 $= 5
 
-$e f ( 1 ) = 1
-$e f ( 2 ) = 1
-$e f ( n ) = f ( n - 1 ) + f ( n - 2 )
-$? f ( 5 )
+$? n - 1
+
+$e ff ( 1 ) = 1
+$e ff ( 2 ) = 1
+$e ff ( n ) = ff ( n - 1 ) + ff ( n - 2 )
+$? ff ( 5 )
 $= 5
 
 ############### Some multiplication and division:
@@ -172,6 +174,9 @@ $= 2 * x
 $e const f
 $a ( ∂ f ) ( x ) = 0
 
+$e f ( x ) = 1
+$a const f
+
 $e f ( x ) = 5
 $a const f
 
@@ -187,6 +192,8 @@ $? ( ∂ ff ) ( x )
 $e ff ( x ) = 4 + 1
 $? const ff
 
+$e ff ( x ) = ( ch x ) ^ 2 - ( sh x ) ^ 2
+$? const ff
 
 ############### Inequalities:
 

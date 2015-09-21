@@ -6,6 +6,7 @@ import c.Rule;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
 * Created by denny on 9/16/15.
@@ -13,11 +14,13 @@ import java.util.List;
 class FringeEl {
     Expr expr;
     Rule byRule;
+    Map<String, Expr> unifMap;
     FringeEl parent;
 
-    FringeEl(Expr expr, Rule byRule) {
+    FringeEl(Expr expr, Rule byRule, Map<String, Expr> unifMap) {
         this.expr = expr;
         this.byRule = byRule;
+        this.unifMap = unifMap;
     }
 
     @Override
@@ -46,7 +49,11 @@ class FringeEl {
         }
         Collections.reverse(path);
         for( FringeEl el : path ){
-            String s = el.byRule==null ? "" : "By " + el.byRule.assertion.toMathString() + " => ";
+            String s = "";
+            if( el.byRule!=null ) {
+                //s = "By " + el.byRule.assertion.toMathString() + " " + unifMap + " => ";
+                s = "By " + el.byRule.toString() + " " + unifMap + " => ";
+            }
             System.out.println("DERIV path: " + s + el.expr.toMathString());
         }
     }

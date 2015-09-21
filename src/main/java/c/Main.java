@@ -37,12 +37,10 @@ public class Main {
         //System.out.println("Rules="+rules);
         for( Rule r : rulesAndQuests ){
             if( r instanceof QuestRule ){
-                List<Rule> allRules = new ArrayList<>();
-                allRules.addAll(rules);
                 QuestRule qrule = (QuestRule) r;
-                allRules.addAll(qrule.localConditionsAsRules());
-                Expr ret = new Calc(allRules).quest(r,
-                        e -> qrule.answer!=null && e.toLispString().equals(qrule.answer.toLispString()));
+                Expr ret = new Calc(rules, qrule.localConditionsAsRules()).quest(r,
+                        e -> qrule.answer!=null && e.toLispString().equals(qrule.answer.toLispString()),
+                        1000);
                 if( qrule.answer==null ){
                     System.out.println("Correct answer was not specified!");
                 }else if( ! ret.toLispString().equals(qrule.answer.toLispString()) ){

@@ -15,12 +15,25 @@ public class Calc {
     AssocCommutCancelRule plusMinus = new AssocCommutCancelRule("+","-","0",false);
     AssocCommutCancelRule multDiv = new AssocCommutCancelRule("*","/","1",true);
 
-    public Calc(List<Rule> rules) {
-        this.rules = rules;
+    public Calc(List<Rule> rules, List<Rule> localRules) {
+        this.rules = new ArrayList<>(rules);
+        this.rules.addAll(localRules);
+
+        // need to try to optimize quest-local rules, i.e. preconditions for quest
+        for( Rule r : localRules ){
+            if( r.assertion.node.equals("=") ){
+                Expr expr = r.assertion.rightChild();
+                Expr simpl = quest(new Rule(expr, Collections.emptyList()),null,15);
+                if( ! expr.equals(simpl) ) {
+                    System.out.println("simpl=" + simpl);
+                }
+            }
+        }
     }
 
-    public Expr quest(Rule q, Predicate<Expr> checkIfAnswer){
-        System.out.println("\n================QUEST:\n"+q+"\n");
+    public Expr quest(Rule q, Predicate<Expr> checkIfAnswer, int maxOps){
+        String indent = (checkIfAnswer==null ? "    ":"");
+        System.out.println("\n"+indent+"================QUEST:\n"+q+"\n");
 
 
         Expr expr = q.assertion;
@@ -30,17 +43,18 @@ public class Calc {
 //        }
 
         Set<FringeEl> fringe = new HashSet<>();
-        fringe.add(new FringeEl(expr, null));
+        fringe.add(new FringeEl(expr, null, null));
 
         Set<FringeEl> visited = new HashSet<>(); // for avoiding loops
         visited.addAll(fringe);
 
-        while (! fringe.isEmpty() ) {
+        int step=0;
+        while (++step<maxOps && ! fringe.isEmpty() ) {
             FringeEl el = shortest(fringe);
             if( el.expr.sub==null ){
                 break; // single term cannot be simplified
             }
-            if( checkIfAnswer.test(el.expr) ){ // answer reached, no more work required
+            if( step>5 && checkIfAnswer!=null && checkIfAnswer.test(el.expr) ){ // answer reached, no more work required
                 break;
             }
 //            if( el.expr.toLispString().length()<q.assertion.toLispString().length() ){
@@ -48,7 +62,7 @@ public class Calc {
 //            }
             fringe.remove(el);
             String exprString = el.expr.toMathString();
-            System.out.println("QUEST try: " + exprString);
+            System.out.println(indent+"QUEST try #" + step + ": " + exprString);
             if( exprString.contains("((∂ f) x)") ){
                 System.out.println("breakpoint");
             }
@@ -69,7 +83,7 @@ public class Calc {
         FringeEl resultPath = shortest(visited);
         Expr res = resultPath.expr;
         resultPath.printDerivationPath();
-        System.out.println("QUEST res: "+res.toMathString());
+        System.out.println(indent+"QUEST res: "+res.toMathString());
         return res;
     }
 
@@ -138,22 +152,29 @@ public class Calc {
                 Expr template = r.assertion.sub.get(0);
                 Map<String, Expr> unifMap = template.unify(expr);
                 if( unifMap!=null ) {
+                    if( expr.toString().equals("(+ n (- 1))") ){
+                        System.out.println("breakpoint");
+                    }
                     boolean canUseRule = true;
                     for( Expr cond : r.cond ){
                         Expr condSubs = cond.substitute(unifMap);
-                        Map<String, Expr> unifMapCond = checkIfTrue(condSubs);
-                        if( unifMapCond==null ){
+                        FringeEl checkIfTrueResult = checkIfTrue(condSubs);
+                        if( checkIfTrueResult==null ){
                             canUseRule = false;
                             break;
                         }else{
+                            Map<String, Expr> unifMapCond = checkIfTrueResult.unifMap;
                             unifMap.putAll(unifMapCond);
                         }
                     }
                     if( canUseRule ) {
                         //System.out.println("unify with " + r + " results in " + unifMap);
+                        if( ! r.freeVariables.containsAll(unifMap.keySet()) ){
+                            throw new IllegalStateException();
+                        }
                         Expr exprNew = r.assertion.sub.get(1).substitute(unifMap);
                         //System.out.println(expr + " ==simplified==> " + exprNew);
-                        ways.add(new FringeEl(exprNew, r));
+                        ways.add(new FringeEl(exprNew, r, unifMap));
                     }
                 }
             }
@@ -161,11 +182,12 @@ public class Calc {
         return ways;
     }
 
-    Map<String, Expr> checkIfTrue(Expr expr){
+    FringeEl checkIfTrue(Expr expr){
         for (Rule r : rules) {
-            Map<String, Expr> unifMap = expr.unify(r.assertion);
+            Expr template = r.assertion;
+            Map<String, Expr> unifMap = template.unify(expr);
             if( unifMap!=null ){
-                return unifMap;
+                return new FringeEl(null, r, unifMap);
             }
         }
         return null;

@@ -40,6 +40,12 @@ public class Expr {
         }
         return sub.get(0);
     }
+    public Expr rightChild(){
+        if( sub.size()!=2 ){
+            throw new IllegalStateException(node+" sub.size()="+sub.size());
+        }
+        return sub.get(1);
+    }
 
     void validate(){
         if( node.equals("-") && sub.size()!=1 ){
@@ -132,6 +138,27 @@ public class Expr {
           }
         }
         return true;
+    }
+
+    Set<String> freeVariables(){
+        Set<String> set = new HashSet<>();
+        if( isVar() ){
+            set.add(node);
+        }else {
+            freeVariables(set);
+        }
+        return set;
+    }
+
+    private void freeVariables(Set<String> fillSet){
+        if( sub==null ) return;
+        for( Expr e : sub ){
+            if( e.isVar() ){
+                fillSet.add(e.node);
+            }else{
+                e.freeVariables(fillSet);
+            }
+        }
     }
 
     public String toLispString() {

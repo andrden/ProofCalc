@@ -3,6 +3,7 @@ package c;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by denny on 8/6/15.
@@ -10,11 +11,13 @@ import java.util.List;
 public class Rule {
     public List<Expr> cond;
     public Expr assertion;
+    public final Set<String> freeVariables;
 
 
     public Rule(Expr assertion, List<Expr> cond) {
         this.assertion = assertion;
         this.cond = cond;
+        freeVariables = assertion.freeVariables();
     }
 
     @Override
