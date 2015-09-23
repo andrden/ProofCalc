@@ -52,7 +52,7 @@ class FringeEl {
             String s = "";
             if( el.byRule!=null ) {
                 //s = "By " + el.byRule.assertion.toMathString() + " " + unifMap + " => ";
-                s = "By " + el.byRule.toString() + " " + unifMap + " => ";
+                s = "By " + el.byRule.toLineString() + " " + (unifMap.isEmpty()?"":unifMap) + " =>  ";
             }
             System.out.println("DERIV path: " + s + el.expr.toMathString());
         }

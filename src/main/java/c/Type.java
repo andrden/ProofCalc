@@ -8,8 +8,9 @@ import java.util.*;
 public class Type {
     static Set<String> vars = new HashSet<>(Arrays.asList("c", "n", "x", "y", "z", "f", "g", "t", "ψ"));
     static Set<String> consts = new HashSet<>(Arrays.asList(
+            "True",
             "∂", "exp", "sin", "cos", "sh", "ch", "π", "√", "const",
-            "xx", "yy", "ff"));
+            "xx", "yy", "ff", "nn"));
 
     static Set<String> infixOps = new HashSet<>(Arrays.asList("+", "-", "*", "/", "^", "≤","≥"));
 

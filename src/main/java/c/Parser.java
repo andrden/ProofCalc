@@ -60,12 +60,12 @@ public class Parser {
                 if( answer!=null ){
                     throw new IllegalStateException();
                 }
-                return new Rule(assertion, cond);
+                return new Rule(assertion, cond, new ArrayList<>(lines));
             } else if( line.get(0).equals("$?") || line.get(0).equals("$a?") ){
                 boolean reusable = line.get(0).equals("$a?");
                 line.remove(0);
                 Expr assertion = parse(line);
-                QuestRule qr = new QuestRule(assertion, cond, answer);
+                QuestRule qr = new QuestRule(assertion, cond, answer, new ArrayList<>(lines));
                 if( reusable ){
                     qr.reusable = true;
                 }

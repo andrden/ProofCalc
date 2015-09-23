@@ -47,6 +47,13 @@ public class Expr {
         return sub.get(1);
     }
 
+    public Expr rightChildReplace(Expr replacement){
+        if( sub.size()!=2 ){
+            throw new IllegalStateException(node+" sub.size()="+sub.size());
+        }
+        return new Expr(node, sub.get(0), replacement);
+    }
+
     void validate(){
         if( node.equals("-") && sub.size()!=1 ){
             throw new IllegalStateException("Only unary minus allowed in internal representations");
@@ -140,7 +147,7 @@ public class Expr {
         return true;
     }
 
-    Set<String> freeVariables(){
+    public Set<String> freeVariables(){
         Set<String> set = new HashSet<>();
         if( isVar() ){
             set.add(node);

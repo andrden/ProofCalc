@@ -44,11 +44,11 @@ public class Main {
                 if( qrule.answer==null ){
                     System.out.println("Correct answer was not specified!");
                 }else if( ! ret.toLispString().equals(qrule.answer.toLispString()) ){
-                    throw new IllegalStateException("Not reached answer="+qrule.answer);
+                    throw new IllegalStateException("Not reached answer="+qrule.answer+"\nsrcLines="+qrule.srcLines);
                 }
 
                 if( qrule.answer!=null && qrule.reusable ){
-                    Rule provenRule = new Rule(new Expr("=", qrule.assertion, qrule.answer), qrule.cond);
+                    Rule provenRule = new Rule(new Expr("=", qrule.assertion, qrule.answer), qrule.cond, null);
                     rules.add(provenRule);
                 }
             }else{

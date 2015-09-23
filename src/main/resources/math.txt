@@ -19,13 +19,13 @@ $= 3
 $? 3 + 0 + 0
 $= 3
 
-$e f ( x ) = x - 1
-$? f ( 1 )
+$e ff ( x ) = x - 1
+$? ff ( 1 )
 $= 0
 
-$e f ( x ) = x - 1
+$e ff ( x ) = x - 1
 $e yy = 1
-$? f ( yy )
+$? ff ( yy )
 $= 0
 
 ############### First declarative math rules:
@@ -62,9 +62,9 @@ $a 5 - 2 = 3
 $? 5 - 1
 $= 4
 
-$e f ( x ) = x - 1
+$e ff ( x ) = x - 1
 $e yy = 2
-$? f ( f ( yy ) )
+$? ff ( ff ( yy ) )
 $= 0
 
 $? 1 + 2
@@ -82,7 +82,8 @@ $= 5
 $? 1 + 1 + 1 + 2
 $= 5
 
-$? n - 1
+$? nn - 1
+$= nn - 1
 
 $e ff ( 1 ) = 1
 $e ff ( 2 ) = 1
@@ -132,7 +133,7 @@ $= 0
 
 ############### Some hyperbolic trigonometry:
 
-$a ch x = ( exp x + 1 / exp x ) / 2
+$a ch y = ( exp y + 1 / exp y ) / 2
 
 $a sh x = ( exp x - 1 / exp x ) / 2
 
@@ -191,9 +192,11 @@ $? ( ∂ ff ) ( x )
 
 $e ff ( x ) = 4 + 1
 $? const ff
+$= True
 
 $e ff ( x ) = ( ch x ) ^ 2 - ( sh x ) ^ 2
 $? const ff
+$= True
 
 ############### Inequalities:
 
