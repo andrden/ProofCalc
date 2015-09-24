@@ -168,10 +168,6 @@ $= x
 $e f ( x ) = x ^ n
 $a ( ∂ f ) ( x ) = n * x ^ ( n - 1 )
 
-$e ff ( x ) = x ^ 2
-$? ( ∂ ff ) ( x )
-$= 2 * x
-
 $e const f
 $a ( ∂ f ) ( x ) = 0
 
@@ -183,12 +179,13 @@ $a const f
 
 ############### Verify derivatives:
 
-$e ff ( x ) = x ^ 3
+$e ff ( x ) = x ^ 2
 $? ( ∂ ff ) ( x )
-$= ( x ^ 2 ) * 3
+$= 2 * x
 
 $e ff ( x ) = 5
 $? ( ∂ ff ) ( x )
+$= 0
 
 $e ff ( x ) = 4 + 1
 $? const ff
@@ -197,6 +194,10 @@ $= True
 $e ff ( x ) = ( ch x ) ^ 2 - ( sh x ) ^ 2
 $? const ff
 $= True
+
+$e ff ( x ) = x ^ 3
+$? ( ∂ ff ) ( x )
+$= ( x ^ 2 ) * 3
 
 ############### Inequalities:
 

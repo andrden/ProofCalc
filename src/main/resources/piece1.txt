@@ -1,0 +1,11 @@
+############### type 1 substitution in checkIfTrue(Expr expr)
+
+$e f ( x ) = 5
+$a const f
+
+$e const f
+$a ( ∂ f ) ( x ) = 0
+
+
+$e ff ( x ) = 5
+$? ( ∂ ff ) ( x )

@@ -16,8 +16,9 @@ public class Calc {
     AssocCommutCancelRule multDiv = new AssocCommutCancelRule("*","/","1",true);
 
     public Calc(List<Rule> rules, List<Rule> localRules) {
-        this.rules = new ArrayList<>(rules);
+        this.rules = new ArrayList<>();
         this.rules.addAll(localRules);
+        this.rules.addAll(rules);
 
         // need to try to optimize quest-local rules, i.e. preconditions for quest
         for( Rule r : localRules ){
@@ -65,7 +66,7 @@ public class Calc {
             fringe.remove(el);
             String exprString = el.expr.toMathString();
             System.out.println(indent+"QUEST try #" + step + ": " + exprString);
-            if( exprString.contains("(const ff)") ){
+            if( exprString.contains("((∂ ff) x)") ){
                 System.out.println("breakpoint");
             }
             while(tryByPairs(el, plusMinus));
@@ -207,10 +208,29 @@ public class Calc {
     FringeEl checkIfTrue(Expr expr){
         for (Rule r : rules) {
             Expr template = r.assertion;
-            //Map<String, Expr> unifMap = template.unify(expr);
-            Map<String, Expr> unifMap = expr.unify(template);
+
+
+/*
+ Checking if 'const ff' is true (when ff(x)=5, such local rule is present).
+ We have to unify rule "f(x)=5 => const f",
+ that is unify its template assertion "const f" with our tested expression "const ff",
+ seeing necessary mapping "f -> ff"
+  */
+            Map<String, Expr> unifMap = template.unify(expr);
             if( unifMap!=null ){
-                return new FringeEl(null, r, unifMap);
+                // we don't need to use this map for replacement in our checked 'expr'
+                return new FringeEl(null, r, Collections.emptyMap() /*unifMap*/);
+            }
+
+/*
+Another situation, more like an equation.
+We want to see whether 'x+1=5' for any value of a parameter.
+We can find that for x=4 this is true (according to rule '4+1=5', so we unify the other way,
+and have to use unifMapEquation to substitute x in our original 'expr'
+ */
+            Map<String, Expr> unifMapEquation = expr.unify(template);
+            if( unifMapEquation!=null ){
+                return new FringeEl(null, r, unifMapEquation);
             }
         }
         return null;
