@@ -16,11 +16,19 @@ class FringeEl {
     Rule byRule;
     Map<String, Expr> unifMap;
     FringeEl parent;
+    List<FringeEl> subDerivations;
 
     FringeEl(Expr expr, Rule byRule, Map<String, Expr> unifMap) {
         this.expr = expr;
         this.byRule = byRule;
         this.unifMap = unifMap;
+    }
+
+    FringeEl(Expr expr, Rule byRule, Map<String, Expr> unifMap, List<FringeEl> subDerivations) {
+        this.expr = expr;
+        this.byRule = byRule;
+        this.unifMap = unifMap;
+        this.subDerivations = subDerivations;
     }
 
     @Override
@@ -49,6 +57,9 @@ class FringeEl {
         }
         Collections.reverse(path);
         for( FringeEl el : path ){
+            if( el.subDerivations!=null && el.subDerivations.size()>0 ){
+                System.out.println("DERIV path: sub-derivs " + el.subDerivations.size());
+            }
             String s = "";
             if( el.byRule!=null ) {
                 //s = "By " + el.byRule.assertion.toMathString() + " " + unifMap + " => ";

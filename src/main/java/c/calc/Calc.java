@@ -24,8 +24,8 @@ public class Calc {
         for( Rule r : localRules ){
             if( r.assertion.node.equals("=") ){
                 Expr expr = r.assertion.rightChild();
-                Rule qrule = new Rule(expr, Collections.emptyList(), null);
-                Expr simpl = quest(qrule, null, 15);
+                //Rule qrule = new Rule(expr, Collections.emptyList(), null);
+                Expr simpl = quest(expr, null, 15);
                 if( ! expr.equals(simpl) ) {
                     System.out.println("simpl=" + simpl);
                     this.rules.add(new Rule(r.assertion.rightChildReplace(simpl), Collections.emptyList(), null));
@@ -34,12 +34,12 @@ public class Calc {
         }
     }
 
-    public Expr quest(Rule q, Predicate<Expr> checkIfAnswer, int maxOps){
+    public Expr quest(Expr expr, Predicate<Expr> checkIfAnswer, int maxOps){
         String indent = (checkIfAnswer==null ? "    ":"");
-        System.out.println("\n"+indent+"================QUEST:\n"+q+"\n");
+        System.out.println("\n"+indent+"================QUEST:\n"+expr+"\n");
 
 
-        Expr expr = q.assertion;
+        //Expr expr = q.assertion;
         expr = plusMinus.optimizeDeep(multDiv.optimizeDeep(plusMinus.optimizeDeep(expr)));
 //        if( ! expr.equals(q.assertion) ){
 //            System.out.println("QUEST try: "+expr.toMathString());
@@ -158,7 +158,11 @@ public class Calc {
                     if( expr.toString().equals("(+ 5 (- 1))") ){
                         System.out.println("breakpoint");
                     }
-                    boolean canUseRule = checkCanUseRule(r, unifMap);
+                    List<FringeEl> subDerivations = checkCanUseRule(r, unifMap);
+                    boolean canUseRule = subDerivations!=null;
+                    if( canUseRule ) {
+                        System.out.println("canUseRule "+r.toLineString()+" unifMap="+unifMap);
+                    }
 //                    for( String v : expr.freeVariables() ){
 //                        if( unifMap.containsKey(v) ){
 //                            canUseRule = false; // we must simplify generically, can't fix vals of vars
@@ -171,14 +175,15 @@ public class Calc {
                         }else {
                             Expr exprNew = r.assertion.sub.get(1).substitute(unifMap);
                             //System.out.println(expr + " ==simplified==> " + exprNew);
-                            ways.add(new FringeEl(exprNew, r, unifMap));
+                            FringeEl fe = new FringeEl(exprNew, r, unifMap);
+                            ways.add(fe);
                         }
                     }
                 }
             }else{
                 Map<String, Expr> unifMap = r.assertion.unify(expr);
                 if( unifMap!=null ) {
-                    boolean canUseRule = checkCanUseRule(r, unifMap);
+                    boolean canUseRule = checkCanUseRule(r, unifMap)!=null;
                     if( canUseRule ) {
                         //System.out.println("ok");
                         ways.add(new FringeEl(new Expr("True"), r, unifMap));
@@ -189,20 +194,20 @@ public class Calc {
         return ways;
     }
 
-    private boolean checkCanUseRule(Rule r, Map<String, Expr> unifMap) {
-        boolean canUseRule = true;
+    private List<FringeEl> checkCanUseRule(Rule r, Map<String, Expr> unifMap) {
+        List<FringeEl> subDerivations = new ArrayList<>();
         for( Expr cond : r.cond ){
             Expr condSubs = cond.substitute(unifMap);
             FringeEl checkIfTrueResult = checkIfTrue(condSubs);
             if( checkIfTrueResult==null ){
-                canUseRule = false;
-                break;
+                return null;
             }else{
                 Map<String, Expr> unifMapCond = checkIfTrueResult.unifMap;
                 unifMap.putAll(unifMapCond);
+                subDerivations.add(checkIfTrueResult);
             }
         }
-        return canUseRule;
+        return subDerivations;
     }
 
     FringeEl checkIfTrue(Expr expr){
@@ -216,11 +221,15 @@ public class Calc {
  that is unify its template assertion "const f" with our tested expression "const ff",
  seeing necessary mapping "f -> ff"
   */
-            Map<String, Expr> unifMap = template.unify(expr);
-            if( unifMap!=null ){
-                // we don't need to use this map for replacement in our checked 'expr'
+            Expr res = quest(expr, null, 10);
+            if( res.node.equals("True") ){
                 return new FringeEl(null, r, Collections.emptyMap() /*unifMap*/);
             }
+//            Map<String, Expr> unifMap = template.unify(expr);
+//            if( unifMap!=null ){
+//                // we don't need to use this map for replacement in our checked 'expr'
+//                return new FringeEl(null, r, Collections.emptyMap() /*unifMap*/);
+//            }
 
 /*
 Another situation, more like an equation.

@@ -38,7 +38,7 @@ public class Main {
         for( Rule r : rulesAndQuests ){
             if( r instanceof QuestRule ){
                 QuestRule qrule = (QuestRule) r;
-                Expr ret = new Calc(rules, qrule.localConditionsAsRules()).quest(r,
+                Expr ret = new Calc(rules, qrule.localConditionsAsRules()).quest(r.assertion,
                         e -> qrule.answer!=null && e.toLispString().equals(qrule.answer.toLispString()),
                         1000);
                 if( qrule.answer==null ){
