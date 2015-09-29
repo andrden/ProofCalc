@@ -165,17 +165,21 @@ $= x
 
 ############### Derivatives:
 
+$e f ( x ) = 1
+$a const f
+
+$e f ( x ) = 5
+$a const f
+
 $e f ( x ) = x ^ n
 $a ( ∂ f ) ( x ) = n * x ^ ( n - 1 )
 
 $e const f
 $a ( ∂ f ) ( x ) = 0
 
-$e f ( x ) = 1
-$a const f
+$e f ( x ) = g ( x ) + h ( x )
+$a ( ∂ f ) ( x ) = ( ∂ g ) ( x ) + ( ∂ h ) ( x )
 
-$e f ( x ) = 5
-$a const f
 
 ############### Verify derivatives:
 
@@ -198,6 +202,15 @@ $= True
 $e ff ( x ) = x ^ 3
 $? ( ∂ ff ) ( x )
 $= ( x ^ 2 ) * 3
+
+$e gg ( x ) = x ^ 2
+$e hh ( x ) = 1
+$e ff ( x ) = gg ( x ) + hh ( x )
+$? ( ∂ ff ) ( x )
+$= 2 * x
+
+$e ff ( x ) = x ^ 2 + 1
+$? ( ∂ ff ) ( x )
 
 ############### Inequalities:
 

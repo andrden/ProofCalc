@@ -247,4 +247,11 @@ x^2
     public String toString() {
         return toLispString();
     }
+
+    @Override
+    public int hashCode() {
+        int result = node != null ? node.hashCode() : 0;
+        result = 31 * result + (sub != null ? sub.hashCode() : 0);
+        return result;
+    }
 }

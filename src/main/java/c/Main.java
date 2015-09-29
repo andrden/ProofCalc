@@ -38,8 +38,9 @@ public class Main {
         for( Rule r : rulesAndQuests ){
             if( r instanceof QuestRule ){
                 QuestRule qrule = (QuestRule) r;
-                Expr ret = new Calc(rules, qrule.localConditionsAsRules()).quest(r.assertion,
-                        e -> qrule.answer!=null && e.toLispString().equals(qrule.answer.toLispString()),
+                Calc calc = new Calc(rules, qrule.localConditionsAsRules());
+                Expr ret = calc.quest(r.assertion,
+                        e -> qrule.answer != null && e.toLispString().equals(qrule.answer.toLispString()),
                         1000);
                 if( qrule.answer==null ){
                     System.out.println("Correct answer was not specified!");
@@ -55,7 +56,7 @@ public class Main {
                 rules.add(r); // add a new given rule to the list of all known Math
             }
         }
-
+        System.out.println("SUCCESS");
     }
 
     static void testUnify(){

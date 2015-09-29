@@ -15,6 +15,8 @@ public class Calc {
     AssocCommutCancelRule plusMinus = new AssocCommutCancelRule("+","-","0",false);
     AssocCommutCancelRule multDiv = new AssocCommutCancelRule("*","/","1",true);
 
+    Map<Expr, Expr> subResults = new HashMap<>();
+
     public Calc(List<Rule> rules, List<Rule> localRules) {
         this.rules = new ArrayList<>();
         this.rules.addAll(localRules);
@@ -35,6 +37,10 @@ public class Calc {
     }
 
     public Expr quest(Expr expr, Predicate<Expr> checkIfAnswer, int maxOps){
+        if( subResults.containsKey(expr) ){
+            return subResults.get(expr);
+        }
+        final Expr origExpr = expr;
         String indent = (checkIfAnswer==null ? "    ":"");
         System.out.println("\n"+indent+"================QUEST:\n"+expr+"\n");
 
@@ -87,7 +93,16 @@ public class Calc {
         Expr res = resultPath.expr;
         resultPath.printDerivationPath();
         System.out.println(indent+"QUEST res: "+res.toMathString());
+        cacheResult(origExpr, res);
         return res;
+    }
+
+    void cacheResult(Expr origExpr, Expr res){
+        if( subResults.containsKey(origExpr) ){
+            throw new IllegalStateException();
+        }else{
+            subResults.put(origExpr, res);
+        }
     }
 
     private boolean tryByPairs(FringeEl el, AssocCommutCancelRule assocCommutCancelRule) {
@@ -161,7 +176,7 @@ public class Calc {
                     List<FringeEl> subDerivations = checkCanUseRule(r, unifMap);
                     boolean canUseRule = subDerivations!=null;
                     if( canUseRule ) {
-                        System.out.println("canUseRule "+r.toLineString()+" unifMap="+unifMap);
+                        //System.out.println("canUseRule "+r.toLineString()+" unifMap="+unifMap);
                     }
 //                    for( String v : expr.freeVariables() ){
 //                        if( unifMap.containsKey(v) ){
@@ -211,6 +226,15 @@ public class Calc {
     }
 
     FringeEl checkIfTrue(Expr expr){
+        if( expr.toLispString().contains("(= (apply ff x) (+ (apply g x) (apply h x)))") ){
+            System.out.println("breakpoint");
+        }
+
+        Expr res = quest(expr, null, 10);
+        if( res.node.equals("True") ){
+            return new FringeEl(null, null/*r*/, Collections.emptyMap() /*unifMap*/);
+        }
+
         for (Rule r : rules) {
             Expr template = r.assertion;
 
@@ -221,10 +245,6 @@ public class Calc {
  that is unify its template assertion "const f" with our tested expression "const ff",
  seeing necessary mapping "f -> ff"
   */
-            Expr res = quest(expr, null, 10);
-            if( res.node.equals("True") ){
-                return new FringeEl(null, r, Collections.emptyMap() /*unifMap*/);
-            }
 //            Map<String, Expr> unifMap = template.unify(expr);
 //            if( unifMap!=null ){
 //                // we don't need to use this map for replacement in our checked 'expr'
