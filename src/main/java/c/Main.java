@@ -63,6 +63,8 @@ public class Main {
         Parser parser = new Parser();
         chkUnify(parser, "x + 5", "7 + 5", "{x=7}");
         chkUnify(parser, "x + 1 = 5", "4 + 1 = 5", "{x=4}");
+        chkUnify(parser,"f ( x ) = x ^ 2 + h", "f ( x ) = x ^ 2 + 22", "{f=f, x=x, h=22}");
+        chkUnify(parser,"f ( x ) = g ( x ) + h ( x )", "f ( x ) = x ^ 2 + 1", "g and h = ??");
     }
 
     static void testParseLine(){
@@ -88,7 +90,7 @@ public class Main {
     }
 
     static void chkUnify(Parser parser, String template, String concrete, String resMap){
-        String res = parser.parse(template).unify(parser.parse(concrete)).toString();
+        String res = "" + parser.parse(template).unify(parser.parse(concrete));
         if( ! res.equals(resMap) ){
             throw new RuntimeException(res + " NOT " + resMap);
         }

@@ -236,7 +236,7 @@ public class Calc {
         }
 
         for (Rule r : rules) {
-            Expr template = r.assertion;
+            Expr concrete = r.assertion;
 
 
 /*
@@ -257,7 +257,7 @@ We want to see whether 'x+1=5' for any value of a parameter.
 We can find that for x=4 this is true (according to rule '4+1=5', so we unify the other way,
 and have to use unifMapEquation to substitute x in our original 'expr'
  */
-            Map<String, Expr> unifMapEquation = expr.unify(template);
+            Map<String, Expr> unifMapEquation = expr.unify(concrete);
             if( unifMapEquation!=null ){
                 return new FringeEl(null, r, unifMapEquation);
             }
