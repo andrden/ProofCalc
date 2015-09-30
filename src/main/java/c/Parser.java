@@ -127,7 +127,7 @@ public class Parser {
         unaryMinus(list, "+", "-");
         while( infixOp(list, "+") );
         unaryPlus(list);
-        while( infixOp(list, "=","≥","≤") );
+        while( infixOp(list, "=","≥","≤","↦") );
         prefixOp(list, "real");
         if(list.size()==1 && list.get(0) instanceof Expr) {
             return (Expr) list.get(0);
@@ -199,7 +199,11 @@ public class Parser {
                 Object left = list.get(i-1);
                 Object right = list.get(i+1);
                 if( left instanceof Expr && right instanceof Expr ) {
-                    Expr comb = new Expr((String) op, (Expr)left, (Expr)right);
+                    String exprOp = (String) op;
+                    if( exprOp.equals("↦") ){
+                        exprOp = "func"; // better readability
+                    }
+                    Expr comb = new Expr(exprOp, (Expr)left, (Expr)right);
                     list.set(i, comb);
                     list.remove(i + 1);
                     list.remove(i - 1);

@@ -1,0 +1,8 @@
+$e f ( x ) = 5
+$a const f
+
+$e const f
+$a ( ∂ f ) ( x ) = 0
+
+$? ( ∂ ( x ↦ 5 ) ) ( x )
+$= 0

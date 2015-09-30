@@ -12,7 +12,7 @@ public class Type {
             "∂", "exp", "sin", "cos", "sh", "ch", "π", "√", "const",
             "xx", "yy", "ff", "gg", "hh", "nn"));
 
-    static Set<String> infixOps = new HashSet<>(Arrays.asList("+", "-", "*", "/", "^", "≤","≥"));
+    static Set<String> infixOps = new HashSet<>(Arrays.asList("+", "-", "*", "/", "^", "≤","≥", "↦"));
 
     static boolean isVar(String s){
         return vars.contains(s);

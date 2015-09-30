@@ -115,6 +115,15 @@ public class Expr {
             }
             return val.equals(concrete);
         }
+        if( node.equals("apply") && ! concrete.node.equals("apply")
+                && sub.get(0).isVar() && rightChild().isVar() ){
+            // (apply g x)
+            String func = sub.get(0).node;
+            if( vars.get(func)==null ){
+                vars.put(func, new Expr("func", rightChild(), concrete));
+                return true;
+            }
+        }
 
         if( ! node.equals(concrete.node) ){
             return false;

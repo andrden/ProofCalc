@@ -64,7 +64,7 @@ public class Main {
         chkUnify(parser, "x + 5", "7 + 5", "{x=7}");
         chkUnify(parser, "x + 1 = 5", "4 + 1 = 5", "{x=4}");
         chkUnify(parser,"f ( x ) = x ^ 2 + h", "f ( x ) = x ^ 2 + 22", "{f=f, x=x, h=22}");
-        chkUnify(parser,"f ( x ) = g ( x ) + h ( x )", "f ( x ) = x ^ 2 + 1", "g and h = ??");
+        chkUnify(parser,"f ( x ) = g ( x ) + h ( x )", "f ( x ) = x ^ 2 + 1", "{f=f, g=(func x (^ x 2)), x=x, h=(func x 1)}");
     }
 
     static void testParseLine(){
@@ -87,6 +87,9 @@ public class Main {
         chk(parser, "5 - f ( x + 1 )", "(+ 5 (- (apply f (+ x 1))))");
         chk(parser, "( sh ψ ) ^ 2 * x - ( ch ψ ) ^ 2 * x = - x",
                 "(= (+ (* (^ (apply sh ψ) 2) x) (- (* (^ (apply ch ψ) 2) x))) (- x))");
+        chk(parser, "x ↦ 1", "(func x 1)");
+        chk(parser, "( ∂ ff ) ( x )", "(apply (apply ∂ ff) x)");
+        chk(parser, "( ∂ ( x ↦ 1 ) ) ( x )", "(apply (apply ∂ (func x 1)) x)");
     }
 
     static void chkUnify(Parser parser, String template, String concrete, String resMap){
