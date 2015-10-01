@@ -171,8 +171,12 @@ $a const f
 $e f ( x ) = 5
 $a const f
 
+$a const ( x ↦ 1 )
+
 $e f ( x ) = x ^ n
 $a ( ∂ f ) ( x ) = n * x ^ ( n - 1 )
+
+$a ( ∂ ( x ↦ x ^ n ) ) ( x ) = n * x ^ ( n - 1 )
 
 $e const f
 $a ( ∂ f ) ( x ) = 0
@@ -210,11 +214,15 @@ $? ( ∂ ff ) ( x )
 $= 2 * x
 
 $? ( ∂ ( x ↦ 1 ) ) ( x )
-$= 55
+$= 0
 
 $e ff ( x ) = x ^ 2 + 1
 $? ( ∂ ff ) ( x )
 $= 2 * x
+
+$e ff ( x ) = √ ( 1 + x ^ 2 )
+$? ( ∂ ff ) ( x )
+$= 123
 
 ############### Inequalities:
 
