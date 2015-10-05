@@ -131,9 +131,12 @@ public class Expr {
         if( sub==null && concrete.sub==null ){
             return true;
         }
-       if( sub.size()!=concrete.sub.size() ){
-           return false;
-       }
+        if( node.equals("+") && sub.size()==2 && sub.size() < concrete.sub.size() ){
+            concrete = new Expr("+", concrete.sub.get(0), new Expr("+", concrete.sub.subList(1,concrete.sub.size())));
+        }
+        if( sub.size()!=concrete.sub.size() ){
+            return false;
+        }
         if (! subUnify(concrete, vars)){
             if( "+".equals(node) && sub.size()==2 ){
                 // try swapping and unifying the other way
