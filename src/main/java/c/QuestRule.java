@@ -10,6 +10,7 @@ import java.util.List;
 public class QuestRule extends Rule{
     Expr answer;
     boolean reusable;
+    boolean focus;
 
     public QuestRule(Expr assertion, List<Expr> cond, Expr answer, List<String> srcLines) {
         super(assertion, cond, srcLines);

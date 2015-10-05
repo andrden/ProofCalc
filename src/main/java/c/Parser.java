@@ -61,11 +61,14 @@ public class Parser {
                     throw new IllegalStateException();
                 }
                 return new Rule(assertion, cond, new ArrayList<>(lines));
-            } else if( line.get(0).equals("$?") || line.get(0).equals("$a?") ){
+            } else if( line.get(0).equals("$?") || line.get(0).equals("$a?") || line.get(0).equals("$?focus") ){
                 boolean reusable = line.get(0).equals("$a?");
+                boolean focus = line.get(0).equals("$?focus");
+
                 line.remove(0);
                 Expr assertion = parse(line);
                 QuestRule qr = new QuestRule(assertion, cond, answer, new ArrayList<>(lines));
+                qr.focus = focus;
                 if( reusable ){
                     qr.reusable = true;
                 }

@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -13,6 +14,7 @@ import java.util.List;
  */
 public class Main {
     public static void main(String[] args) throws Exception{
+        //new Date(1443657600000L).toString();
         InputStream streamMath = Main.class.getClassLoader().getResourceAsStream("math.txt");
         InputStream streamMathOverwrite = Main.class.getClassLoader().getResourceAsStream("mathOverwrite.txt");
         if( streamMathOverwrite!=null && streamMathOverwrite.available()<1 ){
@@ -30,6 +32,12 @@ public class Main {
 
         List<Rule> rules = new ArrayList<>();
 
+        long countFocus = rulesAndQuests.stream()
+                .filter(r -> (r instanceof QuestRule) && ((QuestRule)r).focus).count();
+        if( countFocus>1 ){
+            throw new IllegalStateException();
+        }
+
 //        List<Rule> rules = rulesAndQuests.stream()
 //                .filter(r -> !(r instanceof QuestRule))
 //                .collect(Collectors.toCollection(ArrayList::new));
@@ -38,14 +46,18 @@ public class Main {
         for( Rule r : rulesAndQuests ){
             if( r instanceof QuestRule ){
                 QuestRule qrule = (QuestRule) r;
-                Calc calc = new Calc(rules, qrule.localConditionsAsRules());
-                Expr ret = calc.quest(r.assertion,
-                        e -> qrule.answer != null && e.toLispString().equals(qrule.answer.toLispString()),
-                        1000);
-                if( qrule.answer==null ){
-                    System.out.println("Correct answer was not specified!");
-                }else if( ! ret.toLispString().equals(qrule.answer.toLispString()) ){
-                    throw new IllegalStateException("Not reached answer="+qrule.answer+"\nsrcLines="+qrule.srcLines);
+                if( countFocus==1 && ! qrule.focus ){
+                    System.out.println("skipped non-focus quest rule");
+                }else {
+                    Calc calc = new Calc(rules, qrule.localConditionsAsRules());
+                    Expr ret = calc.quest(r.assertion,
+                            e -> qrule.answer != null && e.toLispString().equals(qrule.answer.toLispString()),
+                            1000);
+                    if (qrule.answer == null) {
+                        System.out.println("Correct answer was not specified!");
+                    } else if (!ret.toLispString().equals(qrule.answer.toLispString())) {
+                        throw new IllegalStateException("Not reached answer=" + qrule.answer + "\nsrcLines=" + qrule.srcLines);
+                    }
                 }
 
                 if( qrule.answer!=null && qrule.reusable ){
