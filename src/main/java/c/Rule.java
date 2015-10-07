@@ -21,7 +21,7 @@ public class Rule {
         this.assertion = assertion;
         this.cond = cond;
         this.srcLines = srcLines;
-        freeVariables = assertion.freeVariables();
+        freeVariables = assertion==null ? null : assertion.freeVariables();
     }
 
     @Override

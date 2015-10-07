@@ -6,11 +6,12 @@ import java.util.*;
  * Created by denny on 8/10/15.
  */
 public class Expr {
-    public String node;
-    public List<Expr> sub;
+    public final String node;
+    public final List<Expr> sub;
 
     public Expr(String node) {
         this.node = node;
+        sub = null;
     }
 
     public Expr(String node, Expr a1) {
@@ -65,8 +66,7 @@ public class Expr {
     }
 
     public Expr shallowClone(){
-        Expr ret = new Expr(node);
-        ret.sub = new ArrayList<>(sub);
+        Expr ret = new Expr(node, new ArrayList<>(sub));
         return ret;
     }
 
@@ -90,11 +90,11 @@ public class Expr {
         if( sub==null ){
             return this;
         }
-        Expr n = new Expr(node);
-        n.sub = new ArrayList<>();
+        List<Expr> subList = new ArrayList<>();
         for( Expr s : sub ){
-            n.sub.add(s.substitute(vars));
+            subList.add(s.substitute(vars));
         }
+        Expr n = new Expr(node, subList);
         return n;
     }
 

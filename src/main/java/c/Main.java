@@ -8,23 +8,53 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Created by denny on 8/6/15.
  */
 public class Main {
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
         //new Date(1443657600000L).toString();
-        InputStream streamMath = Main.class.getClassLoader().getResourceAsStream("math.txt");
-        InputStream streamMathOverwrite = Main.class.getClassLoader().getResourceAsStream("mathOverwrite.txt");
-        if( streamMathOverwrite!=null && streamMathOverwrite.available()<1 ){
-            streamMathOverwrite=null;
-        }
-        BufferedReader br = new BufferedReader(new InputStreamReader(
-                streamMathOverwrite==null ? streamMath : streamMathOverwrite));
 
         testParseLine();
         testUnify();
+
+        runPieces();
+        //runMainFile();
+    }
+
+    static void runPieces() throws Exception{
+        List<String> okPieces = new ArrayList<>();
+        for( int p=1; ; p++ ) {
+            String fname = "piece" + p + ".txt";
+            InputStream streamMath = Main.class.getClassLoader().getResourceAsStream(fname);
+            if( streamMath==null ){
+                break;
+            }
+            BufferedReader br = new BufferedReader(new InputStreamReader(streamMath));
+            System.out.println("### ### running "+fname);
+            runMath(br);
+            okPieces.add(fname);
+        }
+        System.out.println("--- SUMMARY ---");
+        okPieces.forEach(s -> {
+            System.out.println("SUCCESS " + s);
+        });
+    }
+
+    private static void runMainFile() throws Exception {
+        InputStream streamMath = Main.class.getClassLoader().getResourceAsStream("math.txt");
+        InputStream streamMathOverwrite = Main.class.getClassLoader().getResourceAsStream("mathOverwrite.txt");
+        if (streamMathOverwrite != null && streamMathOverwrite.available() < 1) {
+            streamMathOverwrite = null;
+        }
+        BufferedReader br = new BufferedReader(new InputStreamReader(
+                streamMathOverwrite == null ? streamMath : streamMathOverwrite));
+        runMath(br);
+    }
+
+    public static void runMath(BufferedReader br) throws Exception{
 
         Parser parser = new Parser();
         List<Rule> rulesAndQuests = parser.parseMathDoc(br);

@@ -57,13 +57,19 @@ public class Calc {
         Set<FringeEl> visited = new HashSet<>(); // for avoiding loops
         visited.addAll(fringe);
 
+        FringeEl resultPath = null;
         int step=0;
         while (++step<maxOps && ! fringe.isEmpty() ) {
             FringeEl el = shortest(fringe);
             if( el.expr.sub==null ){
+                resultPath = el;
                 break; // single term cannot be simplified
             }
-            if( step>5 && checkIfAnswer!=null && checkIfAnswer.test(el.expr) ){ // answer reached, no more work required
+            if( origExpr.toString().contains("(apply (apply ∂ ff) x)") ){
+                System.out.println("breakpoint");
+            }
+            if( checkIfAnswer!=null && checkIfAnswer.test(el.expr) ){ // answer reached, no more work required
+                resultPath = el;
                 break;
             }
 //            if( el.expr.toLispString().length()<q.assertion.toLispString().length() ){
@@ -72,16 +78,20 @@ public class Calc {
             fringe.remove(el);
             String exprString = el.expr.toMathString();
             System.out.println(indent+"QUEST try #" + step + ": " + exprString);
-            if( exprString.contains("((∂ ff) x)") ){
+            if( exprString.contains("(((∂ (func x (x ^ 2))) x) + ((∂ (func x (x ^ 3))) x) + ((∂ (func x 1)) x))") ){
                 System.out.println("breakpoint");
             }
-            while(tryByPairs(el, plusMinus));
-            while(tryByPairs(el, multDiv));
+            el = tryByPairs(el);
+            if( ! visited.contains(el) ){
+                visited.add(el);
+                fringe.add(el);
+            }
+
             List<FringeEl> exprNew = exprSimplifyDeep(el.expr);
             for( FringeEl feNew : exprNew ){
                 Expr e = feNew.expr;
                 e = plusMinus.optimizeDeep(multDiv.optimizeDeep(plusMinus.optimizeDeep(e)));
-                feNew.expr = e;
+                feNew = feNew.newExpr(e);
                 feNew.parent = el;
                 if( ! visited.contains(feNew) ){
                     visited.add(feNew);
@@ -89,12 +99,44 @@ public class Calc {
                 }
             }
         }
-        FringeEl resultPath = shortest(visited);
+        if( resultPath==null ){
+            resultPath = shortest(visited);
+        }
         Expr res = resultPath.expr;
         resultPath.printDerivationPath();
         System.out.println(indent+"QUEST res: "+res.toMathString());
         cacheResult(origExpr, res);
+        if( origExpr.toString().equals("(apply (apply ∂ ff) x)") ){
+            System.out.println("breakpoint");
+        }
         return res;
+    }
+
+    FringeEl tryByPairs(FringeEl el){
+        Rule tryByPairsRule = new Rule(null,null,null){
+            @Override
+            public String toLineString() {
+                return "[tryByPairs]";
+            }
+        };
+
+        while(true){
+            Expr enew = tryByPairs(el.expr, plusMinus);
+            if( enew!=null ){
+                el = new FringeEl(enew, tryByPairsRule, null, el);
+            }else{
+                break;
+            }
+        }
+        while(true){
+            Expr enew = tryByPairs(el.expr, multDiv);
+            if( enew!=null ){
+                el = new FringeEl(enew, tryByPairsRule, null, el);
+            }else{
+                break;
+            }
+        }
+        return el;
     }
 
     void cacheResult(Expr origExpr, Expr res){
@@ -105,8 +147,8 @@ public class Calc {
         }
     }
 
-    private boolean tryByPairs(FringeEl el, AssocCommutCancelRule assocCommutCancelRule) {
-        List<Expr> splitPairs = assocCommutCancelRule.separateAllPossiblePairs(el.expr);
+    private Expr tryByPairs(Expr expr, AssocCommutCancelRule assocCommutCancelRule) {
+        List<Expr> splitPairs = assocCommutCancelRule.separateAllPossiblePairs(expr);
         //System.out.println("split pairs size="+splitPairs.size());
         for( Expr esplitPair : splitPairs ){
 
@@ -118,13 +160,13 @@ public class Calc {
             for( FringeEl fe : exprNew ){
                 if( fe.expr.toLispString().length()<pair.toLispString().length() ){
                     //System.out.println(""+e+" "+pair);
-                    el.expr = new Expr(assocCommutCancelRule.rolePlus, fe.expr , esplitPair.sub.get(1));
-                    el.expr = assocCommutCancelRule.optimizeDeep(multDiv.optimizeDeep(assocCommutCancelRule.optimizeDeep(el.expr)));
-                    return true;
+                    expr = new Expr(assocCommutCancelRule.rolePlus, fe.expr , esplitPair.sub.get(1));
+                    expr = assocCommutCancelRule.optimizeDeep(multDiv.optimizeDeep(assocCommutCancelRule.optimizeDeep(expr)));
+                    return expr;
                 }
             }
         }
-        return false;
+        return null;
     }
 
     FringeEl shortest(Collection<FringeEl> fringe){
@@ -155,8 +197,7 @@ public class Calc {
                 for( FringeEl fe : elist ){
                     Expr clone = expr.shallowClone();
                     clone.sub.set(i, fe.expr);
-                    fe.expr = clone;
-                    ways.add(fe);
+                    ways.add(fe.newExpr(clone));
                 }
             }
         }
@@ -170,7 +211,7 @@ public class Calc {
                 Expr template = r.assertion.sub.get(0);
                 Map<String, Expr> unifMap = template.unify(expr);
                 if( unifMap!=null ) {
-                    if( expr.toString().equals("(+ 5 (- 1))") ){
+                    if( expr.toString().equals("(apply (apply ∂ (func x (+ (^ x 2) 7))) x)") ){
                         System.out.println("breakpoint");
                     }
                     List<FringeEl> subDerivations = checkCanUseRule(r, unifMap);
@@ -228,6 +269,14 @@ public class Calc {
     FringeEl checkIfTrue(Expr expr){
         if( expr.toLispString().contains("(= (apply ff x) (+ (apply g x) (apply h x)))") ){
             System.out.println("breakpoint");
+        }
+
+        if( expr.node.equals("=") ){
+            // just try to unify both parts of the tested equality first
+            Map<String, Expr> unifMapEquation = expr.sub.get(1).unify(expr.sub.get(0));
+            if( unifMapEquation!=null ){
+                return new FringeEl(null, null, unifMapEquation);
+            }
         }
 
         Expr res = quest(expr, null, 10);

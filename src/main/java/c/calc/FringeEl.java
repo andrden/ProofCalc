@@ -12,11 +12,11 @@ import java.util.Map;
 * Created by denny on 9/16/15.
 */
 class FringeEl {
-    Expr expr;
+    final Expr expr;
     Rule byRule;
     Map<String, Expr> unifMap;
     FringeEl parent;
-    List<FringeEl> subDerivations;
+    //List<FringeEl> subDerivations;
 
     FringeEl(Expr expr, Rule byRule, Map<String, Expr> unifMap) {
         this.expr = expr;
@@ -24,12 +24,28 @@ class FringeEl {
         this.unifMap = unifMap;
     }
 
-    FringeEl(Expr expr, Rule byRule, Map<String, Expr> unifMap, List<FringeEl> subDerivations) {
+    FringeEl(Expr expr, Rule byRule, Map<String, Expr> unifMap, FringeEl parent) {
         this.expr = expr;
         this.byRule = byRule;
         this.unifMap = unifMap;
-        this.subDerivations = subDerivations;
+        this.parent = parent;
     }
+
+    FringeEl newExpr(Expr enew){
+        return new FringeEl(enew, byRule, unifMap, parent);
+    }
+
+    @Override
+    public String toString() {
+        return ""+expr;
+    }
+
+    //    FringeEl(Expr expr, Rule byRule, Map<String, Expr> unifMap, List<FringeEl> subDerivations) {
+//        this.expr = expr;
+//        this.byRule = byRule;
+//        this.unifMap = unifMap;
+//        this.subDerivations = subDerivations;
+//    }
 
     @Override
     public boolean equals(Object o) {
@@ -57,13 +73,13 @@ class FringeEl {
         }
         Collections.reverse(path);
         for( FringeEl el : path ){
-            if( el.subDerivations!=null && el.subDerivations.size()>0 ){
-                System.out.println("DERIV path: sub-derivs " + el.subDerivations.size());
-            }
+//            if( el.subDerivations!=null && el.subDerivations.size()>0 ){
+//                System.out.println("DERIV path: sub-derivs " + el.subDerivations.size());
+//            }
             String s = "";
             if( el.byRule!=null ) {
                 //s = "By " + el.byRule.assertion.toMathString() + " " + unifMap + " => ";
-                s = "By " + el.byRule.toLineString() + " " + (unifMap.isEmpty()?"":unifMap) + " =>  ";
+                s = "By " + el.byRule.toLineString() + " " + (unifMap==null || unifMap.isEmpty()?"":unifMap) + " =>  ";
             }
             System.out.println("DERIV path: " + s + el.expr.toMathString());
         }
