@@ -266,6 +266,24 @@ public class Calc {
         return subDerivations;
     }
 
+    Map<String,Expr> unifyEquality(Expr expr){
+        if( expr.node.equals("=") ) {
+            // just try to unify both parts of the tested equality first
+            Expr concrete = expr.sub.get(0);
+            Expr tpl = expr.sub.get(1);
+            Map<String, Expr> map = tpl.unify(concrete);
+            if (map != null) {
+                //if (tpl.substitute(map).equals(concrete.substitute(map))) {
+                    // Avoid erroneous unification of 'x' with 'x+1'
+                    // for 'x = x + 1' equality.
+                    // Unification itself is correct, but not suitable for equality
+                    return map;
+                //}
+            }
+        }
+        return null;
+    }
+
     FringeEl checkIfTrue(Expr expr){
         if( expr.toLispString().contains("(= (apply ff x) (+ (apply g x) (apply h x)))") ){
             System.out.println("breakpoint");
@@ -273,9 +291,9 @@ public class Calc {
 
         if( expr.node.equals("=") ){
             // just try to unify both parts of the tested equality first
-            Map<String, Expr> unifMapEquation = expr.sub.get(1).unify(expr.sub.get(0));
+            Map<String, Expr> unifMapEquation = unifyEquality(expr);
             if( unifMapEquation!=null ){
-                return new FringeEl(null, null, unifMapEquation);
+                    return new FringeEl(null, null, unifMapEquation);
             }
         }
 

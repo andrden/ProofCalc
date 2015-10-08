@@ -22,7 +22,9 @@ public class Parser {
         while( (line=br.readLine())!=null ){
             if(StringUtils.isBlank(line)) {
                 if (!lines.isEmpty()) {
-                    rules.add(ruleFromLines(lines));
+                    Rule rule = ruleFromLines(lines);
+                    checkDistinct(rule, rules);
+                    rules.add(rule);
                     lines.clear();
                 }
             } else if ( line.startsWith("#" ) ){
@@ -33,9 +35,19 @@ public class Parser {
             //System.out.println(line);
         }
         if( ! lines.isEmpty() ) {
-            rules.add(ruleFromLines(lines));
+            Rule rule = ruleFromLines(lines);
+            checkDistinct(rule, rules);
+            rules.add(rule);
         }
         return rules;
+    }
+
+    void checkDistinct(Rule newRule, List<Rule> rules){
+        for( Rule r : rules ){
+            if( newRule.srcLines.equals(r.srcLines) ){
+                throw new RuntimeException("duplicate "+newRule);
+            }
+        }
     }
 
     Rule ruleFromLines(List<String> lines){

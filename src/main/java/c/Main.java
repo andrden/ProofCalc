@@ -20,8 +20,10 @@ public class Main {
         testParseLine();
         testUnify();
 
-        runPieces();
+        //runPieces();
         //runMainFile();
+
+        runMath(new BufferedReader(new InputStreamReader(Main.class.getClassLoader().getResourceAsStream("piece6.txt"))));
     }
 
     static void runPieces() throws Exception{
@@ -34,7 +36,11 @@ public class Main {
             }
             BufferedReader br = new BufferedReader(new InputStreamReader(streamMath));
             System.out.println("### ### running "+fname);
-            runMath(br);
+            try {
+                runMath(br);
+            }catch (Exception e){
+                throw new RuntimeException(fname, e);
+            }
             okPieces.add(fname);
         }
         System.out.println("--- SUMMARY ---");
@@ -103,6 +109,8 @@ public class Main {
 
     static void testUnify(){
         Parser parser = new Parser();
+        chkUnify(parser, "x", "x + 1", "{x=(+ x 1)}");
+        chkUnify(parser, "x + 1", "x", "null");
         chkUnify(parser, "x + 5", "7 + 5", "{x=7}");
         chkUnify(parser, "x + 1 = 5", "4 + 1 = 5", "{x=4}");
         chkUnify(parser,"f ( x ) = x ^ 2 + h", "f ( x ) = x ^ 2 + 22", "{f=f, x=x, h=22}");
