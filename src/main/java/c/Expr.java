@@ -106,6 +106,26 @@ public class Expr {
         return null;
     }
 
+    public Expr simplifyApplyFunc(){
+        //(func x (+ (apply (func x (^ x 2)) x) (apply (func x 7) x)))    ->   (func x (+ (^ x 2) 7))
+        if( sub==null ){
+            return this;
+        }
+
+        if( node.equals("apply") && sub.get(0).node.equals("func") ){
+            Expr func = sub.get(0);
+            String funcVar = (String)(func.sub.get(0).node);
+            return func.rightChild().substitute(Collections.singletonMap(funcVar, rightChild()));
+        }
+
+        List<Expr> subList = new ArrayList<>();
+        for( Expr s : sub ){
+            subList.add(s.simplifyApplyFunc());
+        }
+        Expr n = new Expr(node, subList);
+        return n;
+    }
+
     boolean unify(Expr concrete, Map<String,Expr> vars){
         if( isVar() ){
             Expr val = vars.get(node);

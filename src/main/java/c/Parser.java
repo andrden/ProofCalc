@@ -4,16 +4,27 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by denny on 8/6/15.
  */
 @SuppressWarnings("unchecked")
 public class Parser {
+    static List<String> splitLine(String line){
+        line = line.replace("+"," + ");
+        line = line.replace("-"," - ");
+        line = line.replace("("," ( ");
+        line = line.replace(")"," ) ");
+
+        StringTokenizer st = new StringTokenizer(line, " \t");
+        List<String> ret = new ArrayList<>();
+        while(st.hasMoreTokens()){
+            ret.add(st.nextToken());
+        }
+        return ret;
+    }
+
     List<Rule> parseMathDoc(BufferedReader br) throws IOException{
         String line;
         List<String> lines = new ArrayList<>();
@@ -54,14 +65,14 @@ public class Parser {
         List<Expr> cond = new ArrayList<>();
         Expr answer = null;
         for( String l : lines ) {
-            LinkedList<String> line = new LinkedList<>(Util.splitLine(l));
+            LinkedList<String> line = new LinkedList<>(splitLine(l));
             if (line.get(0).equals("$=")) {
                 line.remove(0);
                 answer = parse(line);
             }
         }
         for( String l : lines ){
-            LinkedList<String> line = new LinkedList<>(Util.splitLine(l));
+            LinkedList<String> line = new LinkedList<>(splitLine(l));
             if( line.get(0).equals("$e") ){
                 line.remove(0);
                 Expr e = parse(line);
@@ -94,7 +105,7 @@ public class Parser {
     }
 
     Expr parse(String line) {
-        return parse(new LinkedList<>(Util.splitLine(line)));
+        return parse(new LinkedList<>(splitLine(line)));
     }
 
 

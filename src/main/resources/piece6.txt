@@ -43,8 +43,15 @@ $= 0
 $e ff = ( x ↦ x ^ 2 + 5 )
 $? ( ∂ ff ) ( x )
 $= 2 * x
+#DERIV path: ((∂ ff) x)
+#DERIV path: By $e f = ( x ↦ g ( x ) + h ( x ) )  $a ( ∂ f ) ( x ) = ( ∂ g ) ( x ) + ( ∂ h ) ( x ) {x=x} =>  (((∂ (func x (x ^ 2))) x) + ((∂ (func x 5)) x))
+#DERIV path: By $e const f  $a ( ∂ f ) ( x ) = 0 {x=x} =>  ((∂ (func x (x ^ 2))) x)
+#DERIV path: By $a ( ∂ ( x ↦ x ^ n ) ) ( x ) = n * x ^ ( n - 1 ) {x=x} =>  ((x ^ (2 + -1)) * 2)
+#DERIV path: By $e x + 1 = y  $a y - 1 = x {x=x} =>  ((x ^ 1) * 2)
+#DERIV path: By $a x ^ 1 = x {x=x} =>  (2 * x)
+#QUEST res: (2 * x)
 
-$?focus ( ∂ ( x ↦ x ^ 2 + 7 ) ) ( x )
+$? ( ∂ ( x ↦ x ^ 2 + 7 ) ) ( x )
 $= 2 * x
 #DERIV path: ((∂ (func x ((x ^ 2) + 7))) x)
 #DERIV path: By $e f = ( x ↦ g ( x ) + h ( x ) )  $a ( ∂ f ) ( x ) = ( ∂ g ) ( x ) + ( ∂ h ) ( x ) {x=x} =>  (((∂ (func x (x ^ 2))) x) + ((∂ (func x 7)) x))

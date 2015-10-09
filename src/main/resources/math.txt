@@ -105,6 +105,8 @@ $a x / z - y / z = ( x - y ) / z
 
 $a y * x - z * x = ( y - z ) * x
 
+$a 0 * x = 0
+
 ############### Powers and roots:
 
 $a x ^ 1 = x
@@ -175,6 +177,14 @@ $a const f
 
 $a const ( x ↦ 1 )
 
+$a const ( x ↦ 2 )
+
+$a const ( x ↦ 5 )
+
+$a const ( x ↦ 7 )
+
+$a ( ∂ ( x ↦ x ) ) ( x ) = 1
+
 $e f ( x ) = x ^ n
 $a ( ∂ f ) ( x ) = n * x ^ ( n - 1 )
 
@@ -186,6 +196,14 @@ $a ( ∂ f ) ( x ) = 0
 $e f ( x ) = g ( x ) + h ( x )
 $a ( ∂ f ) ( x ) = ( ∂ g ) ( x ) + ( ∂ h ) ( x )
 
+$e f = ( x ↦ g ( x ) + h ( x ) )
+$a ( ∂ f ) ( x ) = ( ∂ g ) ( x ) + ( ∂ h ) ( x )
+
+#$e f(x) = g(x) * h(x)
+#$a ( ∂ f )(x) = ( ∂ g )(x) * h(x) + g(x) * ( ∂ h )(x)
+
+$e f = ( x ↦ g(x) * h(x) )
+$a ( ∂ f )(x) = ( ∂ g )(x) * h(x) + g(x) * ( ∂ h )(x)
 
 ############### Verify derivatives:
 
@@ -239,9 +257,24 @@ $e ff ( x ) = x ^ 2 + 1 + x ^ 3
 $? ( ∂ ff ) ( x )
 $= x ^ 2 * 3 + 2 * x
 
-$e ff ( x ) = ( x + 1 ) ^ 2
+$e ff = (x ↦ 2 * x)
 $? ( ∂ ff ) ( x )
-$= 2 * x
+$= 2
+
+$? ( ∂ (x ↦ 2 * x) ) ( x )
+$= 2
+
+$e ff = (x ↦ x ^ 2 + 2 * x + 1)
+$? ( ∂ ff ) ( x )
+$= 2 * x + 2
+
+$?focus ( ∂ (x ↦ x ^ 2 + 2 * x + 1) ) ( x )
+$= 2 * x + 2
+
+$e ff = (x ↦ ( x + 1 ) ^ 2)
+$? ( ∂ ff ) ( x )
+$= 2 * x + 2
+# (apply (apply ∂ (func x (+ (* 2 x) (^ 1 2) (^ x 2)))) x)
 
 $e ff ( x ) = √ ( 1 + x ^ 2 )
 $? ( ∂ ff ) ( x )

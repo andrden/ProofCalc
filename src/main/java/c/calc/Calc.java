@@ -27,7 +27,7 @@ public class Calc {
             if( r.assertion.node.equals("=") ){
                 Expr expr = r.assertion.rightChild();
                 //Rule qrule = new Rule(expr, Collections.emptyList(), null);
-                Expr simpl = quest(expr, null, 15);
+                Expr simpl = quest(expr, null, 25);
                 if( ! expr.equals(simpl) ) {
                     System.out.println("simpl=" + simpl);
                     this.rules.add(new Rule(r.assertion.rightChildReplace(simpl), Collections.emptyList(), null));
@@ -54,7 +54,7 @@ public class Calc {
         Set<FringeEl> fringe = new HashSet<>();
         fringe.add(new FringeEl(expr, null, null));
 
-        Set<FringeEl> visited = new HashSet<>(); // for avoiding loops
+        Set<FringeEl> visited = new LinkedHashSet<>(); // for avoiding loops
         visited.addAll(fringe);
 
         FringeEl resultPath = null;
@@ -66,7 +66,7 @@ public class Calc {
                 break; // single term cannot be simplified
             }
             if( origExpr.toString().contains("(apply (apply ∂ ff) x)") ){
-                System.out.println("breakpoint");
+                breakpoint();
             }
             if( checkIfAnswer!=null && checkIfAnswer.test(el.expr) ){ // answer reached, no more work required
                 resultPath = el;
@@ -79,7 +79,7 @@ public class Calc {
             String exprString = el.expr.toMathString();
             System.out.println(indent+"QUEST try #" + step + ": " + exprString);
             if( exprString.contains("(((∂ (func x (x ^ 2))) x) + ((∂ (func x (x ^ 3))) x) + ((∂ (func x 1)) x))") ){
-                System.out.println("breakpoint");
+                breakpoint();
             }
             el = tryByPairs(el);
             if( ! visited.contains(el) ){
@@ -91,6 +91,7 @@ public class Calc {
             for( FringeEl feNew : exprNew ){
                 Expr e = feNew.expr;
                 e = plusMinus.optimizeDeep(multDiv.optimizeDeep(plusMinus.optimizeDeep(e)));
+                e = e.simplifyApplyFunc();
                 feNew = feNew.newExpr(e);
                 feNew.parent = el;
                 if( ! visited.contains(feNew) ){
@@ -106,8 +107,11 @@ public class Calc {
         resultPath.printDerivationPath();
         System.out.println(indent+"QUEST res: "+res.toMathString());
         cacheResult(origExpr, res);
+        if( checkIfAnswer!=null ){
+            breakpoint();
+        }
         if( origExpr.toString().equals("(apply (apply ∂ ff) x)") ){
-            System.out.println("breakpoint");
+            breakpoint();
         }
         return res;
     }
@@ -212,7 +216,7 @@ public class Calc {
                 Map<String, Expr> unifMap = template.unify(expr);
                 if( unifMap!=null ) {
                     if( expr.toString().equals("(apply (apply ∂ (func x (+ (^ x 2) 7))) x)") ){
-                        System.out.println("breakpoint");
+                        breakpoint();
                     }
                     List<FringeEl> subDerivations = checkCanUseRule(r, unifMap);
                     boolean canUseRule = subDerivations!=null;
@@ -273,20 +277,28 @@ public class Calc {
             Expr tpl = expr.sub.get(1);
             Map<String, Expr> map = tpl.unify(concrete);
             if (map != null) {
-                //if (tpl.substitute(map).equals(concrete.substitute(map))) {
+                Expr resultTpl = tpl.substitute(map).simplifyApplyFunc();
+                Expr resultConcrete = concrete.substitute(map).simplifyApplyFunc();
+                if (resultTpl.equals(resultConcrete)) {
                     // Avoid erroneous unification of 'x' with 'x+1'
                     // for 'x = x + 1' equality.
                     // Unification itself is correct, but not suitable for equality
                     return map;
-                //}
+                }else{
+                    breakpoint();
+                }
             }
         }
         return null;
     }
 
+    private void breakpoint() {
+        System.out.println("breakpoint");
+    }
+
     FringeEl checkIfTrue(Expr expr){
         if( expr.toLispString().contains("(= (apply ff x) (+ (apply g x) (apply h x)))") ){
-            System.out.println("breakpoint");
+            breakpoint();
         }
 
         if( expr.node.equals("=") ){
@@ -297,7 +309,7 @@ public class Calc {
             }
         }
 
-        Expr res = quest(expr, null, 10);
+        Expr res = quest(expr, null, 20);
         if( res.node.equals("True") ){
             return new FringeEl(null, null/*r*/, Collections.emptyMap() /*unifMap*/);
         }

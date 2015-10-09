@@ -21,9 +21,9 @@ public class Main {
         testUnify();
 
         //runPieces();
-        //runMainFile();
+        runMainFile();
 
-        runMath(new BufferedReader(new InputStreamReader(Main.class.getClassLoader().getResourceAsStream("piece6.txt"))));
+        //runMath(new BufferedReader(new InputStreamReader(Main.class.getClassLoader().getResourceAsStream("piece6.txt"))));
     }
 
     static void runPieces() throws Exception{
@@ -119,6 +119,9 @@ public class Main {
 
     static void testParseLine(){
         Parser parser = new Parser();
+        chk(parser, "3-(2+1)", "(+ 3 (- (+ 2 1)))");
+        chk(parser, "g( f(x+1) )", "(apply g (apply f (+ x 1)))");
+
         chk(parser, "- ( c ^ 2 )", "(- (^ c 2))");
         chk(parser, "3 + 2 + 1", "(+ (+ 3 2) 1)");
         chk(parser, "3 - 2 + 1", "(+ (+ 3 (- 2)) 1)");
