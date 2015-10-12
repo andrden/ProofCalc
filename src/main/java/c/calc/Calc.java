@@ -22,6 +22,17 @@ public class Calc {
         this.rules.addAll(localRules);
         this.rules.addAll(rules);
 
+        for( Rule r : rules ){
+            List<Expr> condsNorm = new ArrayList<>();
+            for( Expr ce : r.cond ){
+                Expr ceNorm = normalize(ce);
+                condsNorm.add(ceNorm);
+            }
+            if( ! r.cond.equals(condsNorm) ){
+                this.rules.add(new Rule(r.assertion, condsNorm, r.getSrcLines()));
+            }
+        }
+
         // need to try to optimize quest-local rules, i.e. preconditions for quest
         for( Rule r : localRules ){
             if( r.assertion.node.equals("=") ){
@@ -46,7 +57,7 @@ public class Calc {
 
 
         //Expr expr = q.assertion;
-        expr = plusMinus.optimizeDeep(multDiv.optimizeDeep(plusMinus.optimizeDeep(expr)));
+        expr = normalize(expr);
 //        if( ! expr.equals(q.assertion) ){
 //            System.out.println("QUEST try: "+expr.toMathString());
 //        }
@@ -90,7 +101,7 @@ public class Calc {
             List<FringeEl> exprNew = exprSimplifyDeep(el.expr);
             for( FringeEl feNew : exprNew ){
                 Expr e = feNew.expr;
-                e = plusMinus.optimizeDeep(multDiv.optimizeDeep(plusMinus.optimizeDeep(e)));
+                e = normalize(e);
                 e = e.simplifyApplyFunc();
                 feNew = feNew.newExpr(e);
                 feNew.parent = el;
@@ -104,7 +115,7 @@ public class Calc {
             resultPath = shortest(visited);
         }
         Expr res = resultPath.expr;
-        resultPath.printDerivationPath();
+        resultPath.printDerivationPath(indent);
         System.out.println(indent+"QUEST res: "+res.toMathString());
         cacheResult(origExpr, res);
         if( checkIfAnswer!=null ){
@@ -114,6 +125,10 @@ public class Calc {
             breakpoint();
         }
         return res;
+    }
+
+    private Expr normalize(Expr expr) {
+        return plusMinus.optimizeDeep(multDiv.optimizeDeep(plusMinus.optimizeDeep(expr)));
     }
 
     FringeEl tryByPairs(FringeEl el){
@@ -243,7 +258,8 @@ public class Calc {
             }else{
                 Map<String, Expr> unifMap = r.assertion.unify(expr);
                 if( unifMap!=null ) {
-                    boolean canUseRule = checkCanUseRule(r, unifMap)!=null;
+                    List<FringeEl> subDerivations = checkCanUseRule(r, unifMap);
+                    boolean canUseRule = subDerivations != null;
                     if( canUseRule ) {
                         //System.out.println("ok");
                         ways.add(new FringeEl(new Expr("True"), r, unifMap));

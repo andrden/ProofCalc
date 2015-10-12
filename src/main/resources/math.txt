@@ -111,6 +111,8 @@ $a 0 * x = 0
 
 $a x ^ 1 = x
 
+$a 1 ^ x = 1
+
 $a √ 0 = 0
 
 $a ( x * y ) ^  2 = x ^ 2 * y ^ 2
@@ -169,8 +171,6 @@ $= x
 
 ############### Derivatives:
 
-$e f ( x ) = 1
-$a const f
 
 $e f ( x ) = 5
 $a const f
@@ -196,14 +196,22 @@ $a ( ∂ f ) ( x ) = 0
 $e f ( x ) = g ( x ) + h ( x )
 $a ( ∂ f ) ( x ) = ( ∂ g ) ( x ) + ( ∂ h ) ( x )
 
+$e f(x) = a(x) + b(x) + c(x)
+$a ( ∂ f ) (x) = ( ∂ a ) (x) + ( ∂ b ) (x) + ( ∂ c ) (x)
+
 $e f = ( x ↦ g ( x ) + h ( x ) )
 $a ( ∂ f ) ( x ) = ( ∂ g ) ( x ) + ( ∂ h ) ( x )
+
+$e f = ( x ↦ a(x) + b(x) + c(x) )
+$a ( ∂ f ) ( x ) = ( ∂ a ) (x) + ( ∂ b ) (x) + ( ∂ c ) (x)
 
 #$e f(x) = g(x) * h(x)
 #$a ( ∂ f )(x) = ( ∂ g )(x) * h(x) + g(x) * ( ∂ h )(x)
 
 $e f = ( x ↦ g(x) * h(x) )
 $a ( ∂ f )(x) = ( ∂ g )(x) * h(x) + g(x) * ( ∂ h )(x)
+
+$a ( ∂ ( x ↦ sin(x) ) ) ( x ) = cos(x)
 
 ############### Verify derivatives:
 
@@ -219,7 +227,7 @@ $e ff ( x ) = 4 + 1
 $? const ff
 $= True
 
-$e ff ( x ) = ( ch x ) ^ 2 - ( sh x ) ^ 2
+$e ff = (x ↦ ( ch x ) ^ 2 - ( sh x ) ^ 2)
 $? const ff
 $= True
 
@@ -228,7 +236,7 @@ $? ( ∂ ff ) ( x )
 $= ( x ^ 2 ) * 3
 
 $e gg ( x ) = x ^ 2
-$e hh ( x ) = 1
+$e hh = ( x ↦ 1 )
 $e ff ( x ) = gg ( x ) + hh ( x )
 $? ( ∂ ff ) ( x )
 $= 2 * x
@@ -268,13 +276,34 @@ $e ff = (x ↦ x ^ 2 + 2 * x + 1)
 $? ( ∂ ff ) ( x )
 $= 2 * x + 2
 
-$?focus ( ∂ (x ↦ x ^ 2 + 2 * x + 1) ) ( x )
+#IDEA: this example could invent/suggest new generalized rule (derivative of sum of 3 functions) during solution finding
+$? ( ∂ (x ↦ x ^ 2 + 2 * x + 1) ) ( x )
 $= 2 * x + 2
+#DERIV path: ((∂ (func x ((2 * x) + (x ^ 2) + 1))) x)
+#DERIV path: By $e f = ( x ↦ a(x) + b(x) + c(x) )  $a ( ∂ f ) ( x ) = ( ∂ a ) (x) + ( ∂ b ) (x) + ( ∂ c ) (x)  =>  (((∂ (func x (2 * x))) x) + ((∂ (func x (x ^ 2))) x) + ((∂ (func x 1)) x))
+#DERIV path: By [tryByPairs]  =>  (((x ^ (2 + -1)) * 2) + ((∂ (func x (2 * x))) x) + ((∂ (func x 1)) x))
+#DERIV path: By [tryByPairs]  =>  (((x ^ 1) * 2) + ((∂ (func x (2 * x))) x) + ((∂ (func x 1)) x))
+#DERIV path: By [tryByPairs]  =>  ((2 * x) + ((∂ (func x (2 * x))) x) + ((∂ (func x 1)) x))
+#DERIV path: By [tryByPairs]  =>  ((2 * x) + ((∂ (func x (2 * x))) x))
+#DERIV path: By $e f = ( x ↦ g(x) * h(x) )  $a ( ∂ f )(x) = ( ∂ g )(x) * h(x) + g(x) * ( ∂ h )(x)  =>  ((((∂ (func x 2)) x) * x) + (((∂ (func x x)) x) * 2) + (2 * x))
+#DERIV path: By [tryByPairs]  =>  ((((∂ (func x x)) x) * 2) + (0 * x) + (2 * x))
+#DERIV path: By [tryByPairs]  =>  ((0 * x) + (2 * x) + 2)
+#DERIV path: By [tryByPairs]  =>  ((2 * x) + 2)
+#QUEST res: ((2 * x) + 2)
+
 
 $e ff = (x ↦ ( x + 1 ) ^ 2)
 $? ( ∂ ff ) ( x )
 $= 2 * x + 2
 # (apply (apply ∂ (func x (+ (* 2 x) (^ 1 2) (^ x 2)))) x)
+
+$e ff = (x ↦ sin(x) )
+$? ( ∂ ff ) ( x )
+$= cos(x)
+
+$e ff = (x ↦ (x * sin(x)) )
+$?focus ( ∂ ff ) ( x )
+$= 124
 
 $e ff ( x ) = √ ( 1 + x ^ 2 )
 $? ( ∂ ff ) ( x )

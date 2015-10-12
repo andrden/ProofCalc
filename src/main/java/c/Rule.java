@@ -44,4 +44,8 @@ public class Rule {
                     "\n";
         }
     }
+
+    public List<String> getSrcLines() {
+        return srcLines;
+    }
 }

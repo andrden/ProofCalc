@@ -64,7 +64,7 @@ class FringeEl {
         return expr != null ? expr.toLispString().hashCode() : 0;
     }
 
-    public void printDerivationPath(){
+    public void printDerivationPath(String indent){
         List<FringeEl> path = new ArrayList<>();
         FringeEl e = this;
         while(e!=null){
@@ -81,7 +81,7 @@ class FringeEl {
                 //s = "By " + el.byRule.assertion.toMathString() + " " + unifMap + " => ";
                 s = "By " + el.byRule.toLineString() + " " + (unifMap==null || unifMap.isEmpty()?"":unifMap) + " =>  ";
             }
-            System.out.println("DERIV path: " + s + el.expr.toMathString());
+            System.out.println(indent+"DERIV path: " + s + el.expr.toMathString());
         }
     }
 }
