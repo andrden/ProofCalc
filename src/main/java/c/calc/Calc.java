@@ -76,7 +76,7 @@ public class Calc {
                 resultPath = el;
                 break; // single term cannot be simplified
             }
-            if( origExpr.toString().contains("(apply (apply ∂ ff) x)") ){
+            if( el.toString().contains("(+ (* (^ x 2) (apply cos x)) (* (apply sin x) 2 x))") ){
                 breakpoint();
             }
             if( checkIfAnswer!=null && checkIfAnswer.test(el.expr) ){ // answer reached, no more work required
@@ -127,7 +127,7 @@ public class Calc {
         return res;
     }
 
-    private Expr normalize(Expr expr) {
+    public Expr normalize(Expr expr) {
         return plusMinus.optimizeDeep(multDiv.optimizeDeep(plusMinus.optimizeDeep(expr)));
     }
 

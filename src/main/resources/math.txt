@@ -211,7 +211,7 @@ $a ( ∂ f ) ( x ) = ( ∂ a ) (x) + ( ∂ b ) (x) + ( ∂ c ) (x)
 $e f = ( x ↦ g(x) * h(x) )
 $a ( ∂ f )(x) = ( ∂ g )(x) * h(x) + g(x) * ( ∂ h )(x)
 
-$a ( ∂ ( x ↦ sin(x) ) ) ( x ) = cos(x)
+$a ( ∂ sin ) ( x ) = cos(x)
 
 ############### Verify derivatives:
 
@@ -297,13 +297,24 @@ $? ( ∂ ff ) ( x )
 $= 2 * x + 2
 # (apply (apply ∂ (func x (+ (* 2 x) (^ 1 2) (^ x 2)))) x)
 
-$e ff = (x ↦ sin(x) )
-$? ( ∂ ff ) ( x )
+$? ( ∂ sin ) ( x )
 $= cos(x)
 
-$e ff = (x ↦ (x * sin(x)) )
+$e ff = ( x ↦ (x * sin(x)) )
+$? ( ∂ ff ) ( x )
+$= cos(x) * x + sin(x)
+
+$e ff = ( x ↦ ((x ^ 2) * sin(x)) )
+$? ( ∂ ff ) ( x )
+$= (x ^ 2) * cos(x) + sin(x) * 2 * x
+
+$e ff = ( x ↦ (sin(x) * sin(x)) )
+$? ( ∂ ff ) ( x )
+$= cos(x) * sin(x) * 2
+
+$e ff = ( x ↦ sin(x ^ 2) )
 $?focus ( ∂ ff ) ( x )
-$= 124
+$= sin(x ^ 2) * 2
 
 $e ff ( x ) = √ ( 1 + x ^ 2 )
 $? ( ∂ ff ) ( x )

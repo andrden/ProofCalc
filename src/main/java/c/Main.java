@@ -23,7 +23,7 @@ public class Main {
         //runPieces();
         runMainFile();
 
-        //runMath(new BufferedReader(new InputStreamReader(Main.class.getClassLoader().getResourceAsStream("piece6.txt"))));
+        //runMath(new BufferedReader(new InputStreamReader(Main.class.getClassLoader().getResourceAsStream("piece8.txt"))));
     }
 
     static void runPieces() throws Exception{
@@ -86,12 +86,13 @@ public class Main {
                     System.out.println("skipped non-focus quest rule");
                 }else {
                     Calc calc = new Calc(rules, qrule.localConditionsAsRules());
+                    Expr qruleAnswer = qrule.answer==null ? null : calc.normalize(qrule.answer);
                     Expr ret = calc.quest(r.assertion,
-                            e -> qrule.answer != null && e.toLispString().equals(qrule.answer.toLispString()),
+                            e -> qruleAnswer != null && e.toLispString().equals(qruleAnswer.toLispString()),
                             1000);
-                    if (qrule.answer == null) {
+                    if (qruleAnswer == null) {
                         System.out.println("Correct answer was not specified!");
-                    } else if (!ret.toLispString().equals(qrule.answer.toLispString())) {
+                    } else if (!ret.toLispString().equals(qruleAnswer.toLispString())) {
                         throw new IllegalStateException("Not reached answer=" + qrule.answer + "\nsrcLines=" + qrule.srcLines);
                     }
                 }
