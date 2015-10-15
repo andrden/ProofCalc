@@ -327,6 +327,22 @@ $e ff = ( x ↦ (x * sin(x)) )
 $? ( ∂ ff ) ( x )
 $= cos(x) * x + sin(x)
 
+$e ff = ( x ↦ (x + sin(x)) )
+$? ( ∂ ff ) ( x )
+$= cos(x) + 1
+
+$e ff = ( x ↦ (x + sin(x)) )
+$?focus ( ∂ ff ) ( y )
+$= cos(y) + 1
+
+$e ff = ( x ↦ (x + sin(x)) )
+$? ( ∂ ff ) ( x + 1 )
+$= cos(x) * x + sin(x)
+
+$e ff = ( x ↦ (x * sin(x)) )
+$? ( ∂ ff ) ( x + 1 )
+$= cos(x) * x + sin(x)
+
 $e ff = ( x ↦ ((x ^ 2) * sin(x)) )
 $? ( ∂ ff ) ( x )
 $= (x ^ 2) * cos(x) + sin(x) * 2 * x
@@ -356,7 +372,11 @@ $? ( ∂ ff ) ( y )
 $= (sin(y) ^ 2) * cos(y) * 3
 
 $e ff = ( x ↦ (sin(x)) ^ 3 )
-$?focus ( ∂ ff ) ( y + 5 )
+$? ( ∂ ff ) ( x + 5 )
+$= (sin(x) ^ 2102) * cos(x) * 3
+
+$e ff = ( x ↦ (sin(x)) ^ 3 )
+$? ( ∂ ff ) ( y + 5 )
 $= (sin(x) ^ 210) * cos(x) * 3
 
 $e ff = ( x ↦ (sin(x)) ^ 3 )
