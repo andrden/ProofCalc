@@ -115,7 +115,13 @@ public class Main {
         chkUnify(parser, "x + 5", "7 + 5", "{x=7}");
         chkUnify(parser, "x + 1 = 5", "4 + 1 = 5", "{x=4}");
         chkUnify(parser,"f ( x ) = x ^ 2 + h", "f ( x ) = x ^ 2 + 22", "{f=f, x=x, h=22}");
-        chkUnify(parser,"f ( x ) = g ( x ) + h ( x )", "f ( x ) = x ^ 2 + 1", "{f=f, g=(func x (^ x 2)), x=x, h=(func x 1)}");
+        chkUnify(parser,"f ( x ) = g ( x ) + h ( x )", "f ( x ) = x ^ 2 + 1", "{f=f, x=x, g=(func x (^ x 2)), h=(func x 1)}");
+
+        chkUnify(parser,"( ∂ ( x ↦ g( h(x) ) ) )(x)", "( ∂ ( x ↦ sin(x ^ 3) ) )(x)","{g=sin, h=(func x (^ x 3)), x=x}");
+        chkUnify(parser,"( ∂ ( x ↦ g( h(x) ) ) )(x)", "( ∂ ( x ↦ (sin(x)) ^ 3 ) )(x)","{g=(func x (^ x 3)), h=sin, x=x}");
+
+        chkUnify(parser,"( ∂ ( x ↦ x ^ n ) )(x)","( ∂ ( x ↦ x ^ 4 ) )(x)", "{n=4, x=x}");
+        chkUnify(parser,"( ∂ ( x ↦ x ^ n ) )(x)","( ∂ ( x ↦ x ^ 4 ) )(x + 1)", "{n=4, x=(+ x 1)}"); // (func x ...) inner var x
     }
 
     static void testParseLine(){

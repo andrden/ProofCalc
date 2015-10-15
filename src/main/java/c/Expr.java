@@ -99,11 +99,17 @@ public class Expr {
     }
 
     public Map<String,Expr> unify(Expr concrete){
-        Map<String,Expr> map = new HashMap<>();
+        Map<String,Expr> map = new LinkedHashMap<>();
         if( unify(concrete, map) ){
             return map;
         }
         return null;
+    }
+
+    public Expr replaceChild(int i, Expr newChild){
+        List<Expr> newSub = new ArrayList<>(sub);
+        newSub.set(i, newChild);
+        return new Expr(node, newSub);
     }
 
     public Expr simplifyApplyFunc(){
@@ -135,13 +141,26 @@ public class Expr {
             }
             return val.equals(concrete);
         }
-        if( node.equals("apply") && ! concrete.node.equals("apply")
-                && sub.get(0).isVar() && rightChild().isVar() ){
-            // (apply g x)
+        if( node.equals("apply") && ! concrete.node.equals("apply") && sub.get(0).isVar() ){
             String func = sub.get(0).node;
-            if( vars.get(func)==null ){
-                vars.put(func, new Expr("func", rightChild(), concrete));
-                return true;
+            if (vars.get(func) == null) {
+                if (rightChild().isVar()) {
+                    // (apply g x)
+                    vars.put(func, new Expr("func", rightChild(), concrete));
+                    return true;
+                } else {
+                    if( concrete.sub != null ) {
+                        for (int i = 0; i < concrete.sub.size(); i++) {
+                            if (concrete.sub.get(i).sub != null) { // if complex expression, not single term
+                                if (rightChild().subUnify(concrete.sub.get(i), vars)) {
+                                    Expr x = new Expr("x");
+                                    vars.put(func, new Expr("func", x, concrete.replaceChild(i, x)));
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -171,10 +190,18 @@ public class Expr {
     }
 
     boolean subUnify(Expr concrete, Map<String, Expr> vars) {
+        Map<String, Expr> varsBk = vars;
+        if( node.equals("func") ){
+            vars = new HashMap<>(vars);
+        }
         for( int i=0; i<sub.size(); i++ ){
           if( ! sub.get(i).unify(concrete.sub.get(i), vars) ){
               return false;
           }
+        }
+        if( node.equals("func") ){
+            vars.remove(sub.get(0).node); // remove function argument variable, no meaning outside function
+            varsBk.putAll(vars);
         }
         return true;
     }

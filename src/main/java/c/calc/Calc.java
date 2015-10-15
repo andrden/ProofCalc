@@ -235,8 +235,8 @@ public class Calc {
                     }
                     List<FringeEl> subDerivations = checkCanUseRule(r, unifMap);
                     boolean canUseRule = subDerivations!=null;
-                    if( canUseRule ) {
-                        //System.out.println("canUseRule "+r.toLineString()+" unifMap="+unifMap);
+                    if( canUseRule && r.toLineString().contains("x ↦ g( h(x) )") ) {
+                        breakpoint();
                     }
 //                    for( String v : expr.freeVariables() ){
 //                        if( unifMap.containsKey(v) ){
