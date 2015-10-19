@@ -1,0 +1,24 @@
+$a ( ∂ ( x ↦ x ) ) ( x ) = 1
+
+$e f ( x ) = x ^ n
+$a ( ∂ f ) ( x ) = n * x ^ ( n - 1 )
+
+$a ( ∂ ( x ↦ x ^ n ) ) ( x ) = n * x ^ ( n - 1 )
+
+$a ( ∂ sin ) ( x ) = cos(x)
+
+$e f ( x ) = g ( x ) + h ( x )
+$a ( ∂ f ) ( x ) = ( ∂ g ) ( x ) + ( ∂ h ) ( x )
+
+$e f = ( x ↦ g ( x ) + h ( x ) )
+$a ( ∂ f ) ( x ) = ( ∂ g ) ( x ) + ( ∂ h ) ( x )
+
+
+
+$e ff = ( x ↦ (x + sin(x)) )
+$? ( ∂ ff ) ( x )
+$= cos(x) + 1
+
+$e ff = ( x ↦ (x + sin(x)) )
+$?focus ( ∂ ff ) ( y )
+$= cos(y) + 1

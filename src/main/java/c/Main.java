@@ -19,9 +19,9 @@ public class Main {
         Tests.testUnify();
 
         //runPieces();
-        runMainFile();
+        //runMainFile();
 
-        //runMath(new BufferedReader(new InputStreamReader(Main.class.getClassLoader().getResourceAsStream("piece8.txt"))));
+        runMath(new BufferedReader(new InputStreamReader(Main.class.getClassLoader().getResourceAsStream("piece8.txt"))));
     }
 
     static void runPieces() throws Exception{
