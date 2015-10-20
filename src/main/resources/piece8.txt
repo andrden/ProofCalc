@@ -18,7 +18,18 @@ $a ( ∂ f ) ( x ) = ( ∂ g ) ( x ) + ( ∂ h ) ( x )
 $e ff = ( x ↦ (x + sin(x)) )
 $? ( ∂ ff ) ( x )
 $= cos(x) + 1
+#DERIV path: ((∂ ff) x)
+#DERIV path: By $e f = ( x ↦ g ( x ) + h ( x ) )  $a ( ∂ f ) ( x ) = ( ∂ g ) ( x ) + ( ∂ h ) ( x ) {x=x} =>  (((∂ (func x x)) x) + ((∂ sin) x))
+#DERIV path: By $a ( ∂ ( x ↦ x ) ) ( x ) = 1 {x=x} =>  (((∂ sin) x) + 1)
+#DERIV path: By $a ( ∂ sin ) ( x ) = cos(x) {x=x} =>  ((cos x) + 1)
+#QUEST res: ((cos x) + 1)
+
 
 $e ff = ( x ↦ (x + sin(x)) )
-$?focus ( ∂ ff ) ( y )
+$? ( ∂ ff ) ( y )
 $= cos(y) + 1
+
+
+$e ff = ( x ↦ (x + sin(x)) )
+$?focus ( ∂ ff ) ( x + 1 )
+$= cos(x) * x + sin(x)

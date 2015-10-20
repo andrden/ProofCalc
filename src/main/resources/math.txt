@@ -332,7 +332,7 @@ $? ( ∂ ff ) ( x )
 $= cos(x) + 1
 
 $e ff = ( x ↦ (x + sin(x)) )
-$?focus ( ∂ ff ) ( y )
+$? ( ∂ ff ) ( y )
 $= cos(y) + 1
 
 $e ff = ( x ↦ (x + sin(x)) )

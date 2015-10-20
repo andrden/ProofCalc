@@ -59,6 +59,9 @@ public class Expr {
         if( node.equals("-") && sub.size()!=1 ){
             throw new IllegalStateException("Only unary minus allowed in internal representations");
         }
+        if( node.equals("func") && ! sub.get(0).isVar() ){
+            throw new IllegalStateException(""+this);
+        }
     }
 
     boolean isVar(){
@@ -190,18 +193,29 @@ public class Expr {
     }
 
     boolean subUnify(Expr concrete, Map<String, Expr> vars) {
-        Map<String, Expr> varsBk = vars;
         if( node.equals("func") ){
-            vars = new HashMap<>(vars);
-        }
-        for( int i=0; i<sub.size(); i++ ){
-          if( ! sub.get(i).unify(concrete.sub.get(i), vars) ){
-              return false;
-          }
-        }
-        if( node.equals("func") ){
-            vars.remove(sub.get(0).node); // remove function argument variable, no meaning outside function
-            varsBk.putAll(vars);
+            if( sub.size()!=2 ){
+                throw new IllegalStateException();
+            }
+            String myFuncArgVar = sub.get(0).node;
+            Expr concreteFuncArgVar = concrete.sub.get(0);
+            Expr myExprSubs = rightChild().substitute(Collections.singletonMap(myFuncArgVar, concreteFuncArgVar));
+
+            if( ! myExprSubs.unify(concrete.rightChild(), vars) ){
+                return false;
+            }
+            if( vars.containsKey(concreteFuncArgVar.node) &&
+                    ! concreteFuncArgVar.equals(vars.get(concreteFuncArgVar.node)) ){
+                // function argument variable, no meaning outside function
+                return false;
+            }
+            vars.remove(concreteFuncArgVar.node);
+        }else{
+            for( int i=0; i<sub.size(); i++ ){
+                if( ! sub.get(i).unify(concrete.sub.get(i), vars) ){
+                    return false;
+                }
+            }
         }
         return true;
     }

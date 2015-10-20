@@ -6,6 +6,18 @@ package c;
 public class Tests {
     static void testUnify(){
         Parser parser = new Parser();
+/*
+        Actually our unification is not pure abstract,
+        but has knowledge of functions.
+        For example, (^ x 2) will be unified with (apply g x)
+        and functional construct value for g will be produced,
+        though the expressions are not similar on the first sight
+*/
+
+        chkUnify(parser, "( ∂ ( x ↦ x ) )(x)", "( ∂ ( x ↦ x + sin(x) ) )(x)", "null");
+        chkUnify(parser, "y ↦ g(y)", "x ↦ x", "{g=(func x x)}");
+        chkUnify(parser, "y ↦ (g(y) + h(y))", "x ↦ (x + sin(x))", "{g=(func x x), h=sin}");
+
         chkUnify(parser, "x", "x + 1", "{x=(+ x 1)}");
         chkUnify(parser, "x + 1", "x", "null");
         chkUnify(parser, "x + 5", "7 + 5", "{x=7}");
@@ -13,8 +25,8 @@ public class Tests {
         chkUnify(parser, "f ( x ) = x ^ 2 + h", "f ( x ) = x ^ 2 + 22", "{f=f, x=x, h=22}");
         chkUnify(parser, "f ( x ) = g ( x ) + h ( x )", "f ( x ) = x ^ 2 + 1", "{f=f, x=x, g=(func x (^ x 2)), h=(func x 1)}");
 
-        chkUnify(parser, "( ∂ ( x ↦ g( h(x) ) ) )(x)", "( ∂ ( x ↦ sin(x ^ 3) ) )(x)","{g=sin, h=(func x (^ x 3)), x=x}");
-        chkUnify(parser, "( ∂ ( x ↦ g( h(x) ) ) )(x)", "( ∂ ( x ↦ (sin(x)) ^ 3 ) )(x)","{g=(func x (^ x 3)), h=sin, x=x}");
+        chkUnify(parser, "( ∂ ( x ↦ g( h(x) ) ) )(x)", "( ∂ ( x ↦ sin(x ^ 3) ) )(x)", "{g=sin, h=(func x (^ x 3)), x=x}");
+        chkUnify(parser, "( ∂ ( x ↦ g( h(x) ) ) )(x)", "( ∂ ( x ↦ (sin(x)) ^ 3 ) )(x)", "{h=sin, g=(func x (^ x 3)), x=x}");
 
         chkUnify(parser, "( ∂ ( x ↦ x ^ n ) )(x)", "( ∂ ( x ↦ x ^ 4 ) )(x)", "{n=4, x=x}");
         chkUnify(parser, "( ∂ ( x ↦ x ^ n ) )(x)", "( ∂ ( x ↦ x ^ 4 ) )(x + 1)", "{n=4, x=(+ x 1)}"); // (func x ...) inner var x
