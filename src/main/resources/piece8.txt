@@ -31,5 +31,5 @@ $= cos(y) + 1
 
 
 $e ff = ( x ↦ (x + sin(x)) )
-$?focus ( ∂ ff ) ( x + 1 )
-$= cos(x) * x + sin(x)
+$? ( ∂ ff ) ( x + 1 )
+$= cos(1 + x) + 1

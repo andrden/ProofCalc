@@ -87,6 +87,11 @@ public class Expr {
     }
 
     public Expr substitute(Map<String,Expr> vars){
+        if( node.equals("func") ){
+            String argVar = sub.get(0).node; // local variable inside this function
+            vars = new HashMap<>(vars);
+            vars.remove(argVar);
+        }
         if( vars.containsKey(node) ){
             return vars.get(node);
         }

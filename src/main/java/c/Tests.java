@@ -14,6 +14,8 @@ public class Tests {
         though the expressions are not similar on the first sight
 */
 
+        chkUnify(parser, "x ↦ g( h(x) )", "x ↦ 1 - sin(sin(x)) * sin(sin(x))", "1null");
+
         chkUnify(parser, "( ∂ ( x ↦ x ) )(x)", "( ∂ ( x ↦ x + sin(x) ) )(x)", "null");
         chkUnify(parser, "y ↦ g(y)", "x ↦ x", "{g=(func x x)}");
         chkUnify(parser, "y ↦ (g(y) + h(y))", "x ↦ (x + sin(x))", "{g=(func x x), h=sin}");

@@ -30,7 +30,7 @@ public class Rule {
             return srcLines.stream().collect(Collectors.joining("\n","\n","\n"));
         }else {
             return "\n" +
-                    "$e " + cond + "\n$a " + assertion.toLispString() +
+                    "$e " + cond + "\n$a " + assertion==null ? "" : assertion.toLispString() +
                     "\n";
         }
     }

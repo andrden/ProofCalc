@@ -137,6 +137,11 @@ public class Calc {
             public String toLineString() {
                 return "[tryByPairs]";
             }
+
+            @Override
+            public String toString() {
+                return toLineString();
+            }
         };
 
         while(true){

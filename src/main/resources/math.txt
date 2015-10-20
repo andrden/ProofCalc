@@ -36,8 +36,8 @@ $a real 3
 #$e real x
 #$a x + 0 = x
 
-$e x + 1 = y
-$a y - 1 = x
+#$e x + 1 = y
+#$a y - 1 = x
 
 $a 0 + 1 = 1
 
@@ -57,10 +57,18 @@ $a 4 - 2 = 2
 
 $a 5 - 2 = 3
 
+
+$a 5 - 1 = 4
+
+$a 3 - 1 = 2
+
+$a 2 - 1 = 1
+
+$a 1 - 1 = 0
+
 ############### Verify we get basic + and - right:
 
-$? 5 - 1
-$= 4
+
 
 $e ff ( x ) = x - 1
 $e yy = 2
@@ -85,11 +93,11 @@ $= 5
 $? nn - 1
 $= nn - 1
 
-$e ff ( 1 ) = 1
-$e ff ( 2 ) = 1
-$e ff ( n ) = ff ( n - 1 ) + ff ( n - 2 )
-$? ff ( 5 )
-$= 5
+#$e ff ( 1 ) = 1
+#$e ff ( 2 ) = 1
+#$e ff ( n ) = ff ( n - 1 ) + ff ( n - 2 )
+#$? ff ( 5 )
+#$= 5
 
 ############### Some multiplication and division:
 
@@ -337,11 +345,11 @@ $= cos(y) + 1
 
 $e ff = ( x ↦ (x + sin(x)) )
 $? ( ∂ ff ) ( x + 1 )
-$= cos(x) * x + sin(x)
+$= cos(1 + x) + 1
 
 $e ff = ( x ↦ (x * sin(x)) )
 $? ( ∂ ff ) ( x + 1 )
-$= cos(x) * x + sin(x)
+$= (1 + x) * cos(1 + x) + sin(1 + x)
 
 $e ff = ( x ↦ ((x ^ 2) * sin(x)) )
 $? ( ∂ ff ) ( x )
@@ -373,19 +381,27 @@ $= (sin(y) ^ 2) * cos(y) * 3
 
 $e ff = ( x ↦ (sin(x)) ^ 3 )
 $? ( ∂ ff ) ( x + 5 )
-$= (sin(x) ^ 2102) * cos(x) * 3
+$= (sin(5 + x) ^ 2) * cos(5 + x) * 3
 
 $e ff = ( x ↦ (sin(x)) ^ 3 )
 $? ( ∂ ff ) ( y + 5 )
-$= (sin(x) ^ 210) * cos(x) * 3
+$= (sin(5 + y) ^ 2) * cos(5 + y) * 3
 
 $e ff = ( x ↦ (sin(x)) ^ 3 )
 $? ( ∂ ff ) ( y - 1 )
-$= (sin(x) ^ 21) * cos(x) * 3
+$= (sin(y - 1) ^ 2) * cos(y - 1) * 3
+
+$e ff = ( x ↦ cos(sin(x)) )
+$?focus ( ∂ ff ) ( x )
+$= (sin(x) ^ 2) * cos(x) * 3111
+
+$e ff = ( x ↦ sin(cos(sin(x))) )
+$? ( ∂ ff ) ( x )
+$= (sin(x) ^ 2) * cos(x) * 3111
 
 $e ff = ( x ↦ (sin(x ^ 2)) ^ 3 )
 $? ( ∂ ff ) ( x )
-$= (sin(x) ^ 2) * cos(x) * 3
+$= (sin(x) ^ 2) * cos(x) * 3111
 
 $e ff ( x ) = √ ( 1 + x ^ 2 )
 $? ( ∂ ff ) ( x )
