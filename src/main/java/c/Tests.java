@@ -14,7 +14,11 @@ public class Tests {
         though the expressions are not similar on the first sight
 */
 
-        chkUnify(parser, "x ↦ g( h(x) )", "x ↦ 1 - sin(sin(x)) * sin(sin(x))", "1null");
+        chkUnify(parser, "x ↦ h(x)", "x ↦ cos(sin(x))", "{h=(func x (apply cos (apply sin x)))}");
+        chkUnify(parser, "x ↦ g( h(x) )", "x ↦ sin(cos(sin(x)))", "{h=(func x (apply cos (apply sin x))), g=sin}");
+        chkUnify(parser, "x ↦ g( h(x) )", "x ↦ 1 - sin(sin(x)) * sin(sin(x))",
+                "{h=(func x (- (* (apply sin (apply sin x)) (apply sin (apply sin x))))), g=(func x (+ 1 x))}");
+        chkUnify(parser, "x ↦ g( h(x) )", "x ↦ cos(sin(x))", "{h=sin, g=cos}");
 
         chkUnify(parser, "( ∂ ( x ↦ x ) )(x)", "( ∂ ( x ↦ x + sin(x) ) )(x)", "null");
         chkUnify(parser, "y ↦ g(y)", "x ↦ x", "{g=(func x x)}");
@@ -25,9 +29,9 @@ public class Tests {
         chkUnify(parser, "x + 5", "7 + 5", "{x=7}");
         chkUnify(parser, "x + 1 = 5", "4 + 1 = 5", "{x=4}");
         chkUnify(parser, "f ( x ) = x ^ 2 + h", "f ( x ) = x ^ 2 + 22", "{f=f, x=x, h=22}");
-        chkUnify(parser, "f ( x ) = g ( x ) + h ( x )", "f ( x ) = x ^ 2 + 1", "{f=f, x=x, g=(func x (^ x 2)), h=(func x 1)}");
+        chkUnify(parser, "f ( x ) = g ( x ) + h ( x )", "f ( x ) = x ^ 2 + 1", "{f=f, g=(func x (^ x 2)), h=(func x 1)}");
 
-        chkUnify(parser, "( ∂ ( x ↦ g( h(x) ) ) )(x)", "( ∂ ( x ↦ sin(x ^ 3) ) )(x)", "{g=sin, h=(func x (^ x 3)), x=x}");
+        chkUnify(parser, "( ∂ ( x ↦ g( h(x) ) ) )(x)", "( ∂ ( x ↦ sin(x ^ 3) ) )(x)", "{h=(func x (^ x 3)), g=sin, x=x}");
         chkUnify(parser, "( ∂ ( x ↦ g( h(x) ) ) )(x)", "( ∂ ( x ↦ (sin(x)) ^ 3 ) )(x)", "{h=sin, g=(func x (^ x 3)), x=x}");
 
         chkUnify(parser, "( ∂ ( x ↦ x ^ n ) )(x)", "( ∂ ( x ↦ x ^ 4 ) )(x)", "{n=4, x=x}");

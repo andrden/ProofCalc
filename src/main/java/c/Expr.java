@@ -109,6 +109,7 @@ public class Expr {
     public Map<String,Expr> unify(Expr concrete){
         Map<String,Expr> map = new LinkedHashMap<>();
         if( unify(concrete, map) ){
+            map.replaceAll((v, e) -> e.simplifyFuncApply());
             return map;
         }
         return null;
@@ -118,6 +119,25 @@ public class Expr {
         List<Expr> newSub = new ArrayList<>(sub);
         newSub.set(i, newChild);
         return new Expr(node, newSub);
+    }
+
+
+    public Expr simplifyFuncApply(){
+        // (func x (apply cos x)) -> cos
+        if( sub==null ){
+            return this;
+        }
+
+        if( node.equals("func") && rightChild().node.equals("apply") && sub.get(0).equals(rightChild().rightChild()) ){
+            return rightChild().sub.get(0);
+        }
+
+        List<Expr> subList = new ArrayList<>();
+        for( Expr s : sub ){
+            subList.add(s.simplifyApplyFunc());
+        }
+        Expr n = new Expr(node, subList);
+        return n;
     }
 
     public Expr simplifyApplyFunc(){
@@ -149,25 +169,35 @@ public class Expr {
             }
             return val.equals(concrete);
         }
-        if( node.equals("apply") && ! concrete.node.equals("apply") && sub.get(0).isVar() ){
+        if( node.equals("apply") && sub.get(0).isVar() ){
             String func = sub.get(0).node;
+
+            if( concrete.node.equals("apply") && rightChild().equals(concrete.rightChild()) ){
+                vars.put(func, concrete.sub.get(0));
+                return true;
+            }
+
             if (vars.get(func) == null) {
-                if (rightChild().isVar()) {
+                Expr argument = rightChild();
+                if (argument.isVar()) {
                     // (apply g x)
-                    vars.put(func, new Expr("func", rightChild(), concrete));
+                    vars.put(func, new Expr("func", argument, concrete));
                     return true;
                 } else {
-                    if( concrete.sub != null ) {
-                        for (int i = 0; i < concrete.sub.size(); i++) {
-                            if (concrete.sub.get(i).sub != null) { // if complex expression, not single term
-                                if (rightChild().subUnify(concrete.sub.get(i), vars)) {
-                                    Expr x = new Expr("x");
-                                    vars.put(func, new Expr("func", x, concrete.replaceChild(i, x)));
-                                    return true;
+                    // (apply g (apply h x)) unify to concrete (^ (apply sin x) 3)
+                        if (concrete.sub != null) {
+                            for (int i = 0; i < concrete.sub.size(); i++) {
+                                Expr concreteSub = concrete.sub.get(i);
+                                if (concreteSub.sub != null) { // if complex expression, not single term
+                                    // trying to find at least one point where inner expression could be unified
+                                    if (argument.unify(concreteSub, vars)) {
+                                        Expr x = new Expr("x");
+                                        vars.put(func, new Expr("func", x, concrete.replaceChild(i, x)));
+                                        return true;
+                                    }
                                 }
                             }
                         }
-                    }
                 }
             }
         }

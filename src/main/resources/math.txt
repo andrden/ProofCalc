@@ -224,6 +224,8 @@ $a ( ∂ f )(x) = ( ∂ g )( h(x) ) * ( ∂ h )(x)
 
 $a ( ∂ sin ) ( x ) = cos(x)
 
+$a ( ∂ cos ) ( x ) = - sin(x)
+
 ############### Verify derivatives:
 
 $e ff ( x ) = x ^ 2
@@ -391,21 +393,30 @@ $e ff = ( x ↦ (sin(x)) ^ 3 )
 $? ( ∂ ff ) ( y - 1 )
 $= (sin(y - 1) ^ 2) * cos(y - 1) * 3
 
+$? ( ∂ cos ) ( x )
+$= - sin(x)
+
+$? ( ∂ cos ) ( 2 * x )
+$= - sin(2 * x)
+
+$? ( ∂ cos ) ( sin(x) ) * (( ∂ sin ) (x))
+$= - sin(sin(x)) * cos(x)
+
 $e ff = ( x ↦ cos(sin(x)) )
-$?focus ( ∂ ff ) ( x )
-$= (sin(x) ^ 2) * cos(x) * 3111
+$? ( ∂ ff ) ( x )
+$= - cos(x) * sin(sin(x))
 
 $e ff = ( x ↦ sin(cos(sin(x))) )
 $? ( ∂ ff ) ( x )
-$= (sin(x) ^ 2) * cos(x) * 3111
+$= - cos(cos(sin(x))) * cos(x) * sin(sin(x))
 
 $e ff = ( x ↦ (sin(x ^ 2)) ^ 3 )
 $? ( ∂ ff ) ( x )
-$= (sin(x) ^ 2) * cos(x) * 3111
+$= (sin(x ^ 2)) ^ 2 * cos(x ^ 2) * 2 * 3 * x
 
 $e ff ( x ) = √ ( 1 + x ^ 2 )
-$? ( ∂ ff ) ( x )
-$= 123
+$?focus ( ∂ ff ) ( x )
+$= 12300
 
 ############### Inequalities:
 
