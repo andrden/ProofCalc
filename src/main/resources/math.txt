@@ -105,6 +105,8 @@ $= nn - 1
 
 $a 2 * 2 = 4
 
+$a 2 * 3 = 6
+
 $a x + x = 2 * x
 
 $a 1 * x = x
@@ -116,6 +118,8 @@ $a x / z - y / z = ( x - y ) / z
 $a y * x - z * x = ( y - z ) * x
 
 $a 0 * x = 0
+
+$a x * 0 = 0
 
 $a 0.5 * 2 = 1
 
@@ -191,25 +195,18 @@ $a const ( x ↦ 1 )
 
 $a const ( x ↦ 2 )
 
+$a const ( x ↦ 3 )
+
 $a const ( x ↦ 5 )
 
 $a const ( x ↦ 7 )
 
-$a ( ∂ ( x ↦ x ) ) ( x ) = 1
+$a ∂ ( x ↦ x ) = (x ↦ 1)
 
-$e f ( x ) = x ^ n
-$a ( ∂ f ) ( x ) = n * x ^ ( n - 1 )
-
-$a ( ∂ ( x ↦ x ^ n ) ) ( x ) = n * x ^ ( n - 1 )
+$a ∂ ( x ↦ x ^ n ) = (x ↦ n * x ^ (n - 1))
 
 $e const f
-$a ( ∂ f ) ( x ) = 0
-
-$e f ( x ) = g ( x ) + h ( x )
-$a ( ∂ f ) ( x ) = ( ∂ g ) ( x ) + ( ∂ h ) ( x )
-
-$e f(x) = a(x) + b(x) + c(x)
-$a ( ∂ f ) (x) = ( ∂ a ) (x) + ( ∂ b ) (x) + ( ∂ c ) (x)
+$a ∂ f = (x ↦ 0)
 
 $e f = ( x ↦ g ( x ) + h ( x ) )
 $a ( ∂ f ) ( x ) = ( ∂ g ) ( x ) + ( ∂ h ) ( x )
@@ -226,13 +223,13 @@ $a ( ∂ f )(x) = ( ∂ g )(x) * h(x) + g(x) * ( ∂ h )(x)
 $e f = ( x ↦ g( h(x) ) )
 $a ( ∂ f )(x) = ( ∂ g )( h(x) ) * ( ∂ h )(x)
 
-$a ( ∂ sin ) ( x ) = cos(x)
+$a ∂ sin = cos
 
-$a ( ∂ cos ) ( x ) = - sin(x)
+$a ∂ cos = (x ↦ - sin(x))
 
 ############### Verify derivatives:
 
-$e ff ( x ) = x ^ 2
+$e ff = (x ↦ x ^ 2)
 $? ( ∂ ff ) ( x )
 $= 2 * x
 
@@ -248,20 +245,20 @@ $e ff = (x ↦ ( ch x ) ^ 2 - ( sh x ) ^ 2)
 $? const ff
 $= True
 
-$e ff ( x ) = x ^ 3
+$e ff = (x ↦ x ^ 3)
 $? ( ∂ ff ) ( x )
 $= ( x ^ 2 ) * 3
 
-$e gg ( x ) = x ^ 2
+$e gg = (x ↦ x ^ 2)
 $e hh = ( x ↦ 1 )
-$e ff ( x ) = gg ( x ) + hh ( x )
+$e ff = (x ↦ gg ( x ) + hh ( x ))
 $? ( ∂ ff ) ( x )
 $= 2 * x
 
 $? ( ∂ ( x ↦ 1 ) ) ( x )
 $= 0
 
-$e ff ( x ) = x ^ 2 + 1
+$e ff = (x ↦ x ^ 2 + 1)
 $? ( ∂ ff ) ( x )
 $= 2 * x
 
@@ -278,7 +275,7 @@ $= 2 * x
 $? ( ∂ ( x ↦ 7 + x ^ 2 ) ) ( x )
 $= 2 * x
 
-$e ff ( x ) = x ^ 2 + 1 + x ^ 3
+$e ff = (x ↦ x ^ 2 + 1 + x ^ 3)
 $? ( ∂ ff ) ( x )
 $= x ^ 2 * 3 + 2 * x
 
@@ -404,19 +401,19 @@ $? ( ∂ cos ) ( 2 * x )
 $= - sin(2 * x)
 
 $? ( ∂ cos ) ( sin(x) ) * (( ∂ sin ) (x))
-$= - sin(sin(x)) * cos(x)
+$= (- sin(sin(x))) * cos(x)
 
 $e ff = ( x ↦ cos(sin(x)) )
 $? ( ∂ ff ) ( x )
-$= - cos(x) * sin(sin(x))
+$= (- sin(sin(x))) * cos(x)
 
 $e ff = ( x ↦ sin(cos(sin(x))) )
-$? ( ∂ ff ) ( x )
-$= - cos(cos(sin(x))) * cos(x) * sin(sin(x))
+$?focus ( ∂ ff ) ( x )
+$= (- sin(sin(x))) * cos(cos(sin(x))) * cos(x)
 
 $e ff = ( x ↦ (sin(x ^ 2)) ^ 3 )
 $? ( ∂ ff ) ( x )
-$= (sin(x ^ 2)) ^ 2 * cos(x ^ 2) * 2 * 3 * x
+$= (sin(x ^ 2)) ^ 2 * cos(x ^ 2) * 6 * x
 
 $e ff = (x ↦ x ^ 5)
 $? ( ∂ ff ) ( x )
@@ -430,8 +427,24 @@ $e ff = (x ↦ √ ( 1 + x ^ 2 ))
 $? ( ∂ ff ) ( x )
 $= ((x ^ 2 + 1) ^ (- 0.5)) * x
 
+$e ff = (x ↦ x ^ 2)
+$? (∂ (∂ ff)) ( x )
+$= 2
+
+$e ff = (x ↦ x ^ 3)
+$? (∂ (∂ ff)) ( x )
+$= 6 * x
+
+$e ff = cos
+$? (∂ (∂ ff)) ( x )
+$= 6 * x
+
+$e ff = (x ↦ 1 + x ^ 2)
+$? (∂ (∂ ff)) ( x )
+$= 6 * x
+
 $e ff = (x ↦ √ ( 1 + x ^ 2 ))
-$?focus (∂ (∂ ff)) ( x )
+$? (∂ (∂ ff)) ( x )
 $= ((x ^ 2 + 1) ^ (- 0.5)) * x * 1234444
 
 ############### Inequalities:
