@@ -123,6 +123,11 @@ $a x * 0 = 0
 
 $a 0.5 * 2 = 1
 
+############### Verify multiplication and division:
+
+$?focus -2 * 2 / 4
+$= 1999
+
 ############### Powers and roots:
 
 $a x ^ 1 = x
@@ -408,7 +413,7 @@ $? ( ∂ ff ) ( x )
 $= (- sin(sin(x))) * cos(x)
 
 $e ff = ( x ↦ sin(cos(sin(x))) )
-$?focus ( ∂ ff ) ( x )
+$? ( ∂ ff ) ( x )
 $= (- sin(sin(x))) * cos(cos(sin(x))) * cos(x)
 
 $e ff = ( x ↦ (sin(x ^ 2)) ^ 3 )

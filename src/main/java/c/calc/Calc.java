@@ -103,6 +103,7 @@ public class Calc {
                 Expr e = feNew.expr;
                 e = normalize(e);
                 e = e.simplifyApplyFunc();
+                e = normalize(e);
                 feNew = feNew.newExpr(e);
                 feNew.parent = el;
                 if( ! visited.contains(feNew) ){
@@ -128,7 +129,7 @@ public class Calc {
     }
 
     public Expr normalize(Expr expr) {
-        return plusMinus.optimizeDeep(multDiv.optimizeDeep(plusMinus.optimizeDeep(expr)));
+        return multDiv.optimizeDeep(plusMinus.optimizeDeep(multDiv.optimizeDeep(plusMinus.optimizeDeep(expr))));
     }
 
     FringeEl tryByPairs(FringeEl el){
