@@ -1,5 +1,8 @@
 package c;
 
+import c.model.Expr;
+import c.model.Rule;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -7,7 +10,7 @@ import java.util.List;
 /**
  * Created by denny on 8/17/15.
  */
-public class QuestRule extends Rule{
+public class QuestRule extends Rule {
     Expr answer;
     boolean reusable;
     boolean focus;

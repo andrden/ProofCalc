@@ -1,6 +1,8 @@
 package c;
 
 import c.calc.Calc;
+import c.model.Expr;
+import c.model.Rule;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -91,7 +93,7 @@ public class Main {
                     if (qruleAnswer == null) {
                         System.out.println("Correct answer was not specified!");
                     } else if (!ret.toLispString().equals(qruleAnswer.toLispString())) {
-                        throw new IllegalStateException("Not reached answer=" + qrule.answer + "\nsrcLines=" + qrule.srcLines);
+                        throw new IllegalStateException("Not reached answer=" + qrule.answer + "\nsrcLines=" + qrule.getSrcLines());
                     }
                 }
 

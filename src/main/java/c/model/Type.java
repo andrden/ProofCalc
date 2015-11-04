@@ -1,4 +1,4 @@
-package c;
+package c.model;
 
 import java.util.*;
 
@@ -20,7 +20,7 @@ public class Type {
     static boolean isConst(String s){
         return consts.contains(s);
     }
-    static boolean isVarOrConst(String s){
+    public static boolean isVarOrConst(String s){
         return isVar(s) || isConst(s);
     }
 }

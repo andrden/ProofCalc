@@ -1,5 +1,8 @@
 package c;
 
+import c.model.Expr;
+import c.model.Rule;
+import c.model.Type;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
@@ -55,7 +58,7 @@ public class Parser {
 
     void checkDistinct(Rule newRule, List<Rule> rules){
         for( Rule r : rules ){
-            if( newRule.srcLines.equals(r.srcLines) ){
+            if( newRule.getSrcLines().equals(r.getSrcLines()) ){
                 throw new RuntimeException("duplicate "+newRule);
             }
         }

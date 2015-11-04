@@ -1,4 +1,4 @@
-package c;
+package c.model;
 
 import java.util.*;
 

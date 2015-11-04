@@ -1,7 +1,7 @@
 package c.calc;
 
-import c.Expr;
-import c.Rule;
+import c.model.Expr;
+import c.model.Rule;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -133,30 +133,18 @@ public class Calc {
     }
 
     FringeEl tryByPairs(FringeEl el){
-        Rule tryByPairsRule = new Rule(null,null,null){
-            @Override
-            public String toLineString() {
-                return "[tryByPairs]";
-            }
-
-            @Override
-            public String toString() {
-                return toLineString();
-            }
-        };
-
         while(true){
-            Expr enew = tryByPairs(el.expr, plusMinus);
+            Expr enew = tryByPairsDeep(el.expr, plusMinus);
             if( enew!=null ){
-                el = new FringeEl(enew, tryByPairsRule, null, el);
+                el = new FringeEl(enew, new NamedRule("tryByPairs+"), null, el);
             }else{
                 break;
             }
         }
         while(true){
-            Expr enew = tryByPairs(el.expr, multDiv);
+            Expr enew = tryByPairsDeep(el.expr, multDiv);
             if( enew!=null ){
-                el = new FringeEl(enew, tryByPairsRule, null, el);
+                el = new FringeEl(enew, new NamedRule("tryByPairs*"), null, el);
             }else{
                 break;
             }
@@ -170,6 +158,23 @@ public class Calc {
         }else{
             subResults.put(origExpr, res);
         }
+    }
+
+    Expr tryByPairsDeep(Expr expr, AssocCommutCancelRule assocCommutCancelRule){
+        Expr enew = tryByPairs(expr, assocCommutCancelRule);
+        if( enew!=null ){
+            return enew;
+        }
+        if( expr.sub!=null ){
+            for(int i=0; i<expr.sub.size(); i++ ){
+                Expr s = expr.sub.get(i);
+                Expr sTry = tryByPairsDeep(s, assocCommutCancelRule);
+                if( sTry != null ){
+                    return expr.replaceChild(i, sTry);
+                }
+            }
+        }
+        return null;
     }
 
     private Expr tryByPairs(Expr expr, AssocCommutCancelRule assocCommutCancelRule) {
@@ -364,5 +369,23 @@ and have to use unifMapEquation to substitute x in our original 'expr'
             }
         }
         return null;
+    }
+
+    private static class NamedRule extends Rule {
+        String name;
+        public NamedRule(String name) {
+            super(null, null, null);
+            this.name = name;
+        }
+
+        @Override
+        public String toLineString() {
+            return "["+name+"]";
+        }
+
+        @Override
+        public String toString() {
+            return toLineString();
+        }
     }
 }

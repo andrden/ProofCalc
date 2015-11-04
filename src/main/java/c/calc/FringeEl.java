@@ -1,7 +1,7 @@
 package c.calc;
 
-import c.Expr;
-import c.Rule;
+import c.model.Expr;
+import c.model.Rule;
 
 import java.util.ArrayList;
 import java.util.Collections;
