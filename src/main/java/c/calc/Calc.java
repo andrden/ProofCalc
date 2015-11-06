@@ -5,6 +5,7 @@ import c.model.Rule;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Created by denny on 8/11/15.
@@ -114,12 +115,20 @@ public class Calc {
         }
         if( resultPath==null ){
             resultPath = shortest(visited);
+            if( checkIfAnswer!=null ){
+                List<FringeEl> topShortest = topShortest(visited, 15);
+                Collections.reverse(topShortest);
+                for( FringeEl el : topShortest ){
+                    System.out.println("Candidate: "+el.expr.toMathString());
+                }
+            }
         }
         Expr res = resultPath.expr;
         resultPath.printDerivationPath(indent);
         System.out.println(indent+"QUEST res: "+res.toMathString());
         cacheResult(origExpr, res);
         if( checkIfAnswer!=null ){
+            List list = visited.stream().filter(x -> ! x.toString().contains("∂")).collect(Collectors.toList());
             breakpoint();
         }
         if( origExpr.toString().equals("(apply (apply ∂ ff) x)") ){
@@ -209,15 +218,11 @@ public class Calc {
         return sh;
     }
 
-//    Expr shortest(List<Expr> exprNew){
-//        Expr sh=null;
-//        for( Expr e : exprNew ){
-//            if( sh==null || sh.toLispString().length()>e.toLispString().length() ){
-//                sh = e;
-//            }
-//        }
-//        return sh;
-//    }
+    List<FringeEl> topShortest(Collection<FringeEl> fringe, int n){
+        return fringe.stream().sorted((a,b) -> Long.compare(a.expr.toLispString().length(),b.expr.toLispString().length()) )
+                .limit(n)
+                .collect(Collectors.toList());
+    }
 
     List<FringeEl> exprSimplifyDeep(Expr expr) {
         List<FringeEl> ways = exprSimplify(expr);
