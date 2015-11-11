@@ -16,13 +16,11 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) throws Exception {
         //new Date(1443657600000L).toString();
-
-        Tests.testParseLine();
-        Tests.testUnify();
+        Tests.allTests();
 
         //runPieces();
-        //runMainFile();
-        runMath(new BufferedReader(new InputStreamReader(Main.class.getClassLoader().getResourceAsStream("piece9.txt"))));
+        runMainFile();
+        //runMath(new BufferedReader(new InputStreamReader(Main.class.getClassLoader().getResourceAsStream("piece9.txt"))));
 
     }
 

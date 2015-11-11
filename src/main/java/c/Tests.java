@@ -6,6 +6,16 @@ import c.model.Expr;
  * Created by denny on 10/15/15.
  */
 public class Tests {
+    static void allTests(){
+        Tests.testParseLine();
+        Tests.testUnify();
+
+        Parser parser = new Parser();
+        Expr e = parser.parse("(x ↦ ( (x ↦ x ^ 3) ((x ↦ 1 + x) (x)) ) )");
+        assertEq("(func x (^ (+ 1 x) 3))", e.simplifyApplyFunc().toLispString());
+
+    }
+
     static void testUnify(){
         Parser parser = new Parser();
 /*
@@ -71,6 +81,10 @@ public class Tests {
 
     static void chkUnify(Parser parser, String template, String concrete, String resMap){
         String res = "" + parser.parse(template).unify(parser.parse(concrete));
+        assertEq(resMap, res);
+    }
+
+    static void assertEq(String resMap, String res) {
         if( ! res.equals(resMap) ){
             throw new RuntimeException(res + " NOT " + resMap);
         }
