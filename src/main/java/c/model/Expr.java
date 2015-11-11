@@ -149,7 +149,8 @@ public class Expr {
         if( node.equals("apply") && sub.get(0).node.equals("func") ){
             Expr func = sub.get(0);
             String funcVar = (String)(func.sub.get(0).node);
-            return func.rightChild().substitute(Collections.singletonMap(funcVar, rightChild()));
+            Expr subs = func.rightChild().substitute(Collections.singletonMap(funcVar, rightChild()));
+            return subs.simplifyApplyFunc(); // maybe there are several nested functions
         }
 
         List<Expr> subList = new ArrayList<>();
