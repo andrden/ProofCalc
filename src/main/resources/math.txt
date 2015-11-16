@@ -198,6 +198,9 @@ $= x
 
 ############### Derivatives:
 
+$a lim0 (x ↦ 0) = 0
+
+$a ∂ f = (x ↦ lim0 (y ↦ (f(x + y) - f(x)) / y))
 
 $e f ( x ) = 5
 $a const f
@@ -241,6 +244,10 @@ $a ∂ sin = cos
 $a ∂ cos = (x ↦ - sin(x))
 
 ############### Verify derivatives:
+
+$e ff = (x ↦ 1.5)
+$?focus ( ∂ ff ) ( x )
+$= 0
 
 $e ff = (x ↦ x ^ 2)
 $? ( ∂ ff ) ( x )
