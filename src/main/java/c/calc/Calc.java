@@ -53,8 +53,9 @@ public class Calc {
             return subResults.get(expr);
         }
         final Expr origExpr = expr;
-        String indent = (checkIfAnswer==null ? "    ":"");
-        System.out.println("\n"+indent+"================QUEST:\n"+expr+"\n");
+        String indent = (checkIfAnswer==null ? null/*"    "*/:"");
+        println(indent, "\n");
+        println(indent, "================QUEST:\n" + expr + "\n");
 
 
         //Expr expr = q.assertion;
@@ -89,7 +90,7 @@ public class Calc {
 //            }
             fringe.remove(el);
             String exprString = el.expr.toMathString();
-            System.out.println(indent+"QUEST try #" + step + ": " + exprString);
+            println(indent, "QUEST try #" + step + ": " + exprString);
             if( exprString.contains("(((∂ (func x (x ^ 2))) x) + ((∂ (func x (x ^ 3))) x) + ((∂ (func x 1)) x))") ){
                 breakpoint();
             }
@@ -119,15 +120,16 @@ public class Calc {
                 List<FringeEl> topShortest = topShortest(visited, 15);
                 Collections.reverse(topShortest);
                 for( FringeEl el : topShortest ){
-                    System.out.println("Candidate: "+el.expr.toMathString());
+                    println(indent, "Candidate: "+el.expr.toMathString());
                 }
             }
         }
         Expr res = resultPath.expr;
-        resultPath.printDerivationPath(indent);
-        System.out.println(indent+"QUEST res: "+res.toMathString());
         cacheResult(origExpr, res);
         if( checkIfAnswer!=null ){
+            resultPath.printDerivationPath(indent);
+            println(indent, "QUEST res: "+res.toMathString());
+
             List list = visited.stream().filter(x -> ! x.toString().contains("∂")).collect(Collectors.toList());
             breakpoint();
         }
@@ -135,6 +137,13 @@ public class Calc {
             breakpoint();
         }
         return res;
+    }
+
+    void println(String indent, String msg){
+        if( indent==null ){
+            return;
+        }
+        System.out.println(indent + msg);
     }
 
     public Expr normalize(Expr expr) {

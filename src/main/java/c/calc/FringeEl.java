@@ -65,6 +65,9 @@ class FringeEl {
     }
 
     public void printDerivationPath(String indent){
+        if( indent==null ){
+            return;
+        }
         List<FringeEl> path = new ArrayList<>();
         FringeEl e = this;
         while(e!=null){

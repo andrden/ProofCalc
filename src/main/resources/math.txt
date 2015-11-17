@@ -196,33 +196,36 @@ $= c ^ 2 - x ^ 2
 $? x * ( ch ψ ) ^ 2 - x * ( sh ψ ) ^ 2
 $= x
 
-############### Derivatives:
+############### Derivatives from Limits:
 
 $a lim0 (x ↦ 0) = 0
 
+$a lim0 (x ↦ 1) = 1
+
 $a ∂ f = (x ↦ lim0 (y ↦ (f(x + y) - f(x)) / y))
+
+############### Verify derivatives from limits:
+
+$e ff = (x ↦ 1.5)
+$? ( ∂ ff ) ( x )
+$= 0
+
+$e ff = (x ↦ x)
+$? ( ∂ ff ) ( x )
+$= 1
+
+$? ∂ ( x ↦ x )
+$= (x ↦ 1)
+
+############### Derivatives:
+
 
 $e f ( x ) = 5
 $a const f
 
-$a const ( x ↦ 0.5 )
-
 $a const ( x ↦ 1 )
 
-$a const ( x ↦ 2 )
-
-$a const ( x ↦ 3 )
-
-$a const ( x ↦ 5 )
-
-$a const ( x ↦ 7 )
-
-$a ∂ ( x ↦ x ) = (x ↦ 1)
-
 $a ∂ ( x ↦ x ^ n ) = (x ↦ n * x ^ (n - 1))
-
-$e const f
-$a ∂ f = (x ↦ 0)
 
 $e f = ( x ↦ g ( x ) + h ( x ) )
 $a ∂ f = ( x ↦ ( ∂ g ) (x) + ( ∂ h ) (x) )
@@ -244,10 +247,6 @@ $a ∂ sin = cos
 $a ∂ cos = (x ↦ - sin(x))
 
 ############### Verify derivatives:
-
-$e ff = (x ↦ 1.5)
-$?focus ( ∂ ff ) ( x )
-$= 0
 
 $e ff = (x ↦ x ^ 2)
 $? ( ∂ ff ) ( x )
