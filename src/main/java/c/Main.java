@@ -18,10 +18,14 @@ public class Main {
         //new Date(1443657600000L).toString();
         Tests.allTests();
 
-        //runPieces();
         runMainFile();
-        //runMath(new BufferedReader(new InputStreamReader(Main.class.getClassLoader().getResourceAsStream("piece9.txt"))));
+        //runPieces();
+        //runPiece("piece10.txt");
 
+    }
+
+    static void runPiece(String pieceFile) throws Exception{
+        runMath(new BufferedReader(new InputStreamReader(Main.class.getClassLoader().getResourceAsStream(pieceFile))));
     }
 
     static void runPieces() throws Exception{

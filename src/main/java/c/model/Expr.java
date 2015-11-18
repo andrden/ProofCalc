@@ -81,9 +81,28 @@ public class Expr {
         Expr expr = (Expr) o;
 
         if (node != null ? !node.equals(expr.node) : expr.node != null) return false;
+        if( node.equals("func") && ! sub.get(0).equals(expr.sub.get(0)) ){
+            // make sure "x ↦ (1 + x)" equals "y ↦ (1 + y)"
+            Set<String> usedVars = new HashSet<>();
+            usedVars.addAll( freeVariables() );
+            usedVars.addAll( expr.freeVariables() );
+            Expr newVar = newVariable(usedVars); // change both functions to use new free variable
+            Expr thisSubst = substitute(Collections.singletonMap(sub.get(0).node, newVar));
+            Expr exprSubst = substitute(Collections.singletonMap(expr.sub.get(0).node, newVar));
+            return thisSubst.equals(exprSubst);
+        }
         if (sub != null ? !sub.equals(expr.sub) : expr.sub != null) return false;
 
         return true;
+    }
+
+    Expr newVariable(Set<String> usedVars){
+        for( int i=1; ; i++ ){
+            String v = "x" + i;
+            if( ! usedVars.contains(v) ){
+                return new Expr(v);
+            }
+        }
     }
 
     public Expr substitute(Map<String,Expr> vars){

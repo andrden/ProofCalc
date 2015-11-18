@@ -1,0 +1,17 @@
+$a lim0 (x ↦ 1) = 1
+
+$a lim0 (x ↦ x) = 0
+
+$e f = ( x ↦ g ( x ) + h ( x ) )
+$a lim0 f = (lim0 g) + (lim0 h)
+
+
+$? lim0 ( x ↦ x + 1 )
+$= 1
+#DERIV path: (lim0 (func x (1 + x)))
+#DERIV path: By $e f = ( x ↦ g ( x ) + h ( x ) )  $a lim0 f = (lim0 g) + (lim0 h)  =>  ((lim0 (func x 1)) + (lim0 (func x x)))
+#DERIV path: By $a lim0 (x ↦ x) = 0  =>  (lim0 (func x 1))
+#DERIV path: By $a lim0 (x ↦ 1) = 1  =>  1
+
+$? lim0 ( y ↦ y + 1 )
+$= 1

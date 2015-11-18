@@ -16,6 +16,14 @@ public class Type {
     static Set<String> infixOps = new HashSet<>(Arrays.asList("+", "-", "*", "/", "^", "≤","≥", "↦"));
 
     static boolean isVar(String s){
+        if( s.charAt(0)=='x' ){
+            for( int i=1; i<s.length(); i++ ){
+                if( s.charAt(i)<'0' || s.charAt(i)>'9' ){
+                    return false;
+                }
+            }
+            return true; // "x", "x24", "x0", "x555643" are all variables
+        }
         return vars.contains(s);
     }
     static boolean isConst(String s){

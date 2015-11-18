@@ -13,7 +13,7 @@ public class Tests {
         Parser parser = new Parser();
         Expr e = parser.parse("(x ↦ ( (x ↦ x ^ 3) ((x ↦ 1 + x) (x)) ) )");
         assertEq("(func x (^ (+ 1 x) 3))", e.simplifyApplyFunc().toLispString());
-
+        assertTrue(parser.parse("x ↦ (1 + x)").equals(parser.parse("y ↦ (1 + y)")));
     }
 
     static void testUnify(){
@@ -82,6 +82,12 @@ public class Tests {
     static void chkUnify(Parser parser, String template, String concrete, String resMap){
         String res = "" + parser.parse(template).unify(parser.parse(concrete));
         assertEq(resMap, res);
+    }
+
+    static void assertTrue(boolean res) {
+        if( ! res ){
+            throw new RuntimeException();
+        }
     }
 
     static void assertEq(String resMap, String res) {
