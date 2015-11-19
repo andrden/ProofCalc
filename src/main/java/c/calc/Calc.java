@@ -250,6 +250,7 @@ public class Calc {
 
     List<FringeEl> exprSimplify(Expr expr) {
         List<FringeEl> ways = new ArrayList<>();
+        ways.addAll(new CodedRules(expr).getWays());
         for (Rule r : rules) {
             if (r.assertion.node.equals("=")) {
                 Expr template = r.assertion.sub.get(0);
@@ -385,21 +386,4 @@ and have to use unifMapEquation to substitute x in our original 'expr'
         return null;
     }
 
-    private static class NamedRule extends Rule {
-        String name;
-        public NamedRule(String name) {
-            super(null, null, null);
-            this.name = name;
-        }
-
-        @Override
-        public String toLineString() {
-            return "["+name+"]";
-        }
-
-        @Override
-        public String toString() {
-            return toLineString();
-        }
-    }
 }
