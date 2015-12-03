@@ -1,0 +1,38 @@
+1)
+# The direct geometrical approximate proof of "∂ sin" is actually simpler than using difference of sinuses formula,
+# or even more so deriving that formula. So such geometrical proof was likely how people first calculated this derivative.
+$?focus ∂ sin
+
+
+2)
+
+# this rule could be auto-derived:
+$e f = ( x ↦ a(x) + b(x) + c(x) )
+$a ∂ f = ( x ↦ ( ∂ a ) (x) + ( ∂ b ) (x) + ( ∂ c ) (x) )
+
+
+$e ff = (x ↦ x ^ 2 + 2 * x + 1)
+$? ( ∂ ff ) ( x )
+$= 2 * x + 2
+
+#IDEA: this example could invent/suggest new generalized rule (derivative of sum of 3 functions) during solution finding
+$? ( ∂ (x ↦ x ^ 2 + 2 * x + 1) ) ( x )
+$= 2 * x + 2
+#DERIV path: ((∂ (func x ((2 * x) + (x ^ 2) + 1))) x)
+#DERIV path: By $e f = ( x ↦ a(x) + b(x) + c(x) )  $a ( ∂ f ) ( x ) = ( ∂ a ) (x) + ( ∂ b ) (x) + ( ∂ c ) (x)  =>  (((∂ (func x (2 * x))) x) + ((∂ (func x (x ^ 2))) x) + ((∂ (func x 1)) x))
+#DERIV path: By [tryByPairs]  =>  (((x ^ (2 + -1)) * 2) + ((∂ (func x (2 * x))) x) + ((∂ (func x 1)) x))
+#DERIV path: By [tryByPairs]  =>  (((x ^ 1) * 2) + ((∂ (func x (2 * x))) x) + ((∂ (func x 1)) x))
+#DERIV path: By [tryByPairs]  =>  ((2 * x) + ((∂ (func x (2 * x))) x) + ((∂ (func x 1)) x))
+#DERIV path: By [tryByPairs]  =>  ((2 * x) + ((∂ (func x (2 * x))) x))
+#DERIV path: By $e f = ( x ↦ g(x) * h(x) )  $a ( ∂ f )(x) = ( ∂ g )(x) * h(x) + g(x) * ( ∂ h )(x)  =>  ((((∂ (func x 2)) x) * x) + (((∂ (func x x)) x) * 2) + (2 * x))
+#DERIV path: By [tryByPairs]  =>  ((((∂ (func x x)) x) * 2) + (0 * x) + (2 * x))
+#DERIV path: By [tryByPairs]  =>  ((0 * x) + (2 * x) + 2)
+#DERIV path: By [tryByPairs]  =>  ((2 * x) + 2)
+#QUEST res: ((2 * x) + 2)
+
+
+3)
+trying to compute derivative of 'sin' should lead to formula for
+limit0 of sin(x)/x,
+and limit0 sin(x/2)/(x/2) and in general
+limit0 of f(x) versus limit0 of f(x/2)
