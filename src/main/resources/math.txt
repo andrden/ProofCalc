@@ -292,14 +292,17 @@ $= 3
 $? lim0 (y ↦ cos (x))
 $= cos(x)
 
-$?focus lim0 (y ↦ cos (y))
+$? lim0 cos
+$= cos(0)
+
+$? lim0 (y ↦ cos (y))
 $= cos(0)
 
 $? lim0 (y ↦ 2 * cos (y))
-$= 2 * cos(x) * cos(x)
+$= 2 * cos(0)
 
-$? lim0 (y ↦ 2 * cos (y) * cos (y))
-$= 2 * cos(x) * cos(x)
+$?focus lim0 (y ↦ 2 * cos (y) * cos (y))
+$= 2 * cos(0) * cos(0)
 
 $? lim0 (y ↦ 2 * cos (x) * cos (x))
 $= 2 * cos(x) * cos(x)

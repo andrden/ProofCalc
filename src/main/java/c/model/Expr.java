@@ -131,6 +131,16 @@ public class Expr {
             map.replaceAll((v, e) -> e.simplifyFuncApply());
             return map;
         }
+        // retry for the case of unifying "x ↦ cos(g(x))" with "cos"
+        if( node.equals("func") && rightChild().node.equals("apply") && ! concrete.node.equals("func") ){
+            map = new LinkedHashMap<>();
+            Expr var = sub.get(0);
+            Expr altConcrete = new Expr("func",var, new Expr("apply", concrete, var));
+            if( unify(altConcrete, map) ){
+                map.replaceAll((v, e) -> e.simplifyFuncApply());
+                return map;
+            }
+        }
         return null;
     }
 
@@ -138,6 +148,16 @@ public class Expr {
         List<Expr> newSub = new ArrayList<>(sub);
         newSub.set(i, newChild);
         return new Expr(node, newSub);
+    }
+
+    public Expr simplifyFuncOrApply(){
+        for( Expr e = this; ; ){
+            Expr e1 = e.simplifyApplyFunc().simplifyFuncApply();
+            if( e1.equals(e) ){
+                return e;
+            }
+            e = e1; // and simplify further
+        }
     }
 
 

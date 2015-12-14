@@ -26,6 +26,8 @@ public class Tests {
         though the expressions are not similar on the first sight
 */
 
+        chkUnify(parser, "x ↦ cos(g(x))", "x ↦ cos(x)", "{g=(func x x)}");
+        chkUnify(parser, "x ↦ cos(g(x))", "cos", "{g=(func x x)}");
         chkUnify(parser, "x ↦ h(x)", "x ↦ cos(sin(x))", "{h=(func x (apply cos (apply sin x)))}");
         chkUnify(parser, "x ↦ g( h(x) )", "x ↦ sin(cos(sin(x)))", "{h=(func x (apply cos (apply sin x))), g=sin}");
         chkUnify(parser, "x ↦ g( h(x) )", "x ↦ 1 - sin(sin(x)) * sin(sin(x))",

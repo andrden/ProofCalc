@@ -300,7 +300,7 @@ public class Calc {
         List<FringeEl> subDerivations = new ArrayList<>();
         for( Expr cond : r.cond ){
             Expr condSubs = cond.substitute(unifMap);
-            FringeEl checkIfTrueResult = checkIfTrue(condSubs);
+            FringeEl checkIfTrueResult = checkIfTrueOrCanBeMadeTrue(condSubs);
             if( checkIfTrueResult==null ){
                 return null;
             }else{
@@ -319,8 +319,8 @@ public class Calc {
             Expr tpl = expr.sub.get(1);
             Map<String, Expr> map = tpl.unify(concrete);
             if (map != null) {
-                Expr resultTpl = tpl.substitute(map).simplifyApplyFunc();
-                Expr resultConcrete = concrete.substitute(map).simplifyApplyFunc();
+                Expr resultTpl = tpl.substitute(map).simplifyFuncOrApply();
+                Expr resultConcrete = concrete.substitute(map).simplifyFuncOrApply();
                 if (resultTpl.equals(resultConcrete)) {
                     // Avoid erroneous unification of 'x' with 'x+1'
                     // for 'x = x + 1' equality.
@@ -338,7 +338,7 @@ public class Calc {
         System.out.println("breakpoint");
     }
 
-    FringeEl checkIfTrue(Expr expr){
+    FringeEl checkIfTrueOrCanBeMadeTrue(Expr expr){
         if( expr.toLispString().contains("(= (apply ff x) (+ (apply g x) (apply h x)))") ){
             breakpoint();
         }

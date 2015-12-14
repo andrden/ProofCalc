@@ -1,0 +1,25 @@
+$a lim0 (x ↦ x) = 0
+
+$e f = ( x ↦ cos(g ( x )) )
+$a lim0 f = cos(lim0 g)
+
+$e f = ( x ↦ g ( x ) * h ( x ) )
+$a lim0 f = (lim0 g) * (lim0 h)
+
+
+
+
+$? lim0 cos
+$= cos(0)
+
+$? lim0 (y ↦ cos (y))
+$= cos(0)
+
+$? lim0 (y ↦ 2 * cos (y))
+$= 2 * cos(0)
+
+$? lim0 (y ↦ cos (y) * cos (y))
+$= cos(0) * cos(0)
+
+$?focus lim0 (y ↦ 2 * cos (y) * cos (y))
+$= 29999 * cos(0) * cos(0)

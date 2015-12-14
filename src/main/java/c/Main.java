@@ -18,9 +18,9 @@ public class Main {
         //new Date(1443657600000L).toString();
         Tests.allTests();
 
-        runMainFile();
+        //runMainFile();
         //runPieces();
-        //runPiece("piece10.txt");
+        runPiece("piece11.txt");
 
     }
 
