@@ -196,7 +196,7 @@ public class Calc {
     }
 
     private Expr tryByPairs(Expr expr, AssocCommutCancelRule assocCommutCancelRule) {
-        List<Expr> splitPairs = assocCommutCancelRule.separateAllPossiblePairs(expr);
+        Set<Expr> splitPairs = new HashSet<>(assocCommutCancelRule.separateAllPossiblePairs(expr));
         //System.out.println("split pairs size="+splitPairs.size());
         for( Expr esplitPair : splitPairs ){
 

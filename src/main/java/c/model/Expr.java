@@ -125,23 +125,37 @@ public class Expr {
         return n;
     }
 
-    public Map<String,Expr> unify(Expr concrete){
+    List<Map<String,Expr>> unifyImpl(Expr concrete){
         Map<String,Expr> map = new LinkedHashMap<>();
-        if( unify(concrete, map) ){
-            map.replaceAll((v, e) -> e.simplifyFuncApply());
-            return map;
+        List<Map<String,Expr>> cases = unify(concrete, map);
+        if( ! cases.isEmpty() ){
+            for( Map<String,Expr> m : cases ) {
+                m.replaceAll((v, e) -> e.simplifyFuncApply());
+            }
+        }
+        return cases;
+    }
+
+    public Map<String,Expr> unify(Expr concrete){
+        List<Map<String,Expr>> cases = unifyList(concrete);
+        if( cases.isEmpty() ){
+            return null;
+        }
+        return cases.get(0);
+    }
+
+    private List<Map<String,Expr>> unifyList(Expr concrete) {
+        List<Map<String,Expr>> cases = unifyImpl(concrete);
+        if( ! cases.isEmpty() ){
+            return cases;
         }
         // retry for the case of unifying "x ↦ cos(g(x))" with "cos"
         if( node.equals("func") && rightChild().node.equals("apply") && ! concrete.node.equals("func") ){
-            map = new LinkedHashMap<>();
             Expr var = sub.get(0);
             Expr altConcrete = new Expr("func",var, new Expr("apply", concrete, var));
-            if( unify(altConcrete, map) ){
-                map.replaceAll((v, e) -> e.simplifyFuncApply());
-                return map;
-            }
+            cases = unifyImpl(altConcrete);
         }
-        return null;
+        return cases;
     }
 
     public Expr replaceChild(int i, Expr newChild){
@@ -200,21 +214,28 @@ public class Expr {
         return n;
     }
 
-    boolean unify(Expr concrete, Map<String,Expr> vars){
+    List<Map<String,Expr>> unify(Expr concrete, Map<String,Expr> vars){
+        List<Map<String,Expr>> cases = new ArrayList<>();
         if( isVar() ){
             Expr val = vars.get(node);
             if( val==null ){
                 vars.put(node, concrete);
-                return true;
+                cases.add(vars);
+                return cases;
             }
-            return val.equals(concrete);
+            if( val.equals(concrete) ){
+                cases.add(vars);
+                return cases;
+            }
+            return cases;
         }
         if( node.equals("apply") && sub.get(0).isVar() ){
             String func = sub.get(0).node;
 
             if( concrete.node.equals("apply") && rightChild().equals(concrete.rightChild()) ){
                 vars.put(func, concrete.sub.get(0));
-                return true;
+                cases.add(vars);
+                return cases;
             }
 
             if (vars.get(func) == null) {
@@ -222,7 +243,8 @@ public class Expr {
                 if (argument.isVar()) {
                     // (apply g x)
                     vars.put(func, new Expr("func", argument, concrete));
-                    return true;
+                    cases.add(vars);
+                    return cases;
                 } else {
                     // (apply g (apply h x)) unify to concrete (^ (apply sin x) 3)
                         if (concrete.sub != null) {
@@ -230,10 +252,13 @@ public class Expr {
                                 Expr concreteSub = concrete.sub.get(i);
                                 if (concreteSub.sub != null) { // if complex expression, not single term
                                     // trying to find at least one point where inner expression could be unified
-                                    if (argument.unify(concreteSub, vars)) {
-                                        Expr x = new Expr("x");
-                                        vars.put(func, new Expr("func", x, concrete.replaceChild(i, x)));
-                                        return true;
+                                    List<Map<String,Expr>> sub = argument.unify(concreteSub, vars);
+                                    if (! sub.isEmpty()) {
+                                        cases.addAll(sub);
+//                                        for( Map<String,Expr> m : sub )
+//                                        Expr x = new Expr("x");
+//                                        vars.put(func, new Expr("func", x, concrete.replaceChild(i, x)));
+                                        return cases;
                                     }
                                 }
                             }
@@ -243,28 +268,33 @@ public class Expr {
         }
 
         if( ! node.equals(concrete.node) ){
-            return false;
+            return cases;
         }
         if( sub==null && concrete.sub==null ){
-            return true;
+            cases.add(vars);
+            return cases;
         }
         if( node.equals("+") && sub.size()==2 && sub.size() < concrete.sub.size() ){
             concrete = new Expr("+", concrete.sub.get(0), new Expr("+", concrete.sub.subList(1,concrete.sub.size())));
         }
         if( sub.size()!=concrete.sub.size() ){
-            return false;
+            return cases;
         }
         if (! subUnify(concrete, vars)){
             if( "+".equals(node) && sub.size()==2 ){
                 // try swapping and unifying the other way
                 if (! subUnify(new Expr(concrete.node, concrete.sub.get(1), concrete.sub.get(0)), vars)){
-                    return false; // tried 2 ways and failed
+                    return cases; // tried 2 ways and failed
                 }
-                return true; // swapped unification succeeded
+                cases.add(vars);
+                return cases;
+                //return true; // swapped unification succeeded
             }
-            return false;
+            return cases;
         }
-        return true;
+        cases.add(vars);
+        return cases;
+        //return true;
     }
 
     boolean subUnify(Expr concrete, Map<String, Expr> vars) {
@@ -276,7 +306,8 @@ public class Expr {
             Expr concreteFuncArgVar = concrete.sub.get(0);
             Expr myExprSubs = rightChild().substitute(Collections.singletonMap(myFuncArgVar, concreteFuncArgVar));
 
-            if( ! myExprSubs.unify(concrete.rightChild(), vars) ){
+            List<Map<String,Expr>> cases = myExprSubs.unify(concrete.rightChild(), vars);
+            if( cases.isEmpty() ){
                 return false;
             }
             if( vars.containsKey(concreteFuncArgVar.node) &&
@@ -287,7 +318,8 @@ public class Expr {
             vars.remove(concreteFuncArgVar.node);
         }else{
             for( int i=0; i<sub.size(); i++ ){
-                if( ! sub.get(i).unify(concrete.sub.get(i), vars) ){
+                List<Map<String,Expr>> cases = sub.get(i).unify(concrete.sub.get(i), vars);
+                if( cases.isEmpty() ){
                     return false;
                 }
             }
