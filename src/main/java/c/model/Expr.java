@@ -254,10 +254,11 @@ public class Expr {
                                     // trying to find at least one point where inner expression could be unified
                                     List<Map<String,Expr>> sub = argument.unify(concreteSub, vars);
                                     if (! sub.isEmpty()) {
+                                        for( Map<String,Expr> m : sub ) {
+                                            Expr x = new Expr("x");
+                                            m.put(func, new Expr("func", x, concrete.replaceChild(i, x)));
+                                        }
                                         cases.addAll(sub);
-//                                        for( Map<String,Expr> m : sub )
-//                                        Expr x = new Expr("x");
-//                                        vars.put(func, new Expr("func", x, concrete.replaceChild(i, x)));
                                         return cases;
                                     }
                                 }

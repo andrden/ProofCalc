@@ -33,48 +33,69 @@ public class Tests {
         chkUnify(parser, "x ↦ g(x) * h(x)", "y ↦ cos(y) * cos(y) * 2", "{g=(func x x)}");
     }
 
-    static void testUnify(){
-        Parser parser = new Parser();
+    static class UTest{
+        String template;
+        String concrete;
+        String resMap;
 
-        Runnable[] rarr = {
-            ()->chkUnify(parser, "x", "x + 1", "{x=(+ x 1)}"),
-            ()->chkUnify(parser, "x ↦ cos(g(x))", "x ↦ cos(x)", "{g=(func x x)}"),
-            ()->chkUnify(parser, "x ↦ cos(g(x))", "cos", "{g=(func x x)}"),
-            ()->chkUnify(parser, "x ↦ h(x)", "x ↦ cos(sin(x))", "{h=(func x (apply cos (apply sin x)))}"),
-            ()->chkUnify(parser, "x ↦ g( h(x) )", "x ↦ sin(cos(sin(x)))", "{h=(func x (apply cos (apply sin x))), g=sin}"),
-            ()->chkUnify(parser, "x ↦ g( h(x) )", "x ↦ 1 - sin(sin(x)) * sin(sin(x))",
-                    "{h=(func x (- (* (apply sin (apply sin x)) (apply sin (apply sin x))))), g=(func x (+ 1 x))}"),
-            ()->chkUnify(parser, "x ↦ g( h(x) )", "x ↦ cos(sin(x))", "{h=sin, g=cos}"),
-
-            ()->chkUnify(parser, "( ∂ ( x ↦ x ) )(x)", "( ∂ ( x ↦ x + sin(x) ) )(x)", "null"),
-            ()->chkUnify(parser, "y ↦ g(y)", "x ↦ x", "{g=(func x x)}"),
-            ()->chkUnify(parser, "y ↦ (g(y) + h(y))", "x ↦ (x + sin(x))", "{g=(func x x), h=sin}"),
-            ()->chkUnify(parser, "x ↦ g(x) * h(x)", "y ↦ cos(y) * cos(y) * 2", "{g=(func x x)}"),
-
-            ()->chkUnify(parser, "x + 1", "x", "null"),
-            ()->chkUnify(parser, "x + 5", "7 + 5", "{x=7}"),
-            ()->chkUnify(parser, "x + 1 = 5", "4 + 1 = 5", "{x=4}"),
-            ()->chkUnify(parser, "f ( x ) = x ^ 2 + h", "f ( x ) = x ^ 2 + 22", "{f=f, x=x, h=22}"),
-            ()->chkUnify(parser, "f ( x ) = g ( x ) + h ( x )", "f ( x ) = x ^ 2 + 1", "{f=f, g=(func x (^ x 2)), h=(func x 1)}"),
-
-            ()->chkUnify(parser, "( ∂ ( x ↦ g( h(x) ) ) )(x)", "( ∂ ( x ↦ sin(x ^ 3) ) )(x)", "{h=(func x (^ x 3)), g=sin, x=x}"),
-            ()->chkUnify(parser, "( ∂ ( x ↦ g( h(x) ) ) )(x)", "( ∂ ( x ↦ (sin(x)) ^ 3 ) )(x)", "{h=sin, g=(func x (^ x 3)), x=x}"),
-
-            ()->chkUnify(parser, "( ∂ ( x ↦ x ^ n ) )(x)", "( ∂ ( x ↦ x ^ 4 ) )(x)", "{n=4, x=x}"),
-            ()->chkUnify(parser, "( ∂ ( x ↦ x ^ n ) )(x)", "( ∂ ( x ↦ x ^ 4 ) )(x + 1)", "{n=4, x=(+ x 1)}"), // (func x ...) inner var x
-            ()->chkUnify(parser, "( ∂ ( x ↦ x ^ n ) )(x)", "( ∂ ( x ↦ x ^ 4 ) )(y + 1)", "{n=4, x=(+ y 1)}"), // (func x ...) inner var x
-        };
-
-        int errs = 0;
-        for( Runnable r : rarr ){
+        UTest(String template, String concrete, String resMap) {
+            this.template = template;
+            this.concrete = concrete;
+            this.resMap = resMap;
+        }
+        String chkUnify(Parser parser){
             try{
-                r.run();
+                Tests.chkUnify(parser, template, concrete, resMap);
+                return null;
             }catch (Exception e){
-                errs ++;
-                System.err.println(""+e);
+                return template + " => " + concrete + "  " + e;
             }
         }
-        if( errs>0 ){
+    }
+
+    static void testUnify(){
+
+        UTest[] rarr = {
+                new UTest( "x ↦ g(x) * h(x)", "y ↦ cos(y) * cos(y) * 2", "{g=(func x x)}"),
+                new UTest("x ↦ g( h(x) )", "x ↦ cos(sin(x))", "{h=sin, g=cos}"),
+                new UTest( "x", "x + 1", "{x=(+ x 1)}"),
+                new UTest( "x ↦ cos(g(x))", "x ↦ cos(x)", "{g=(func x x)}"),
+                new UTest( "x ↦ cos(g(x))", "cos", "{g=(func x x)}"),
+                new UTest( "x ↦ h(x)", "x ↦ cos(sin(x))", "{h=(func x (apply cos (apply sin x)))}"),
+                new UTest( "x ↦ g( h(x) )", "x ↦ sin(cos(sin(x)))", "{h=(func x (apply cos (apply sin x))), g=sin}"),
+                new UTest( "x ↦ g( h(x) )", "x ↦ 1 - sin(sin(x)) * sin(sin(x))",
+                    "{h=(func x (- (* (apply sin (apply sin x)) (apply sin (apply sin x))))), g=(func x (+ 1 x))}"),
+
+                new UTest( "( ∂ ( x ↦ x ) )(x)", "( ∂ ( x ↦ x + sin(x) ) )(x)", "null"),
+                new UTest( "y ↦ g(y)", "x ↦ x", "{g=(func x x)}"),
+                new UTest( "y ↦ (g(y) + h(y))", "x ↦ (x + sin(x))", "{g=(func x x), h=sin}"),
+
+                new UTest( "x + 1", "x", "null"),
+                new UTest( "x + 5", "7 + 5", "{x=7}"),
+                new UTest( "x + 1 = 5", "4 + 1 = 5", "{x=4}"),
+                new UTest( "f ( x ) = x ^ 2 + h", "f ( x ) = x ^ 2 + 22", "{f=f, x=x, h=22}"),
+                new UTest( "f ( x ) = g ( x ) + h ( x )", "f ( x ) = x ^ 2 + 1", "{f=f, g=(func x (^ x 2)), h=(func x 1)}"),
+
+                new UTest( "( ∂ ( x ↦ g( h(x) ) ) )(x)", "( ∂ ( x ↦ sin(x ^ 3) ) )(x)", "{h=(func x (^ x 3)), g=sin, x=x}"),
+                new UTest( "( ∂ ( x ↦ g( h(x) ) ) )(x)", "( ∂ ( x ↦ (sin(x)) ^ 3 ) )(x)", "{h=sin, g=(func x (^ x 3)), x=x}"),
+
+                new UTest( "( ∂ ( x ↦ x ^ n ) )(x)", "( ∂ ( x ↦ x ^ 4 ) )(x)", "{n=4, x=x}"),
+                new UTest( "( ∂ ( x ↦ x ^ n ) )(x)", "( ∂ ( x ↦ x ^ 4 ) )(x + 1)", "{n=4, x=(+ x 1)}"), // (func x ...) inner var x
+                new UTest( "( ∂ ( x ↦ x ^ n ) )(x)", "( ∂ ( x ↦ x ^ 4 ) )(y + 1)", "{n=4, x=(+ y 1)}"), // (func x ...) inner var x
+        };
+
+        Parser parser = new Parser();
+        StringBuilder sb = new StringBuilder();
+        int errs=0;
+        for( UTest r : rarr ){
+           String s = r.chkUnify(parser);
+           if( s!=null ){
+               errs++;
+               sb.append(s+"\n");
+           }
+        }
+        if( sb.length() > 0 ){
+            System.err.println(sb);
             throw new RuntimeException("errs="+errs+" out of " + rarr.length + " tests");
         }
     }
