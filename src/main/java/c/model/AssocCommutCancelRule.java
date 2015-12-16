@@ -1,4 +1,4 @@
-package c.calc;
+package c.model;
 
 import c.model.Expr;
 
@@ -8,9 +8,9 @@ import java.util.*;
  * Created by denny on 8/21/15.
  */
 public class AssocCommutCancelRule {
-    String rolePlus;
-    String roleMinus;
-    String roleNeutral;
+    final String rolePlus;
+    final String roleMinus;
+    final String roleNeutral;
     boolean extractSign;
 
     public AssocCommutCancelRule(String rolePlus, String roleMinus, String roleNeutral, boolean extractSign) {
@@ -20,7 +20,7 @@ public class AssocCommutCancelRule {
         this.extractSign = extractSign;
     }
 
-    Expr optimizeDeep(Expr e){
+    public Expr optimizeDeep(Expr e){
         if( e.sub==null ){
             return e;
         }
@@ -31,7 +31,7 @@ public class AssocCommutCancelRule {
         return optimize(new Expr(e.node, newSub));
     }
 
-    List<Expr> separateAllPossiblePairs(Expr e){
+    public List<Expr> separateAllPossiblePairs(Expr e){
         List<Expr> variants = new ArrayList<>();
         if( e.node.equals(rolePlus) && e.sub.size()>2 ) {
             List<Expr> plusList = new ArrayList<>();
@@ -46,11 +46,12 @@ public class AssocCommutCancelRule {
                     List<Expr> rest = new ArrayList<>(plusList);
                     rest.remove(j);
                     rest.remove(i);
-                    variants.add(new Expr(rolePlus, pair, new Expr(rolePlus, rest)));
+                    Expr plusRest = rest.size()==1 ? rest.get(0) : new Expr(rolePlus, rest);
+                    variants.add(new Expr(rolePlus, pair, plusRest));
                 }
             }
         }
-        return variants;
+        return new ArrayList<>(new HashSet<>(variants));
     }
 
     Expr optimize(Expr e){
@@ -142,5 +143,9 @@ public class AssocCommutCancelRule {
                 else minusList.add(e);
             }
         }
+    }
+
+    public String getRolePlus() {
+        return rolePlus;
     }
 }

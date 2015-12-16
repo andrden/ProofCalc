@@ -2,6 +2,7 @@ package c;
 
 import c.calc.Calc;
 import c.model.Expr;
+import c.model.Normalizer;
 import c.model.Rule;
 
 import java.io.BufferedReader;
@@ -18,9 +19,9 @@ public class Main {
         //new Date(1443657600000L).toString();
         Tests.allTests();
 
-        //runMainFile();
+        runMainFile();
         //runPieces();
-        runPiece("piece11.txt");
+        //runPiece("piece11.txt");
 
     }
 
@@ -88,7 +89,7 @@ public class Main {
                     System.out.println("skipped non-focus quest rule");
                 }else {
                     Calc calc = new Calc(rules, qrule.localConditionsAsRules());
-                    Expr qruleAnswer = qrule.answer==null ? null : calc.normalize(qrule.answer);
+                    Expr qruleAnswer = qrule.answer==null ? null : Normalizer.normalize(qrule.answer);
                     Expr ret = calc.quest(r.assertion,
                             e -> qruleAnswer != null && e.toLispString().equals(qruleAnswer.toLispString()),
                             1000);

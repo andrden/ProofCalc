@@ -137,14 +137,14 @@ public class Expr {
     }
 
     public Map<String,Expr> unify(Expr concrete){
-        List<Map<String,Expr>> cases = unifyList(concrete);
+        List<Map<String,Expr>> cases = unifyOptions(concrete);
         if( cases.isEmpty() ){
             return null;
         }
         return cases.get(0);
     }
 
-    private List<Map<String,Expr>> unifyList(Expr concrete) {
+    public List<Map<String,Expr>> unifyOptions(Expr concrete) {
         List<Map<String,Expr>> cases = unifyImpl(concrete);
         if( ! cases.isEmpty() ){
             return cases;
@@ -275,30 +275,36 @@ public class Expr {
             cases.add(vars);
             return cases;
         }
-        if( node.equals("+") && sub.size()==2 && sub.size() < concrete.sub.size() ){
-            concrete = new Expr("+", concrete.sub.get(0), new Expr("+", concrete.sub.subList(1,concrete.sub.size())));
+        if( (node.equals("+") || node.equals("*")) && sub.size()==2 && sub.size() < concrete.sub.size() ){
+            List<Expr> optionsConcrete = Normalizer.getAssocCommuteRule(concrete).separateAllPossiblePairs(concrete);
+            for( Expr e : optionsConcrete ){
+                cases.addAll(subUnify0(e, new HashMap<>(vars)));
+            }
+            return cases;
+            //concrete = new Expr("+", concrete.sub.get(0), new Expr("+", concrete.sub.subList(1,concrete.sub.size())));
+        }else {
+            return subUnify0(concrete, vars);
         }
+    }
+
+    private List<Map<String, Expr>> subUnify0(Expr concrete, Map<String, Expr> vars) {
+        List<Map<String,Expr>> cases = new ArrayList<>();
         if( sub.size()!=concrete.sub.size() ){
             return cases;
         }
-        if (! subUnify(concrete, vars)){
+        cases = subUnify(concrete, vars);
+        if ( cases.isEmpty() ){
             if( "+".equals(node) && sub.size()==2 ){
                 // try swapping and unifying the other way
-                if (! subUnify(new Expr(concrete.node, concrete.sub.get(1), concrete.sub.get(0)), vars)){
-                    return cases; // tried 2 ways and failed
-                }
-                cases.add(vars);
+                cases = subUnify(new Expr(concrete.node, concrete.sub.get(1), concrete.sub.get(0)), vars);
                 return cases;
-                //return true; // swapped unification succeeded
             }
             return cases;
         }
-        cases.add(vars);
         return cases;
-        //return true;
     }
 
-    boolean subUnify(Expr concrete, Map<String, Expr> vars) {
+    List<Map<String,Expr>> subUnify(Expr concrete, Map<String, Expr> vars) {
         if( node.equals("func") ){
             if( sub.size()!=2 ){
                 throw new IllegalStateException();
@@ -308,24 +314,28 @@ public class Expr {
             Expr myExprSubs = rightChild().substitute(Collections.singletonMap(myFuncArgVar, concreteFuncArgVar));
 
             List<Map<String,Expr>> cases = myExprSubs.unify(concrete.rightChild(), vars);
-            if( cases.isEmpty() ){
-                return false;
-            }
-            if( vars.containsKey(concreteFuncArgVar.node) &&
-                    ! concreteFuncArgVar.equals(vars.get(concreteFuncArgVar.node)) ){
-                // function argument variable, no meaning outside function
-                return false;
-            }
-            vars.remove(concreteFuncArgVar.node);
-        }else{
-            for( int i=0; i<sub.size(); i++ ){
-                List<Map<String,Expr>> cases = sub.get(i).unify(concrete.sub.get(i), vars);
-                if( cases.isEmpty() ){
-                    return false;
+            List<Map<String,Expr>> badCases = new ArrayList<>();
+            for( Map<String,Expr> vs : cases ){
+                if( vs.containsKey(concreteFuncArgVar.node) &&
+                        ! concreteFuncArgVar.equals(vs.get(concreteFuncArgVar.node)) ){
+                    // function argument variable, no meaning outside function
+                    badCases.add(vs);
+                }else {
+                    vs.remove(concreteFuncArgVar.node);
                 }
             }
+            cases.removeAll(badCases);
+            return cases;
+        }else{
+            List<Map<String,Expr>> cases = null;
+            for( int i=0; i<sub.size(); i++ ){
+                cases = sub.get(i).unify(concrete.sub.get(i), vars);
+                if( cases.isEmpty() ){
+                    return cases;
+                }
+            }
+            return cases;
         }
-        return true;
     }
 
     public Set<String> freeVariables(){

@@ -87,9 +87,12 @@ public class Parser {
                     throw new IllegalStateException();
                 }
                 return new Rule(assertion, cond, new ArrayList<>(lines));
-            } else if( line.get(0).equals("$?") || line.get(0).equals("$a?") || line.get(0).equals("$?focus") ){
-                boolean reusable = line.get(0).equals("$a?");
-                boolean focus = line.get(0).equals("$?focus");
+            } else if( line.get(0).equals("$?")
+                    || line.get(0).equals("$a?")
+                    || line.get(0).equals("$a?focus")
+                    || line.get(0).equals("$?focus") ){
+                boolean reusable = line.get(0).equals("$a?") || line.get(0).equals("$a?focus");
+                boolean focus = line.get(0).equals("$?focus") || line.get(0).equals("$a?focus");
 
                 line.remove(0);
                 Expr assertion = parse(line);
@@ -161,7 +164,7 @@ public class Parser {
         if(list.size()==1 && list.get(0) instanceof Expr) {
             return (Expr) list.get(0);
         }
-        throw new RuntimeException(""+list);
+        throw new RuntimeException("parseByOps: "+list);
     }
 
     void parseAtoms(List list){

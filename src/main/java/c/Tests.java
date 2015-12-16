@@ -1,6 +1,7 @@
 package c;
 
 import c.model.Expr;
+import c.model.Normalizer;
 
 /**
  * Created by denny on 10/15/15.
@@ -28,9 +29,16 @@ public class Tests {
     static void testUnifyMany() {
         Parser parser = new Parser();
 
-        chkUnify(parser, "g + h", "cos(y) + cos(y) + 2", "{g=(func x x)}");
-        chkUnify(parser, "g * h", "cos(y) * cos(y) * 2", "{g=(func x x)}");
-        chkUnify(parser, "x ↦ g(x) * h(x)", "y ↦ cos(y) * cos(y) * 2", "{g=(func x x)}");
+        chkUnifyMany(parser, "x ↦ g(x) * h(x)", "y ↦ cos(y) * cos(y) * 2",
+                "[{g=(func y (* (apply cos y) (apply cos y))), h=(func y 2)}, {g=(func y (* (apply cos y) 2)), h=cos}]");
+        chkUnifyMany(parser, "g + h", "cos(y) + cos(y) + 2",
+                "[{g=(+ (apply cos y) (apply cos y)), h=2}, {g=(+ (apply cos y) 2), h=(apply cos y)}]");
+        chkUnifyMany(parser, "g * h", "cos(y) * cos(y) * 2",
+                "[{g=(* (apply cos y) (apply cos y)), h=2}, {g=(* (apply cos y) 2), h=(apply cos y)}]");
+        chkUnifyMany(parser, "(x + y) * z", "(exp(x) + exp(x) + 2) / 4",
+                "x,y,z???");
+        chkUnifyMany(parser, "(x + y) * z", "((1 / exp(x)) ^ 2 + exp(x) ^ 2 + 2) / 4",
+                "x,y,z???");
     }
 
     static class UTest{
@@ -45,9 +53,11 @@ public class Tests {
         }
         String chkUnify(Parser parser){
             try{
-                Tests.chkUnify(parser, template, concrete, resMap);
+                String res = "" + parser.parse(template).unify(parser.parse(concrete));
+                assertEq(resMap, res);
                 return null;
             }catch (Exception e){
+                e.printStackTrace();
                 return template + " => " + concrete + "  " + e;
             }
         }
@@ -56,7 +66,6 @@ public class Tests {
     static void testUnify(){
 
         UTest[] rarr = {
-                new UTest( "x ↦ g(x) * h(x)", "y ↦ cos(y) * cos(y) * 2", "{g=(func x x)}"),
                 new UTest("x ↦ g( h(x) )", "x ↦ cos(sin(x))", "{h=sin, g=cos}"),
                 new UTest( "x", "x + 1", "{x=(+ x 1)}"),
                 new UTest( "x ↦ cos(g(x))", "x ↦ cos(x)", "{g=(func x x)}"),
@@ -128,8 +137,10 @@ public class Tests {
         chk(parser, "( ∂ ( x ↦ 1 ) ) ( x )", "(apply (apply ∂ (func x 1)) x)");
     }
 
-    static void chkUnify(Parser parser, String template, String concrete, String resMap){
-        String res = "" + parser.parse(template).unify(parser.parse(concrete));
+    static void chkUnifyMany(Parser parser, String template, String concrete, String resMap){
+        Expr t = Normalizer.normalize(parser.parse(template));
+        Expr c = Normalizer.normalize(parser.parse(concrete));
+        String res = "" + t.unifyOptions(c);
         assertEq(resMap, res);
     }
 

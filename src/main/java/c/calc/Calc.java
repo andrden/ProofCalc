@@ -1,6 +1,8 @@
 package c.calc;
 
+import c.model.AssocCommutCancelRule;
 import c.model.Expr;
+import c.model.Normalizer;
 import c.model.Rule;
 
 import java.util.*;
@@ -13,8 +15,6 @@ import java.util.stream.Collectors;
 public class Calc {
     List<Rule> rules;
 
-    AssocCommutCancelRule plusMinus = new AssocCommutCancelRule("+","-","0",false);
-    AssocCommutCancelRule multDiv = new AssocCommutCancelRule("*","/","1",true);
 
     Map<Expr, Expr> subResults = new HashMap<>();
 
@@ -26,7 +26,7 @@ public class Calc {
         for( Rule r : rules ){
             List<Expr> condsNorm = new ArrayList<>();
             for( Expr ce : r.cond ){
-                Expr ceNorm = normalize(ce);
+                Expr ceNorm = Normalizer.normalize(ce);
                 condsNorm.add(ceNorm);
             }
             if( ! r.cond.equals(condsNorm) ){
@@ -59,7 +59,7 @@ public class Calc {
 
 
         //Expr expr = q.assertion;
-        expr = normalize(expr);
+        expr = Normalizer.normalize(expr);
 //        if( ! expr.equals(q.assertion) ){
 //            System.out.println("QUEST try: "+expr.toMathString());
 //        }
@@ -103,9 +103,9 @@ public class Calc {
             List<FringeEl> exprNew = exprSimplifyDeep(el.expr);
             for( FringeEl feNew : exprNew ){
                 Expr e = feNew.expr;
-                e = normalize(e);
+                e = Normalizer.normalize(e);
                 e = e.simplifyApplyFunc();
-                e = normalize(e);
+                e = Normalizer.normalize(e);
                 feNew = feNew.newExpr(e);
                 feNew.parent = el;
                 if( ! visited.contains(feNew) ){
@@ -146,13 +146,9 @@ public class Calc {
         System.out.println(indent + msg);
     }
 
-    public Expr normalize(Expr expr) {
-        return multDiv.optimizeDeep(plusMinus.optimizeDeep(multDiv.optimizeDeep(plusMinus.optimizeDeep(expr))));
-    }
-
     FringeEl tryByPairs(FringeEl el){
         while(true){
-            Expr enew = tryByPairsDeep(el.expr, plusMinus);
+            Expr enew = tryByPairsDeep(el.expr, Normalizer.plusMinus);
             if( enew!=null ){
                 el = new FringeEl(enew, new NamedRule("tryByPairs+"), null, el);
             }else{
@@ -160,7 +156,7 @@ public class Calc {
             }
         }
         while(true){
-            Expr enew = tryByPairsDeep(el.expr, multDiv);
+            Expr enew = tryByPairsDeep(el.expr, Normalizer.multDiv);
             if( enew!=null ){
                 el = new FringeEl(enew, new NamedRule("tryByPairs*"), null, el);
             }else{
@@ -202,14 +198,14 @@ public class Calc {
 
             Expr pair = esplitPair.sub.get(0);
             Expr e1 = assocCommutCancelRule.optimizeDeep(pair);
-            pair = assocCommutCancelRule.optimizeDeep(multDiv.optimizeDeep(e1));
+            pair = assocCommutCancelRule.optimizeDeep(Normalizer.multDiv.optimizeDeep(e1));
             List<FringeEl> exprNew = exprSimplifyDeep(pair);
             //System.out.println("   split pair: simplNew.size="+exprNew.size()+" "+esplitPair.toMathString());
             for( FringeEl fe : exprNew ){
                 if( fe.expr.toLispString().length()<pair.toLispString().length() ){
                     //System.out.println(""+e+" "+pair);
-                    expr = new Expr(assocCommutCancelRule.rolePlus, fe.expr , esplitPair.sub.get(1));
-                    expr = assocCommutCancelRule.optimizeDeep(multDiv.optimizeDeep(assocCommutCancelRule.optimizeDeep(expr)));
+                    expr = new Expr(assocCommutCancelRule.getRolePlus(), fe.expr , esplitPair.sub.get(1));
+                    expr = assocCommutCancelRule.optimizeDeep(Normalizer.multDiv.optimizeDeep(assocCommutCancelRule.optimizeDeep(expr)));
                     return expr;
                 }
             }
