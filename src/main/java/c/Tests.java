@@ -36,9 +36,9 @@ public class Tests {
         chkUnifyMany(parser, "g * h", "cos(y) * cos(y) * 2",
                 "[{g=(* (apply cos y) (apply cos y)), h=2}, {g=(* (apply cos y) 2), h=(apply cos y)}]");
         chkUnifyMany(parser, "(x + y) * z", "(exp(x) + exp(x) + 2) / 4",
-                "x,y,z???");
+                "[{x=(+ (apply exp x) 2), y=(apply exp x), z=(/ 4)}, {x=(+ (apply exp x) (apply exp x)), y=2, z=(/ 4)}]");
         chkUnifyMany(parser, "(x + y) * z", "((1 / exp(x)) ^ 2 + exp(x) ^ 2 + 2) / 4",
-                "x,y,z???");
+                "[{x=(+ (^ (apply exp x) 2) 2), y=(^ (/ (apply exp x)) 2), z=(/ 4)}, {x=(+ (^ (/ (apply exp x)) 2) (^ (apply exp x) 2)), y=2, z=(/ 4)}, {x=(+ (^ (/ (apply exp x)) 2) 2), y=(^ (apply exp x) 2), z=(/ 4)}]");
     }
 
     static class UTest{

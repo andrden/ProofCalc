@@ -19,6 +19,9 @@ $= 3
 $? 3 + 0 + 0
 $= 3
 
+$? 0 + x
+$= x
+
 $e ff ( x ) = x - 1
 $? ff ( 1 )
 $= 0
@@ -161,6 +164,8 @@ $a sin ( π / 2 ) = 1
 
 $a cos ( x ) = √ ( 1 - sin x * sin x )
 
+$a tan(x) = sin(x) / cos(x)
+
 $a sin(x) - sin(y) = 2 * cos((x + y) / 2) * sin ((x - y) / 2 )
 
 ############### Verify trigonometry:
@@ -176,7 +181,7 @@ $a sh x = ( exp x - 1 / exp x ) / 2
 
 ############### Verify hyperbolic trigonometry:
 
-$a?focus ( ch x ) ^ 2 - ( sh x ) ^ 2
+$a? ( ch x ) ^ 2 - ( sh x ) ^ 2
 $= 1
 
 $? ( ( ch y ) ^ 2 - ( sh y ) ^ 2 ) * y
@@ -220,6 +225,9 @@ $e f = ( x ↦ cos(g ( x )) )
 $a lim0 f = cos(lim0 g)
 
 $a ∂ f = (x ↦ lim0 (y ↦ (f(x + y) - f(x)) / y))
+
+$e f = ( y ↦ sin(y / 2) / y )
+$a lim0 f = 0.5
 
 ############### Verify derivatives from limits:
 
@@ -307,8 +315,17 @@ $= 2 * cos(0) * cos(0)
 $? lim0 (y ↦ 2 * cos (x) * cos (x))
 $= 2 * cos(x) * cos(x)
 
+$? cos(0 + x)
+$= cos(x)
+
+$? cos(0 + x) * cos(x) * 2
+$= cos(x) * cos(x) * 2
+
+$? ((cos (0 + x)) * (cos x) * 2)
+$= cos(x) * cos(x) * 2
+
 $? lim0 (y ↦ 2 * cos (y / 2 + x) * cos (y / 2 + x))
-$= 2 * cos(x) * cos(x)
+$= cos(x) * cos(x) * 2
 
 $? lim0 (y ↦ cos (y / 2 + x) * 2 * cos (y / 2 + x))
 $= 2 * cos(x) * cos(x)
@@ -316,7 +333,7 @@ $= 2 * cos(x) * cos(x)
 # The direct geometrical approximate proof of "∂ sin" is actually simpler than using difference of sinuses formula,
 # or even more so deriving that formula. So such geometrical proof was likely how people first calculated this derivative.
 $? ∂ sin
-$= 22222
+$= (x ↦ cos(x) * (lim0 (y ↦ 2 * sin(y / 2) / y)) )
 
 ############### Derivatives:
 
@@ -515,6 +532,9 @@ $= (sin(y - 1) ^ 2) * cos(y - 1) * 3
 
 $? ( ∂ cos ) ( x )
 $= - sin(x)
+
+$? ( ∂ tan ) ( x )
+$= 7777777777
 
 $? ( ∂ cos ) ( 2 * x )
 $= - sin(2 * x)

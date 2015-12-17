@@ -95,6 +95,7 @@ public class Calc {
                 breakpoint();
             }
             el = tryByPairs(el);
+            el = el.newExpr(Normalizer.normalize(el.expr));
             if( ! visited.contains(el) ){
                 visited.add(el);
                 fringe.add(el);

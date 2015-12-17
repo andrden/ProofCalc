@@ -327,12 +327,13 @@ public class Expr {
             cases.removeAll(badCases);
             return cases;
         }else{
-            List<Map<String,Expr>> cases = null;
+            List<Map<String,Expr>> cases = Collections.singletonList(vars);
             for( int i=0; i<sub.size(); i++ ){
-                cases = sub.get(i).unify(concrete.sub.get(i), vars);
-                if( cases.isEmpty() ){
-                    return cases;
+                List<Map<String,Expr>> casesNew = new ArrayList<>();
+                for( Map<String,Expr> vs : cases ) {
+                    casesNew.addAll(sub.get(i).unify(concrete.sub.get(i), vs));
                 }
+                cases = casesNew;
             }
             return cases;
         }

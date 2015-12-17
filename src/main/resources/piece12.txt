@@ -1,0 +1,9 @@
+$e f = ( x ↦ g ( x ) * h ( x ) )
+$a lim0 f = (lim0 g) * (lim0 h)
+
+$a ∂ f = (x ↦ lim0 (y ↦ (f(x + y) - f(x)) / y))
+
+$a sin(x) - sin(y) = 2 * cos((x + y) / 2) * sin ((x - y) / 2 )
+
+$? ∂ sin
+$= (x ↦ cos(x) * (lim0 (y ↦ 2 * sin(y / 2) / y)) )
