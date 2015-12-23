@@ -91,7 +91,7 @@ public class Calc {
             fringe.remove(el);
             String exprString = el.expr.toMathString();
             println(indent, "QUEST try #" + step + ": " + exprString);
-            if( exprString.contains("(((∂ (func x (x ^ 2))) x) + ((∂ (func x (x ^ 3))) x) + ((∂ (func x 1)) x))") ){
+            if( exprString.contains("(lim0 (func y ((cos ((y * (/ 2)) + x)) * (sin (y * (/ 2))) * 2 * (/ y))))") ){
                 breakpoint();
             }
             el = tryByPairs(el);
@@ -256,24 +256,12 @@ public class Calc {
                     if( expr.toString().equals("(apply (apply ∂ (func x (+ (^ x 2) 7))) x)") ){
                         breakpoint();
                     }
-                    List<FringeEl> subDerivations = checkCanUseRule(r, unifMap);
-                    boolean canUseRule = subDerivations!=null;
-                    if( canUseRule && r.toLineString().contains("x ↦ g( h(x) )") ) {
-                        breakpoint();
-                    }
-//                    for( String v : expr.freeVariables() ){
-//                        if( unifMap.containsKey(v) ){
-//                            canUseRule = false; // we must simplify generically, can't fix vals of vars
-//                        }
-//                    }
-                    if( canUseRule ) {
-                        //System.out.println("unify with " + r + " results in " + unifMap);
-                        if( ! r.freeVariables.containsAll(unifMap.keySet()) ){
-                            //throw new IllegalStateException();
-                        }else {
-                            Expr exprNew = r.assertion.sub.get(1).substitute(unifMap);
+                    List<Map<String, Expr>> options = checkCanUseRule(r, unifMap);
+                    for( Map<String, Expr> m : options ){
+                        if( r.freeVariables.containsAll(m.keySet()) ){
+                            Expr exprNew = r.assertion.sub.get(1).substitute(m);
                             //System.out.println(expr + " ==simplified==> " + exprNew);
-                            FringeEl fe = new FringeEl(exprNew, r, unifMap);
+                            FringeEl fe = new FringeEl(exprNew, r, m);
                             ways.add(fe);
                         }
                     }
@@ -281,8 +269,8 @@ public class Calc {
             }else{
                 Map<String, Expr> unifMap = r.assertion.unify(expr);
                 if( unifMap!=null ) {
-                    List<FringeEl> subDerivations = checkCanUseRule(r, unifMap);
-                    boolean canUseRule = subDerivations != null;
+                    List<Map<String, Expr>> subDerivations = checkCanUseRule(r, unifMap);
+                    boolean canUseRule = ! subDerivations.isEmpty();
                     if( canUseRule ) {
                         //System.out.println("ok");
                         ways.add(new FringeEl(new Expr("True"), r, unifMap));
@@ -293,40 +281,46 @@ public class Calc {
         return ways;
     }
 
-    private List<FringeEl> checkCanUseRule(Rule r, Map<String, Expr> unifMap) {
-        List<FringeEl> subDerivations = new ArrayList<>();
+    private List<Map<String, Expr>> checkCanUseRule(Rule r, Map<String, Expr> unifMap) {
+        List<Map<String, Expr>> cases = Collections.singletonList(unifMap);
         for( Expr cond : r.cond ){
-            Expr condSubs = cond.substitute(unifMap);
-            FringeEl checkIfTrueResult = checkIfTrueOrCanBeMadeTrue(condSubs);
-            if( checkIfTrueResult==null ){
-                return null;
-            }else{
-                Map<String, Expr> unifMapCond = checkIfTrueResult.unifMap;
-                unifMap.putAll(unifMapCond);
-                subDerivations.add(checkIfTrueResult);
+            List<Map<String, Expr>> newCases = new ArrayList<>();
+            for( Map<String, Expr> m : cases ) {
+                Expr condSubs = cond.substitute(m);
+                List<FringeEl> checkIfTrueResultList = checkIfTrueOrCanBeMadeTrue(condSubs);
+                if (checkIfTrueResultList != null) {
+                    for( FringeEl checkIfTrueResult : checkIfTrueResultList ) {
+                        Map<String, Expr> mi = new HashMap<>(m);
+                        mi.putAll(checkIfTrueResult.unifMap);
+                        newCases.add(mi);
+                    }
+                }
             }
+            cases = newCases;
         }
-        return subDerivations;
+        return cases;
     }
 
-    Map<String,Expr> unifyEquality(Expr expr){
+    List<Map<String,Expr>> unifyEquality(Expr expr){
         if( expr.node.equals("=") ) {
+            List<Map<String,Expr>> ret = new ArrayList<>();
             // just try to unify both parts of the tested equality first
             Expr concrete = expr.sub.get(0);
             Expr tpl = expr.sub.get(1);
-            Map<String, Expr> map = tpl.unify(concrete);
-            if (map != null) {
+            List<Map<String,Expr>> cases = tpl.unifyOptions(concrete);
+            for( Map<String, Expr> map : cases ){
                 Expr resultTpl = tpl.substitute(map).simplifyFuncOrApply();
                 Expr resultConcrete = concrete.substitute(map).simplifyFuncOrApply();
                 if (resultTpl.equals(resultConcrete)) {
                     // Avoid erroneous unification of 'x' with 'x+1'
                     // for 'x = x + 1' equality.
                     // Unification itself is correct, but not suitable for equality
-                    return map;
+                    ret.add(map);
                 }else{
                     breakpoint();
                 }
             }
+            return ret;
         }
         return null;
     }
@@ -335,22 +329,26 @@ public class Calc {
         System.out.println("breakpoint");
     }
 
-    FringeEl checkIfTrueOrCanBeMadeTrue(Expr expr){
+    List<FringeEl> checkIfTrueOrCanBeMadeTrue(Expr expr){
         if( expr.toLispString().contains("(= (apply ff x) (+ (apply g x) (apply h x)))") ){
             breakpoint();
         }
 
         if( expr.node.equals("=") ){
             // just try to unify both parts of the tested equality first
-            Map<String, Expr> unifMapEquation = unifyEquality(expr);
-            if( unifMapEquation!=null ){
-                    return new FringeEl(null, null, unifMapEquation);
+            List<Map<String,Expr>> cases = unifyEquality(expr);
+            if( cases!=null && ! cases.isEmpty() ) {
+                List<FringeEl> ret = new ArrayList<>();
+                for( Map<String, Expr> unifMapEquation : cases ){
+                    ret.add(new FringeEl(null, null, unifMapEquation));
+                }
+                return ret;
             }
         }
 
         Expr res = quest(expr, null, 20);
         if( res.node.equals("True") ){
-            return new FringeEl(null, null/*r*/, Collections.emptyMap() /*unifMap*/);
+            return Collections.singletonList(new FringeEl(null, null/*r*/, Collections.emptyMap() /*unifMap*/));
         }
 
         for (Rule r : rules) {
@@ -377,7 +375,7 @@ and have to use unifMapEquation to substitute x in our original 'expr'
  */
             Map<String, Expr> unifMapEquation = expr.unify(concrete);
             if( unifMapEquation!=null ){
-                return new FringeEl(null, r, unifMapEquation);
+                return Collections.singletonList(new FringeEl(null, r, unifMapEquation));
             }
         }
         return null;
