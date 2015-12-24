@@ -131,7 +131,10 @@ public class Calc {
             resultPath.printDerivationPath(indent);
             println(indent, "QUEST res: "+res.toMathString());
 
-            List list = visited.stream().filter(x -> ! x.toString().contains("∂")).collect(Collectors.toList());
+            List list = visited.stream()
+                    .filter(x -> ! x.toString().contains("lim0"))
+                    .filter(x -> ! x.toString().contains("∂"))
+                    .collect(Collectors.toList());
             breakpoint();
         }
         if( origExpr.toString().equals("(apply (apply ∂ ff) x)") ){
