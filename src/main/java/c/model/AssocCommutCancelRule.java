@@ -33,7 +33,7 @@ public class AssocCommutCancelRule {
 
     public List<Expr> separateAllPossiblePairs(Expr e){
         List<Expr> variants = new ArrayList<>();
-        if( e.node.equals(rolePlus) && e.sub.size()>2 ) {
+        if( e.node.equals(rolePlus) && e.subCount()>2 ) {
             List<Expr> plusList = new ArrayList<>();
             List<Expr> minusList = new ArrayList<>();
             scan(1, e, plusList, minusList);
@@ -71,8 +71,12 @@ public class AssocCommutCancelRule {
                 }
             }
             Comparator<Expr> normExprComparator = (o1, o2) -> o1.toLispString().compareTo(o2.toLispString());
-            Collections.sort(plusList, normExprComparator);
-            Collections.sort(minusList, normExprComparator);
+            if( plusList.size()>1 ) {
+                Collections.sort(plusList, normExprComparator);
+            }
+            if( minusList.size()>1 ) {
+                Collections.sort(minusList, normExprComparator);
+            }
 
             return assemble(plusList, minusList);
         }else {
@@ -134,7 +138,7 @@ public class AssocCommutCancelRule {
                 scan(sign, i, plusList, minusList);
             }
         } else if( e.node.equals(roleMinus) ){
-             scan(- sign, e.sub.get(0), plusList, minusList);
+             scan(- sign, e.child(0), plusList, minusList);
         } else {
             if( e.node.equals(roleNeutral) && e.sub==null ){
                 // skip neutral element

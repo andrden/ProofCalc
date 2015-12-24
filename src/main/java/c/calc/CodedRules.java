@@ -21,11 +21,11 @@ public class CodedRules {
     }
 
     void limit0Const(Expr expr) {
-        if( expr.node.equals("apply") && expr.sub.get(0).node.equals("lim0") && expr.sub.get(1).node.equals("func") ){
-            String var = expr.sub.get(1).sub.get(0).node;
-            Set<String> usedVars = expr.sub.get(1).sub.get(1).freeVariables();
+        if( expr.node.equals("apply") && expr.child(0).node.equals("lim0") && expr.child(1).node.equals("func") ){
+            String var = expr.child(1).child(0).node;
+            Set<String> usedVars = expr.child(1).child(1).freeVariables();
             if( ! usedVars.contains(var) ){
-                ways.add( new FringeEl(expr.sub.get(1).sub.get(1), new NamedRule("lim0-const"), null) );
+                ways.add( new FringeEl(expr.child(1).child(1), new NamedRule("lim0-const"), null) );
             }
         }
     }

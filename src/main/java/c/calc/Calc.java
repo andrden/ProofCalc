@@ -74,7 +74,7 @@ public class Calc {
         int step=0;
         while (++step<maxOps && ! fringe.isEmpty() ) {
             FringeEl el = shortest(fringe);
-            if( el.expr.sub==null ){
+            if( ! el.expr.hasChildren() ){
                 resultPath = el;
                 break; // single term cannot be simplified
             }
@@ -183,9 +183,9 @@ public class Calc {
         if( enew!=null ){
             return enew;
         }
-        if( expr.sub!=null ){
-            for(int i=0; i<expr.sub.size(); i++ ){
-                Expr s = expr.sub.get(i);
+        if( expr.hasChildren() ){
+            for(int i=0; i<expr.subCount(); i++ ){
+                Expr s = expr.child(i);
                 Expr sTry = tryByPairsDeep(s, assocCommutCancelRule);
                 if( sTry != null ){
                     return expr.replaceChild(i, sTry);
@@ -200,7 +200,7 @@ public class Calc {
         //System.out.println("split pairs size="+splitPairs.size());
         for( Expr esplitPair : splitPairs ){
 
-            Expr pair = esplitPair.sub.get(0);
+            Expr pair = esplitPair.child(0);
             Expr e1 = assocCommutCancelRule.optimizeDeep(pair);
             pair = assocCommutCancelRule.optimizeDeep(Normalizer.multDiv.optimizeDeep(e1));
             List<FringeEl> exprNew = exprSimplifyDeep(pair);
@@ -208,7 +208,7 @@ public class Calc {
             for( FringeEl fe : exprNew ){
                 if( fe.expr.toLispString().length()<pair.toLispString().length() ){
                     //System.out.println(""+e+" "+pair);
-                    expr = new Expr(assocCommutCancelRule.getRolePlus(), fe.expr , esplitPair.sub.get(1));
+                    expr = new Expr(assocCommutCancelRule.getRolePlus(), fe.expr , esplitPair.child(1));
                     expr = assocCommutCancelRule.optimizeDeep(Normalizer.multDiv.optimizeDeep(assocCommutCancelRule.optimizeDeep(expr)));
                     return expr;
                 }
@@ -235,12 +235,11 @@ public class Calc {
 
     List<FringeEl> exprSimplifyDeep(Expr expr) {
         List<FringeEl> ways = exprSimplify(expr);
-        if( expr.sub!=null ) {
-            for (int i = 0; i < expr.sub.size(); i++) {
-                List<FringeEl> elist = exprSimplifyDeep(expr.sub.get(i));
+        if( expr.hasChildren() ) {
+            for (int i = 0; i < expr.subCount(); i++) {
+                List<FringeEl> elist = exprSimplifyDeep(expr.child(i));
                 for( FringeEl fe : elist ){
-                    Expr clone = expr.shallowClone();
-                    clone.sub.set(i, fe.expr);
+                    Expr clone = expr.replaceChild(i, fe.expr);
                     ways.add(fe.newExpr(clone));
                 }
             }
@@ -253,7 +252,7 @@ public class Calc {
         ways.addAll(new CodedRules(expr).getWays());
         for (Rule r : rules) {
             if (r.assertion.node.equals("=")) {
-                Expr template = r.assertion.sub.get(0);
+                Expr template = r.assertion.child(0);
                 Map<String, Expr> unifMap = template.unify(expr);
                 if( unifMap!=null ) {
                     if( expr.toString().equals("(apply (apply ∂ (func x (+ (^ x 2) 7))) x)") ){
@@ -262,7 +261,7 @@ public class Calc {
                     List<Map<String, Expr>> options = checkCanUseRule(r, unifMap);
                     for( Map<String, Expr> m : options ){
                         if( r.freeVariables.containsAll(m.keySet()) ){
-                            Expr exprNew = r.assertion.sub.get(1).substitute(m);
+                            Expr exprNew = r.assertion.child(1).substitute(m);
                             //System.out.println(expr + " ==simplified==> " + exprNew);
                             FringeEl fe = new FringeEl(exprNew, r, m);
                             ways.add(fe);
@@ -308,8 +307,8 @@ public class Calc {
         if( expr.node.equals("=") ) {
             List<Map<String,Expr>> ret = new ArrayList<>();
             // just try to unify both parts of the tested equality first
-            Expr concrete = expr.sub.get(0);
-            Expr tpl = expr.sub.get(1);
+            Expr concrete = expr.child(0);
+            Expr tpl = expr.child(1);
             List<Map<String,Expr>> cases = tpl.unifyOptions(concrete);
             for( Map<String, Expr> map : cases ){
                 Expr resultTpl = tpl.substitute(map).simplifyFuncOrApply();
