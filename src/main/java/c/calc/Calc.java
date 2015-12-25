@@ -21,9 +21,12 @@ public class Calc {
     public Calc(List<Rule> rules, List<Rule> localRules) {
         this.rules = new ArrayList<>();
         this.rules.addAll(localRules);
-        this.rules.addAll(rules);
 
         for( Rule r : rules ){
+            if( ! r.assertion.equals(Normalizer.normalize(r.assertion)) ){
+              r = new Rule(Normalizer.normalize(r.assertion), r.cond, r.getSrcLines());
+            }
+            this.rules.add(r);
             List<Expr> condsNorm = new ArrayList<>();
             for( Expr ce : r.cond ){
                 Expr ceNorm = Normalizer.normalize(ce);
@@ -94,7 +97,7 @@ public class Calc {
             if( exprString.contains("(lim0 (func y ((cos ((y * (/ 2)) + x)) * (sin (y * (/ 2))) * 2 * (/ y))))") ){
                 breakpoint();
             }
-            el = tryByPairs(el);
+            //el = tryByPairs(el);
             el = el.newExpr(Normalizer.normalize(el.expr));
             if( ! visited.contains(el) ){
                 visited.add(el);
@@ -196,7 +199,7 @@ public class Calc {
     }
 
     private Expr tryByPairs(Expr expr, AssocCommutCancelRule assocCommutCancelRule) {
-        Set<Expr> splitPairs = new HashSet<>(assocCommutCancelRule.separateAllPossiblePairs(expr));
+        Set<Expr> splitPairs = assocCommutCancelRule.separateAllPossiblePairs(expr);
         //System.out.println("split pairs size="+splitPairs.size());
         for( Expr esplitPair : splitPairs ){
 
@@ -235,6 +238,12 @@ public class Calc {
 
     List<FringeEl> exprSimplifyDeep(Expr expr) {
         List<FringeEl> ways = exprSimplify(expr);
+        for( Expr splitPair : Normalizer.plusMinus.separateAllPossiblePairs(expr) ){
+            ways.addAll(exprSimplifyDeep(splitPair));
+        }
+        for( Expr splitPair : Normalizer.multDiv.separateAllPossiblePairs(expr) ){
+            ways.addAll(exprSimplifyDeep(splitPair));
+        }
         if( expr.hasChildren() ) {
             for (int i = 0; i < expr.subCount(); i++) {
                 List<FringeEl> elist = exprSimplifyDeep(expr.child(i));

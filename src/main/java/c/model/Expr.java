@@ -286,7 +286,10 @@ public class Expr {
             return cases;
         }
         if( (node.equals("+") || node.equals("*")) && sub.length==2 && sub.length < concrete.sub.length ){
-            List<Expr> optionsConcrete = Normalizer.getAssocCommuteRule(concrete).separateAllPossiblePairs(concrete);
+            Set<Expr> optionsConcrete = Normalizer.getAssocCommuteRule(concrete).separateAllPossiblePairs(concrete);
+            // options here must be only groupings, without transposed pair treated as different, otherwise we will
+            // produce g=(func y (* 2 (apply cos y)) and g=(func y (* (apply cos y) 2)) which are actually the same function
+            // and will only increase branching factor, not adding new possibilities for unification
             for( Expr e : optionsConcrete ){
                 cases.addAll(subUnify0(e, new HashMap<>(vars)));
             }

@@ -31,9 +31,9 @@ public class AssocCommutCancelRule {
         return optimize(new Expr(e.node, newSub));
     }
 
-    public List<Expr> separateAllPossiblePairs(Expr e){
-        List<Expr> variants = new ArrayList<>();
+    public Set<Expr> separateAllPossiblePairs(Expr e){
         if( e.node.equals(rolePlus) && e.subCount()>2 ) {
+            Set<Expr> variants = new HashSet<>();
             List<Expr> plusList = new ArrayList<>();
             List<Expr> minusList = new ArrayList<>();
             scan(1, e, plusList, minusList);
@@ -50,8 +50,9 @@ public class AssocCommutCancelRule {
                     variants.add(new Expr(rolePlus, pair, plusRest));
                 }
             }
+            return variants;
         }
-        return new ArrayList<>(new HashSet<>(variants));
+        return Collections.emptySet();
     }
 
     Expr optimize(Expr e){

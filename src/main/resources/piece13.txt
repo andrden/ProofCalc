@@ -1,0 +1,8 @@
+$a (x + y) * z = x * z + y * z
+
+$a y * x - z * x = ( y - z ) * x
+
+$a ( ch x ) ^ 2 - ( sh x ) ^ 2 = 1
+
+$?focus (x - y) * ( ch ψ ) ^ 2 + (y - x) * ( sh ψ ) ^ 2
+$= 44444
