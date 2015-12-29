@@ -151,6 +151,9 @@ public class Expr {
         if( cases.isEmpty() ){
             return null;
         }
+//        if( cases.size()!=1 ){
+//            throw new IllegalStateException();
+//        }
         return cases.get(0);
     }
 
