@@ -1,3 +1,7 @@
+*) it is not bad to have many rules for every detailed situation,
+but it would be nice if those rules were auto-generated from example problems
+
+
 1)
 # The direct geometrical approximate proof of "∂ sin" is actually simpler than using difference of sinuses formula,
 # or even more so deriving that formula. So such geometrical proof was likely how people first calculated this derivative.

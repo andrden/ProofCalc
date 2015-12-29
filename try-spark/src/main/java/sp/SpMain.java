@@ -28,6 +28,7 @@ public class SpMain{
         int slices = (args.length == 1) ? Integer.parseInt(args[0]) : 2;
         int n = 100000 * slices;
         List<Integer> l = new ArrayList<Integer>(n);
+        // l.removeIf(x -> x<10);
         for (int i = 0; i < n; i++) {
             l.add(i);
         }

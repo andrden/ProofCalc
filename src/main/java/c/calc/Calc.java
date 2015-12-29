@@ -23,9 +23,9 @@ public class Calc {
         this.rules.addAll(localRules);
 
         for( Rule r : rules ){
-            if( ! r.assertion.equals(Normalizer.normalize(r.assertion)) ){
-              r = new Rule(Normalizer.normalize(r.assertion), r.cond, r.getSrcLines());
-            }
+//            if( ! r.assertion.equals(Normalizer.normalize(r.assertion)) ){
+//              r = new Rule(Normalizer.normalize(r.assertion), r.cond, r.getSrcLines());
+//            }
             this.rules.add(r);
             List<Expr> condsNorm = new ArrayList<>();
             for( Expr ce : r.cond ){
