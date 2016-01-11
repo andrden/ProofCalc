@@ -1,3 +1,7 @@
+# All rules actually express some equivalence, that is one expression can be replaced with another,
+# according to a rule. Equivalence can be named 'equals' for value expressions or
+# can be general equivalence ( A <=> B ) for theorem-like boolean (quantified) expressions
+
 ############### Just testing AssocCommutCancelRule, no other rules required here:
 
 $? 4 + 5 - 4
@@ -696,7 +700,7 @@ $? (∂ (∂ ff)) ( x )
 $= -((1 + x) ^ (- 1.5)) * 0.25
 
 $e ff = (x ↦ √ ( 1 + x ^ 2 ))
-$?focus (∂ (∂ ff)) ( x )
+$? (∂ (∂ ff)) ( x )
 $= (((x ^ 2) + 1) ^ (- 0.5)) - (((x ^ 2) + 1) ^ (- 1.5)) * x * x
 
 $e ff = (x ↦ √ ( 1 + x ^ 2 ))

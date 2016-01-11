@@ -91,7 +91,7 @@ public class Parser {
                     || line.get(0).equals("$a?")
                     || line.get(0).equals("$a?focus")
                     || line.get(0).equals("$?focus") ){
-                boolean reusable = line.get(0).equals("$a?") || line.get(0).equals("$a?focus");
+                boolean reusable = true;//line.get(0).equals("$a?") || line.get(0).equals("$a?focus");
                 boolean focus = line.get(0).equals("$?focus") || line.get(0).equals("$a?focus");
 
                 line.remove(0);

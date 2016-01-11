@@ -92,7 +92,7 @@ public class Main {
                     Expr qruleAnswer = qrule.answer==null ? null : Normalizer.normalize(qrule.answer);
                     Expr ret = calc.quest(r.assertion,
                             e -> qruleAnswer != null && e.toLispString().equals(qruleAnswer.toLispString()),
-                            1000);
+                            150);
                     if (qruleAnswer == null) {
                         System.out.println("Correct answer was not specified!");
                     } else if (!ret.toLispString().equals(qruleAnswer.toLispString())) {
