@@ -27,6 +27,12 @@ public class Expr {
         validate();
     }
 
+    public Expr(String node, Expr a1, Expr a2, Expr a3) {
+        this.node = node;
+        sub = new Expr[]{a1, a2, a3};
+        validate();
+    }
+
     public Expr(String node, List<Expr> sub) {
         this.node = node;
         this.sub = sub.toArray(new Expr[sub.size()]);

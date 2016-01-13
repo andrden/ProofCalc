@@ -112,6 +112,10 @@ public class Tests {
 
     static void testParseLine(){
         Parser parser = new Parser();
+        chk(parser, "∀ϵ ∈ ℝ+ ∃δ ∈ ℝ+ 0 < ϵ ", "(∀ ϵ ℝ+ (∃ δ ℝ+ (< 0 ϵ)))");
+        chk(parser, "0 < ϵ + 1 ", "(< 0 (+ ϵ 1))");
+        chk(parser, "∀ϵ ∈ ℝ+ 0 < ϵ ", "(∀ ϵ ℝ+ (< 0 ϵ))");
+
         chk(parser, "3-(2+1)", "(+ 3 (- (+ 2 1)))");
         chk(parser, "g( f(x+1) )", "(apply g (apply f (+ x 1)))");
 

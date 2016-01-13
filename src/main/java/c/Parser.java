@@ -16,9 +16,12 @@ import java.util.*;
 public class Parser {
     static List<String> splitLine(String line){
         line = line.replace("+"," + ");
+        line = line.replace("ℝ +","ℝ+");
         line = line.replace("-"," - ");
         line = line.replace("("," ( ");
         line = line.replace(")"," ) ");
+        line = line.replace("∀"," ∀ ");
+        line = line.replace("∃"," ∃ ");
 
         StringTokenizer st = new StringTokenizer(line, " \t");
         List<String> ret = new ArrayList<>();
@@ -150,8 +153,17 @@ public class Parser {
         return parseByOps(line);
     }
 
-    Expr parseByOps(List<String> line){
+    Expr parseByOps(List line){
         List list = new ArrayList(line);
+        if( list.get(0).equals("∀") || list.get(0).equals("∃") ){
+            if( ! list.get(2).equals("∈") ){
+                throw new IllegalStateException();
+            }
+            Expr right = parseByOps(list.subList(4, list.size()));
+            Expr var = (Expr) (list.get(1));
+            Expr set = (Expr) (list.get(3));
+            return new Expr((String)list.get(0), var, set, right);
+        }
         while( parseApply(list) );
         while( infixOp(list, "^") );
         unaryMinus(list, "*", "/");
@@ -159,7 +171,7 @@ public class Parser {
         unaryMinus(list, "+", "-");
         while( infixOp(list, "+") );
         unaryPlus(list);
-        while( infixOp(list, "=","≥","≤","↦") );
+        while( infixOp(list, "=","<",">","≥","≤","↦") );
         prefixOp(list, "real");
         if(list.size()==1 && list.get(0) instanceof Expr) {
             return (Expr) list.get(0);

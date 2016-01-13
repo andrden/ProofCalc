@@ -6,11 +6,12 @@ import java.util.*;
  * Created by denny on 8/11/15.
  */
 public class Type {
-    static Set<String> vars = new HashSet<>(Arrays.asList("a", "b", "c", "n", "x", "y", "z", "f", "g","h", "t", "ψ"));
+    static Set<String> vars = new HashSet<>(Arrays.asList(
+            "a", "b", "c", "n", "x", "y", "z", "f", "g","h", "t", "ψ","ϵ","δ"));
     static Set<String> consts = new HashSet<>(Arrays.asList(
             "True",
             "exp", "sin", "cos", "tan", "sh", "ch", "π", "√", "const",
-            "lim0", "∂",
+            "lim0", "∂", "ℝ+",
             "xx", "yy", "ff", "gg", "hh", "nn"));
 
     static Set<String> infixOps = new HashSet<>(Arrays.asList("+", "-", "*", "/", "^", "≤","≥", "↦"));
