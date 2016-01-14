@@ -15,6 +15,8 @@ import java.util.*;
 @SuppressWarnings("unchecked")
 public class Parser {
     static List<String> splitLine(String line){
+        line = line.replace(","," , ");
+        line = line.replace(":"," : ");
         line = line.replace("+"," + ");
         line = line.replace("ℝ +","ℝ+");
         line = line.replace("-"," - ");
@@ -155,22 +157,29 @@ public class Parser {
 
     Expr parseByOps(List line){
         List list = new ArrayList(line);
+        while( parseApply(list) );
         if( list.get(0).equals("∀") || list.get(0).equals("∃") ){
             if( ! list.get(2).equals("∈") ){
                 throw new IllegalStateException();
             }
-            Expr right = parseByOps(list.subList(4, list.size()));
             Expr var = (Expr) (list.get(1));
             Expr set = (Expr) (list.get(3));
+            int s = 4;
+            if( list.get(s).equals(":") ){
+                // skip colon after quantifier
+                // colon can always be used but sometimes is optional
+                s ++;
+            }
+            Expr right = parseByOps(list.subList(s, list.size()));
             return new Expr((String)list.get(0), var, set, right);
         }
-        while( parseApply(list) );
         while( infixOp(list, "^") );
         unaryMinus(list, "*", "/");
         while( infixOp(list, "*") );
         unaryMinus(list, "+", "-");
         while( infixOp(list, "+") );
         unaryPlus(list);
+        while( infixOp(list, ",") );
         while( infixOp(list, "=","<",">","≥","≤","↦") );
         prefixOp(list, "real");
         if(list.size()==1 && list.get(0) instanceof Expr) {
@@ -193,6 +202,11 @@ public class Parser {
         for( int i=list.size()-1; i>=1; i-- ){ // associative right to left
             if( list.get(i) instanceof Expr && list.get(i-1) instanceof Expr ){
                 Expr apply = new Expr("apply", (Expr)list.get(i-1), (Expr)list.get(i));
+                Expr args = apply.rightChild();
+                if( args.node.equals(",") ){
+                    // function of more than 1 argument, flattening
+                    apply = new Expr("apply", apply.child(0), args.child(0), args.child(1));
+                }
                 list.set(i-1, apply);
                 list.remove(i);
                 return true;

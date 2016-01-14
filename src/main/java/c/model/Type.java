@@ -12,6 +12,7 @@ public class Type {
             "True",
             "exp", "sin", "cos", "tan", "sh", "ch", "π", "√", "const",
             "lim0", "∂", "ℝ+",
+            "int", // interval in ℝ, e.g. int(-5,5)
             "xx", "yy", "ff", "gg", "hh", "nn"));
 
     static Set<String> infixOps = new HashSet<>(Arrays.asList("+", "-", "*", "/", "^", "≤","≥", "↦"));
