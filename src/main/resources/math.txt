@@ -218,6 +218,19 @@ $= c ^ 2 - x ^ 2
 $? x * ( ch ψ ) ^ 2 - x * ( sh ψ ) ^ 2
 $= x
 
+############### Quantified:
+
+$a (∀ϵ ∈ ℝ+: 0 < ϵ) = True
+
+############### Verify quantified:
+
+$? ∀ϵ ∈ ℝ+ ∃δ ∈ ℝ+: 0 < ϵ
+$= True
+
+$?focus ∀ϵ ∈ ℝ+ ∃δ ∈ ℝ+ ∀x ∈ int(-δ,δ): 0 < ϵ
+$= True
+
+
 ############### Derivatives from Limits:
 
 # c.calc.CodedRules.limit0Const()

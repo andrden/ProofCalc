@@ -52,6 +52,10 @@ public class Expr {
         return sub[1];
     }
 
+    public Expr lastChild(){
+        return sub[sub.length-1];
+    }
+
     public Expr child(int i){
         return sub[i];
     }
