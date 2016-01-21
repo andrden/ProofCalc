@@ -220,16 +220,38 @@ $= x
 
 ############### Quantified:
 
+$a abs(0) = 0
+
+$a abs(- 2) = 2
+
+$a (∀ϵ ∈ ℝ+: 2 < ϵ) = False
+
 $a (∀ϵ ∈ ℝ+: 0 < ϵ) = True
+
+$a (lim0 f = a) = ( ∀ϵ ∈ ℝ+ ∃δ ∈ ℝ+ ∀x ∈ int(-δ,δ): abs(f(x) - a) < ϵ )
 
 ############### Verify quantified:
 
 $? ∀ϵ ∈ ℝ+ ∃δ ∈ ℝ+: 0 < ϵ
 $= True
 
-$?focus ∀ϵ ∈ ℝ+ ∃δ ∈ ℝ+ ∀x ∈ int(-δ,δ): 0 < ϵ
+$? ∀ϵ ∈ ℝ+ ∃δ ∈ ℝ+ ∀x ∈ int(-δ,δ): 0 < ϵ
 $= True
 
+$? lim0 (x ↦ 0) = 0
+$= True
+
+$? lim0 (x ↦ 7) = 7
+$= True
+
+$? lim0 (x ↦ 2 * y) = 2 * y
+$= True
+
+$? lim0 (x ↦ 0) = 2
+$= False
+
+$? lim0 (x ↦ 2 * y) = 2 * y + 2
+$= False
 
 ############### Derivatives from Limits:
 

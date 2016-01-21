@@ -13,7 +13,7 @@ public class CodedRules {
     List<FringeEl> ways = new ArrayList<>();
 
     CodedRules(Expr expr){
-        limit0Const(expr);
+        //limit0Const(expr);
         stripQuantifier(expr);
     }
 

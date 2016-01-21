@@ -9,8 +9,8 @@ public class Type {
     static Set<String> vars = new HashSet<>(Arrays.asList(
             "a", "b", "c", "n", "x", "y", "z", "f", "g","h", "t", "ψ","ϵ","δ"));
     static Set<String> consts = new HashSet<>(Arrays.asList(
-            "True",
-            "exp", "sin", "cos", "tan", "sh", "ch", "π", "√", "const",
+            "True","False",
+            "abs", "exp", "sin", "cos", "tan", "sh", "ch", "π", "√", "const",
             "lim0", "∂", "ℝ+",
             "int", // interval in ℝ, e.g. int(-5,5)
             "xx", "yy", "ff", "gg", "hh", "nn"));
