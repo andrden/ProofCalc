@@ -230,6 +230,10 @@ $a (∀ϵ ∈ ℝ+: 0 < ϵ) = True
 
 $a (lim0 f = a) = ( ∀ϵ ∈ ℝ+ ∃δ ∈ ℝ+ ∀x ∈ int(-δ,δ): abs(f(x) - a) < ϵ )
 
+$a (∀x ∈ int(-δ,δ): abs(x) < ϵ) = (δ ≤ ϵ)
+
+$a (∀ϵ ∈ ℝ+ ∃δ ∈ ℝ+: δ ≤ ϵ) = True
+
 ############### Verify quantified:
 
 $? ∀ϵ ∈ ℝ+ ∃δ ∈ ℝ+: 0 < ϵ
@@ -251,6 +255,15 @@ $? lim0 (x ↦ 0) = 2
 $= False
 
 $? lim0 (x ↦ 2 * y) = 2 * y + 2
+$= False
+
+$? lim0 (x ↦ x + 2) = 2
+$= True
+
+$? lim0 (x ↦ x + 2 * y) = 2 * y
+$= True
+
+$?focus lim0 (x ↦ x + 3) = 2
 $= False
 
 ############### Derivatives from Limits:
