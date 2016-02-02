@@ -182,6 +182,7 @@ public class Parser {
         while( infixOp(list, ",") );
         while( infixOp(list, "=","<",">","≥","≤","↦") );
         prefixOp(list, "real");
+        while( infixOp(list, "∈") );
         if(list.size()==1 && list.get(0) instanceof Expr) {
             return (Expr) list.get(0);
         }

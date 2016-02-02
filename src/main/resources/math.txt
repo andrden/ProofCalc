@@ -230,7 +230,11 @@ $a (∀ϵ ∈ ℝ+: 0 < ϵ) = True
 
 $a (lim0 f = a) = ( ∀ϵ ∈ ℝ+ ∃δ ∈ ℝ+ ∀x ∈ int(-δ,δ): abs(f(x) - a) < ϵ )
 
+$e δ ∈ ℝ+
 $a (∀x ∈ int(-δ,δ): abs(x) < ϵ) = (δ ≤ ϵ)
+
+$e δ ∈ ℝ+
+$a (∀x ∈ int(-δ,δ): abs(y + x) < ϵ) = (abs(y) + δ ≤ ϵ)
 
 $a (∀ϵ ∈ ℝ+ ∃δ ∈ ℝ+: δ ≤ ϵ) = True
 
@@ -263,7 +267,10 @@ $= True
 $? lim0 (x ↦ x + 2 * y) = 2 * y
 $= True
 
-$?focus lim0 (x ↦ x + 3) = 2
+$?focus ∀ϵ ∈ ℝ+ ∃δ ∈ ℝ+ ∀x ∈ int(-δ,δ): abs(3 + x) < ϵ
+$= False
+
+$? lim0 (x ↦ x + 3) = 2
 $= False
 
 ############### Derivatives from Limits:

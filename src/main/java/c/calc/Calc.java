@@ -104,7 +104,7 @@ public class Calc {
                 fringe.add(el);
             }
 
-            List<FringeEl> exprNew = exprSimplifyDeep(el.expr);
+            List<FringeEl> exprNew = exprSimplifyDeep(el.expr, new Scope());
             for( FringeEl feNew : exprNew ){
                 Expr e = feNew.expr;
                 e = Normalizer.normalize(e);
@@ -206,7 +206,7 @@ public class Calc {
             Expr pair = esplitPair.child(0);
             Expr e1 = assocCommutCancelRule.optimizeDeep(pair);
             pair = assocCommutCancelRule.optimizeDeep(Normalizer.multDiv.optimizeDeep(e1));
-            List<FringeEl> exprNew = exprSimplifyDeep(pair);
+            List<FringeEl> exprNew = exprSimplifyDeep(pair, new Scope());
             //System.out.println("   split pair: simplNew.size="+exprNew.size()+" "+esplitPair.toMathString());
             for( FringeEl fe : exprNew ){
                 if( fe.expr.toLispString().length()<pair.toLispString().length() ){
@@ -236,17 +236,23 @@ public class Calc {
                 .collect(Collectors.toList());
     }
 
-    List<FringeEl> exprSimplifyDeep(Expr expr) {
-        List<FringeEl> ways = exprSimplify(expr);
+    List<FringeEl> exprSimplifyDeep(Expr expr, Scope scope) {
+        List<FringeEl> ways = exprSimplify(expr, scope);
         for( Expr splitPair : Normalizer.plusMinus.separateAllPossiblePairs(expr) ){
-            ways.addAll(exprSimplifyDeep(splitPair));
+            ways.addAll(exprSimplifyDeep(splitPair, scope));
         }
         for( Expr splitPair : Normalizer.multDiv.separateAllPossiblePairs(expr) ){
-            ways.addAll(exprSimplifyDeep(splitPair));
+            ways.addAll(exprSimplifyDeep(splitPair, scope));
         }
         if( expr.hasChildren() ) {
-            for (int i = 0; i < expr.subCount(); i++) {
-                List<FringeEl> elist = exprSimplifyDeep(expr.child(i));
+            int start = 0;
+            Scope subScope = scope;
+            if( expr.isQuantified() ){
+                start = 2;
+                subScope = scope.push(new Expr("∈", expr.child(0), expr.child(1)));
+            }
+            for (int i = start; i < expr.subCount(); i++) {
+                List<FringeEl> elist = exprSimplifyDeep(expr.child(i), subScope);
                 for( FringeEl fe : elist ){
                     Expr clone = expr.replaceChild(i, fe.expr);
                     ways.add(fe.newExpr(clone));
@@ -256,7 +262,7 @@ public class Calc {
         return ways;
     }
 
-    List<FringeEl> exprSimplify(Expr expr) {
+    List<FringeEl> exprSimplify(Expr expr, Scope scope) {
         List<FringeEl> ways = new ArrayList<>();
         ways.addAll(new CodedRules(expr).getWays());
         for (Rule r : rules) {
@@ -267,7 +273,7 @@ public class Calc {
                     if( expr.toString().equals("(apply (apply ∂ (func x (+ (^ x 2) 7))) x)") ){
                         breakpoint();
                     }
-                    List<Map<String, Expr>> options = checkCanUseRule(r, unifMap);
+                    List<Map<String, Expr>> options = checkCanUseRule(r, unifMap, scope);
                     for( Map<String, Expr> m : options ){
                         if( r.freeVariables.containsAll(m.keySet()) ){
                             Expr exprNew = r.assertion.child(1).substitute(m);
@@ -280,7 +286,7 @@ public class Calc {
             }else{
                 Map<String, Expr> unifMap = r.assertion.unify(expr);
                 if( unifMap!=null ) {
-                    List<Map<String, Expr>> subDerivations = checkCanUseRule(r, unifMap);
+                    List<Map<String, Expr>> subDerivations = checkCanUseRule(r, unifMap, scope);
                     boolean canUseRule = ! subDerivations.isEmpty();
                     if( canUseRule ) {
                         //System.out.println("ok");
@@ -292,18 +298,23 @@ public class Calc {
         return ways;
     }
 
-    private List<Map<String, Expr>> checkCanUseRule(Rule r, Map<String, Expr> unifMap) {
+    private List<Map<String, Expr>> checkCanUseRule(Rule r, Map<String, Expr> unifMap, Scope scope) {
         List<Map<String, Expr>> cases = Collections.singletonList(unifMap);
         for( Expr cond : r.cond ){
             List<Map<String, Expr>> newCases = new ArrayList<>();
             for( Map<String, Expr> m : cases ) {
                 Expr condSubs = cond.substitute(m);
-                List<FringeEl> checkIfTrueResultList = checkIfTrueOrCanBeMadeTrue(condSubs);
-                if (checkIfTrueResultList != null) {
-                    for( FringeEl checkIfTrueResult : checkIfTrueResultList ) {
-                        Map<String, Expr> mi = new HashMap<>(m);
-                        mi.putAll(checkIfTrueResult.unifMap);
-                        newCases.add(mi);
+                if( scope.has(condSubs) ){
+                    Map<String, Expr> mi = new HashMap<>(m);
+                    newCases.add(mi);
+                }else {
+                    List<FringeEl> checkIfTrueResultList = checkIfTrueOrCanBeMadeTrue(condSubs);
+                    if (checkIfTrueResultList != null) {
+                        for (FringeEl checkIfTrueResult : checkIfTrueResultList) {
+                            Map<String, Expr> mi = new HashMap<>(m);
+                            mi.putAll(checkIfTrueResult.unifMap);
+                            newCases.add(mi);
+                        }
                     }
                 }
             }

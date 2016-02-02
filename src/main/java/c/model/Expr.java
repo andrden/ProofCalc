@@ -64,6 +64,10 @@ public class Expr {
         return sub!=null;
     }
 
+    public boolean isQuantified(){
+        return node.equals("∀") || node.equals("∃");
+    }
+
     public int subCount(){
         return sub.length;
     }
