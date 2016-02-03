@@ -11,6 +11,10 @@ $a lim0 (y ↦ sin(y / 2) / y) = 0.5
 
 $a sin(x) - sin(y) = 2 * cos((x + y) / 2) * sin ((x - y) / 2 )
 
+$a lim0 (x ↦ 2) = 2
+
+
+
 $? lim0 (y ↦ cos(x + y / 2) * sin(y / 2) * 2 / y)
 $= cos(x) * 0.5 * 2
 

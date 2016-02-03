@@ -16,6 +16,9 @@ public class Rule {
 
 
     public Rule(Expr assertion, List<Expr> cond, List<String> srcLines) {
+        if( assertion!=null && assertion.node.equals("=") && assertion.rightChild().node.equals("True") ){
+            assertion = assertion.child(0);
+        }
         this.assertion = assertion;
         this.cond = cond;
         this.srcLines = srcLines;

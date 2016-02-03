@@ -6,6 +6,7 @@ $a lim0 f = cos(lim0 g)
 $e f = ( x ↦ g ( x ) * h ( x ) )
 $a lim0 f = (lim0 g) * (lim0 h)
 
+$a lim0 (x ↦ 2) = 2
 
 
 
