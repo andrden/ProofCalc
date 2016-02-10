@@ -14,6 +14,7 @@ public class CodedRules {
 
     CodedRules(Expr expr){
         //limit0Const(expr);
+        funcConst(expr);
         stripQuantifier(expr);
     }
 
@@ -28,6 +29,19 @@ public class CodedRules {
             Set<String> usedVars = expr.child(1).child(1).freeVariables();
             if( ! usedVars.contains(var) ){
                 ways.add( new FringeEl(expr.child(1).child(1), new NamedRule("lim0-const"), null) );
+            }
+        }
+    }
+
+    void funcConst(Expr expr) {
+        // computes e.g. const ( y ↦ x ) = True
+        if( expr.node.equals("apply") && expr.child(0).node.equals("const") && expr.child(1).node.equals("func") ){
+            String var = expr.child(1).child(0).node;
+            Set<String> usedVars = expr.child(1).child(1).freeVariables();
+            if( ! usedVars.contains(var) ){
+                ways.add( new FringeEl(Expr.True, new NamedRule("func-const"), null) );
+            }else{
+                ways.add( new FringeEl(Expr.False, new NamedRule("func-const"), null) );
             }
         }
     }

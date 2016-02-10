@@ -10,6 +10,13 @@ public class Expr {
     final Expr[] sub;
     private String lispString;
 
+    public static Expr True = node("True");
+    public static Expr False = node("False");
+
+    public static Expr node(String node){
+        return new Expr(node);
+    }
+
     public Expr(String node) {
         this.node = node;
         sub = null;

@@ -66,6 +66,7 @@ public class Tests {
     static void testUnify(){
 
         UTest[] rarr = {
+                new UTest("const (x ↦ y)", "const (x ↦ x * x * x)", "null"),
                 new UTest("( ∂ f ) ( x )", "(∂ ( x ↦ 1 )) ( x )", "{f=(func x 1), x=x}"),
                 new UTest("x ↦ g( h(x) )", "x ↦ cos(sin(x))", "{h=sin, g=cos}"),
                 new UTest( "x", "x + 1", "{x=(+ x 1)}"),
