@@ -250,6 +250,14 @@ $a (∃δ ∈ ℝ+: 1 + δ ≤ ϵ) = (1 < ϵ)
 
 $a (∃δ ∈ ℝ+: 3 + δ ≤ ϵ) = (3 < ϵ)
 
+$a (has_lim0 (x ↦ x)) = True
+
+$a (has_lim0 (x ↦ 1)) = True
+
+$a (has_lim0 (x ↦ 2)) = True
+
+$a (has_lim0 (x ↦ 5)) = True
+
 ############### Verify quantified:
 
 $? ∀ϵ ∈ ℝ+ ∃δ ∈ ℝ+: 0 < ϵ
@@ -262,6 +270,12 @@ $? lim0 (x ↦ 0) = 0
 $= True
 
 $? lim0 (x ↦ 1) = 1
+$= True
+
+$? lim0 (x ↦ 2) = 2
+$= True
+
+$? lim0 (x ↦ 5) = 5
 $= True
 
 $? lim0 (x ↦ 7) = 7
@@ -301,11 +315,17 @@ $= False
 
 $a lim0 (x ↦ x) = 0
 
-$e f = ( x ↦ g ( x ) + h ( x ) )
-$a lim0 f = (lim0 g) + (lim0 h)
+$e has_lim0 g
+$e has_lim0 h
+$a lim0 ( x ↦ g ( x ) + h ( x ) ) = (lim0 g) + (lim0 h)
 
-$e f = ( x ↦ g ( x ) * h ( x ) )
-$a lim0 f = (lim0 g) * (lim0 h)
+$e has_lim0 g
+$e has_lim0 h
+$a lim0 ( x ↦ g ( x ) * h ( x ) ) = (lim0 g) * (lim0 h)
+
+$e has_lim0 g
+$e has_lim0 h
+$a has_lim0 ( x ↦ g ( x ) * h ( x ) )
 
 $e f = ( x ↦ cos(g ( x )) )
 $a lim0 f = cos(lim0 g)
@@ -320,6 +340,9 @@ $a lim0 f = 0.5
 $? lim0 (x ↦ 0)
 $= 0
 
+$a? lim0 ( x ↦ x * 2 / x )
+$= 2
+
 $e ff = (x ↦ 1.5)
 $? ( ∂ ff ) ( x )
 $= 0
@@ -330,7 +353,7 @@ $= 1
 $? ∂ ( x ↦ x )
 $= (x ↦ 1)
 
-$a?focus ∂ ( x ↦ 2 * x )
+$a? ∂ ( x ↦ 2 * x )
 $= (x ↦ 2)
 
 $? ∂ ( x ↦ x + x )
@@ -355,10 +378,22 @@ $= 1
 $? lim0 ( y ↦ y + 1 )
 $= 1
 
+$? has_lim0 ( y ↦ 2 * 5 )
+$= True
+
+$? lim0 ( y ↦ 2 * 5 )
+$= 2 * 5
+
 $? lim0 ( y ↦ y + (2 * 5) )
 $= 2 * 5
 
 $? lim0 ( y ↦ (2 * 5) + y )
+$= 2 * 5
+
+$?focus lim0 ( y ↦ x )
+$= 2 * 5
+
+$? lim0 ( y ↦ x * x )
 $= 2 * 5
 
 $? ∂ ( x ↦ x * x )

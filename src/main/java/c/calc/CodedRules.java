@@ -22,6 +22,7 @@ public class CodedRules {
     }
 
     void limit0Const(Expr expr) {
+        // computes e.g. lim0 ( y ↦ x ) = x
         if( expr.node.equals("apply") && expr.child(0).node.equals("lim0") && expr.child(1).node.equals("func") ){
             String var = expr.child(1).child(0).node;
             Set<String> usedVars = expr.child(1).child(1).freeVariables();

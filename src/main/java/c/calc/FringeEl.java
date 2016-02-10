@@ -84,7 +84,8 @@ class FringeEl {
                 //s = "By " + el.byRule.assertion.toMathString() + " " + unifMap + " => ";
                 s = "By " + el.byRule.toLineString() + " " + (unifMap==null || unifMap.isEmpty()?"":unifMap) + " =>  ";
             }
-            System.out.println(indent+"DERIV path: " + s + el.expr.toMathString());
+            String str = indent + "DERIV path: " + s + el.expr.toMathString();
+            System.out.println(str);
         }
     }
 }
