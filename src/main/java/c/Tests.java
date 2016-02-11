@@ -66,6 +66,7 @@ public class Tests {
     static void testUnify(){
 
         UTest[] rarr = {
+                new UTest( "( ∂ ( x ↦ x ^ n ) )(x)", "( ∂ ( x ↦ x ^ 4 ) )(x)", "{n=4, x=x}"),
                 new UTest("const (x ↦ y)", "const (x ↦ x * x * x)", "null"),
                 new UTest("( ∂ f ) ( x )", "(∂ ( x ↦ 1 )) ( x )", "{f=(func x 1), x=x}"),
                 new UTest("x ↦ g( h(x) )", "x ↦ cos(sin(x))", "{h=sin, g=cos}"),
@@ -90,7 +91,6 @@ public class Tests {
                 new UTest( "( ∂ ( x ↦ g( h(x) ) ) )(x)", "( ∂ ( x ↦ sin(x ^ 3) ) )(x)", "{h=(func x (^ x 3)), g=sin, x=x}"),
                 new UTest( "( ∂ ( x ↦ g( h(x) ) ) )(x)", "( ∂ ( x ↦ (sin(x)) ^ 3 ) )(x)", "{h=sin, g=(func x (^ x 3)), x=x}"),
 
-                new UTest( "( ∂ ( x ↦ x ^ n ) )(x)", "( ∂ ( x ↦ x ^ 4 ) )(x)", "{n=4, x=x}"),
                 new UTest( "( ∂ ( x ↦ x ^ n ) )(x)", "( ∂ ( x ↦ x ^ 4 ) )(x + 1)", "{n=4, x=(+ x 1)}"), // (func x ...) inner var x
                 new UTest( "( ∂ ( x ↦ x ^ n ) )(x)", "( ∂ ( x ↦ x ^ 4 ) )(y + 1)", "{n=4, x=(+ y 1)}"), // (func x ...) inner var x
         };

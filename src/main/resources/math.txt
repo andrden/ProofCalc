@@ -260,13 +260,10 @@ $a (has_lim0 (x ↦ 5)) = True
 
 ############### Verify quantified:
 
-$? const (x ↦ x * x * x)
-$= False
-
 $? const (x ↦ y)
 $= True
 
-$?focus const (x ↦ x * x * x)
+$? const (x ↦ x * x * x)
 $= False
 
 $? ∀ϵ ∈ ℝ+ ∃δ ∈ ℝ+: 0 < ϵ
@@ -399,8 +396,8 @@ $= 2 * 5
 $? lim0 ( y ↦ (2 * 5) + y )
 $= 2 * 5
 
-$? lim0 ( y ↦ x )
-$= 2 * 5
+$?focus lim0 ( y ↦ x )
+$= x
 
 $? lim0 ( y ↦ x * x )
 $= 2 * 5

@@ -158,7 +158,7 @@ public class Expr {
 
     List<Map<String,Expr>> unifyImpl(Expr concrete){
         Map<String,Expr> map = new LinkedHashMap<>();
-        List<Map<String,Expr>> cases = unify(concrete, map);
+        List<Map<String,Expr>> cases = unify(concrete, map, new HashSet<>());
         if( ! cases.isEmpty() ){
             for( Map<String,Expr> m : cases ) {
                 m.replaceAll((v, e) -> e.simplifyFuncApply());
@@ -248,13 +248,24 @@ public class Expr {
         return n;
     }
 
-    List<Map<String,Expr>> unify(Expr concrete, Map<String,Expr> vars){
+    boolean disjoint(Set<String> a, Set<String> b){
+        for( String s : a ){
+            if( b.contains(s) ){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    List<Map<String,Expr>> unify(Expr concrete, Map<String,Expr> vars, Set<String> argsVars){
         List<Map<String,Expr>> cases = new ArrayList<>();
         if( isVar() ){
             Expr val = vars.get(node);
             if( val==null ){
-                vars.put(node, concrete);
-                cases.add(vars);
+                if( disjoint(concrete.freeVariables(), argsVars) || concrete.equals(this) ) {
+                    vars.put(node, concrete);
+                    cases.add(vars);
+                }
                 return cases;
             }
             if( val.equals(concrete) ){
@@ -286,7 +297,7 @@ public class Expr {
                                 Expr concreteSub = concrete.sub[i];
                                 if (concreteSub.sub != null) { // if complex expression, not single term
                                     // trying to find at least one point where inner expression could be unified
-                                    List<Map<String,Expr>> sub = argument.unify(concreteSub, vars);
+                                    List<Map<String,Expr>> sub = argument.unify(concreteSub, vars, argsVars);
                                     if (! sub.isEmpty()) {
                                         for( Map<String,Expr> m : sub ) {
                                             Expr x = new Expr("x");
@@ -315,25 +326,25 @@ public class Expr {
             // produce g=(func y (* 2 (apply cos y)) and g=(func y (* (apply cos y) 2)) which are actually the same function
             // and will only increase branching factor, not adding new possibilities for unification
             for( Expr e : optionsConcrete ){
-                cases.addAll(subUnify0(e, new HashMap<>(vars)));
+                cases.addAll(subUnify0(e, new HashMap<>(vars), argsVars));
             }
             return cases;
             //concrete = new Expr("+", concrete.sub[0], new Expr("+", concrete.sub.subList(1,concrete.sub.length)));
         }else {
-            return subUnify0(concrete, vars);
+            return subUnify0(concrete, vars, argsVars);
         }
     }
 
-    private List<Map<String, Expr>> subUnify0(Expr concrete, Map<String, Expr> vars) {
+    private List<Map<String, Expr>> subUnify0(Expr concrete, Map<String, Expr> vars, Set<String> argsVars) {
         List<Map<String,Expr>> cases = new ArrayList<>();
         if( sub.length!=concrete.sub.length ){
             return cases;
         }
-        cases = subUnify(concrete, vars);
+        cases = subUnify(concrete, vars, argsVars);
         if ( cases.isEmpty() ){
             if( "+".equals(node) && sub.length==2 ){
                 // try swapping and unifying the other way
-                cases = subUnify(new Expr(concrete.node, concrete.sub[1], concrete.sub[0]), vars);
+                cases = subUnify(new Expr(concrete.node, concrete.sub[1], concrete.sub[0]), vars, argsVars);
                 return cases;
             }
             return cases;
@@ -341,7 +352,13 @@ public class Expr {
         return cases;
     }
 
-    List<Map<String,Expr>> subUnify(Expr concrete, Map<String, Expr> vars) {
+    Set<String> extend(Set<String> argsVars, String s){
+        Set<String> ret = new HashSet<>(argsVars);
+        ret.add(s);
+        return ret;
+    }
+
+    List<Map<String,Expr>> subUnify(Expr concrete, Map<String, Expr> vars, Set<String> argsVars) {
         if( node.equals("func") ){
             if( sub.length!=2 ){
                 throw new IllegalStateException();
@@ -350,7 +367,7 @@ public class Expr {
             Expr concreteFuncArgVar = concrete.sub[0];
             Expr myExprSubs = rightChild().substitute(Collections.singletonMap(myFuncArgVar, concreteFuncArgVar));
 
-            List<Map<String,Expr>> cases = myExprSubs.unify(concrete.rightChild(), vars);
+            List<Map<String,Expr>> cases = myExprSubs.unify(concrete.rightChild(), vars, extend(argsVars, myFuncArgVar));
             List<Map<String,Expr>> badCases = new ArrayList<>();
             for( Map<String,Expr> vs : cases ){
                 if( vs.containsKey(concreteFuncArgVar.node) &&
@@ -368,7 +385,7 @@ public class Expr {
             for( int i=0; i<sub.length; i++ ){
                 List<Map<String,Expr>> casesNew = new ArrayList<>();
                 for( Map<String,Expr> vs : cases ) {
-                    casesNew.addAll(sub[i].unify(concrete.sub[i], vs));
+                    casesNew.addAll(sub[i].unify(concrete.sub[i], vs, argsVars));
                 }
                 cases = casesNew;
             }
