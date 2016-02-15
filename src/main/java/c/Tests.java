@@ -66,6 +66,7 @@ public class Tests {
     static void testUnify(){
 
         UTest[] rarr = {
+                new UTest( "lim0 ( y ↦ x )", "lim0 ( x ↦ x )", "null"),
                 new UTest( "( ∂ ( x ↦ x ^ n ) )(x)", "( ∂ ( x ↦ x ^ 4 ) )(x)", "{n=4, x=x}"),
                 new UTest("const (x ↦ y)", "const (x ↦ x * x * x)", "null"),
                 new UTest("( ∂ f ) ( x )", "(∂ ( x ↦ 1 )) ( x )", "{f=(func x 1), x=x}"),

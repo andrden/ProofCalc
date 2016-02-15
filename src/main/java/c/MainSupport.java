@@ -16,14 +16,14 @@ import java.util.List;
  */
 public class MainSupport {
     static void runPiece(String pieceFile) throws Exception{
-        runMath(new BufferedReader(new InputStreamReader(Main.class.getClassLoader().getResourceAsStream(pieceFile))));
+        runMath(new BufferedReader(new InputStreamReader(Main.class.getClassLoader().getResourceAsStream("tests/"+pieceFile))));
     }
 
     static void runPieces() throws Exception{
         List<String> okPieces = new ArrayList<>();
         for( int p=1; ; p++ ) {
             String fname = "piece" + p + ".txt";
-            InputStream streamMath = Main.class.getClassLoader().getResourceAsStream(fname);
+            InputStream streamMath = Main.class.getClassLoader().getResourceAsStream("tests/"+fname);
             if( streamMath==null ){
                 break;
             }

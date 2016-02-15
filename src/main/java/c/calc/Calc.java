@@ -252,7 +252,8 @@ public class Calc {
                 subScope = scope.push(new Expr("∈", expr.child(0), expr.child(1)));
             }
             for (int i = start; i < expr.subCount(); i++) {
-                List<FringeEl> elist = exprSimplifyDeep(expr.child(i), subScope);
+                Expr child = expr.child(i);
+                List<FringeEl> elist = exprSimplifyDeep(child, subScope);
                 for( FringeEl fe : elist ){
                     Expr clone = expr.replaceChild(i, fe.expr);
                     ways.add(fe.newExpr(clone));

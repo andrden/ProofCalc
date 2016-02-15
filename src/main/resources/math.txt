@@ -258,6 +258,12 @@ $a (has_lim0 (x ↦ 2)) = True
 
 $a (has_lim0 (x ↦ 5)) = True
 
+$e const f
+$a (has_lim0 f) = True
+
+$e const f
+$a (lim0 f) = f(0)
+
 ############### Verify quantified:
 
 $? const (x ↦ y)
@@ -336,6 +342,10 @@ $a has_lim0 ( x ↦ g ( x ) * h ( x ) )
 $e f = ( x ↦ cos(g ( x )) )
 $a lim0 f = cos(lim0 g)
 
+$e f = ( x ↦ cos(g ( x )) )
+$e has_lim0 g
+$a (has_lim0 f) = True
+
 $a ∂ f = (x ↦ lim0 (y ↦ (f(x + y) - f(x)) / y))
 
 $e f = ( y ↦ sin(y / 2) / y )
@@ -396,17 +406,20 @@ $= 2 * 5
 $? lim0 ( y ↦ (2 * 5) + y )
 $= 2 * 5
 
-$?focus lim0 ( y ↦ x )
+$? lim0 ( y ↦ x )
 $= x
 
 $? lim0 ( y ↦ x * x )
-$= 2 * 5
+$= x * x
 
 $? ∂ ( x ↦ x * x )
 $= (x ↦ 2 * x)
 
 $? lim0 (y ↦ cos (y / 2 + x))
 $= cos(x)
+
+$? lim0 (y ↦ 2 * cos (y))
+$= cos(x) * 2
 
 $? lim0 (y ↦ 2 * cos (y / 2 + x))
 $= cos(x) * 2

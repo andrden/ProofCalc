@@ -22,6 +22,7 @@ class FringeEl {
         this.expr = expr;
         this.byRule = byRule;
         this.unifMap = unifMap;
+        verify();
     }
 
     FringeEl(Expr expr, Rule byRule, Map<String, Expr> unifMap, FringeEl parent) {
@@ -29,6 +30,16 @@ class FringeEl {
         this.byRule = byRule;
         this.unifMap = unifMap;
         this.parent = parent;
+        verify();
+    }
+
+    void verify(){
+//        if( expr!=null && expr.toString().equals("(apply cos x)") ){
+//            System.currentTimeMillis();
+//        }
+        if( byRule!=null && byRule.toString().contains("(= (apply lim0 (func y x)) x)") ){
+            System.currentTimeMillis();
+        }
     }
 
     FringeEl newExpr(Expr enew){
