@@ -10,9 +10,9 @@ public class Main {
         //new Date(1443657600000L).toString();
         Tests.allTests();
 
-        //MainSupport.runMainFile();
+        MainSupport.runMainFile();
         //MainSupport.runPieces();
-        MainSupport.runPiece("piece16.txt");
+        //MainSupport.runPiece("piece17.txt");
 
     }
 

@@ -365,6 +365,12 @@ public class Expr {
             }
             String myFuncArgVar = sub[0].node;
             Expr concreteFuncArgVar = concrete.sub[0];
+            if( !myFuncArgVar.equals(concreteFuncArgVar.node) && rightChild().hasFreeVar(concreteFuncArgVar.node) ){
+                // can't unify ( y ↦ x ) with ( x ↦ x )
+                return Collections.emptyList();
+                // maybe too restrictive fix,
+                // but at least should not try to change this function ( y ↦ x ) to use function variable x
+            }
             Expr myExprSubs = rightChild().substitute(Collections.singletonMap(myFuncArgVar, concreteFuncArgVar));
 
             List<Map<String,Expr>> cases = myExprSubs.unify(concrete.rightChild(), vars, extend(argsVars, myFuncArgVar));
@@ -385,12 +391,18 @@ public class Expr {
             for( int i=0; i<sub.length; i++ ){
                 List<Map<String,Expr>> casesNew = new ArrayList<>();
                 for( Map<String,Expr> vs : cases ) {
-                    casesNew.addAll(sub[i].unify(concrete.sub[i], vs, argsVars));
+                    Expr subTemplate = sub[i];
+                    Expr subConcrete = concrete.sub[i];
+                    casesNew.addAll(subTemplate.unify(subConcrete, vs, argsVars));
                 }
                 cases = casesNew;
             }
             return cases;
         }
+    }
+
+    public boolean hasFreeVar(String v){
+        return freeVariables().contains(v);
     }
 
     public Set<String> freeVariables(){

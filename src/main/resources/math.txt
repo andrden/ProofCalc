@@ -333,6 +333,10 @@ $a lim0 ( x ↦ g ( x ) + h ( x ) ) = (lim0 g) + (lim0 h)
 
 $e has_lim0 g
 $e has_lim0 h
+$a has_lim0 ( x ↦ g ( x ) + h ( x ) )
+
+$e has_lim0 g
+$e has_lim0 h
 $a lim0 ( x ↦ g ( x ) * h ( x ) ) = (lim0 g) * (lim0 h)
 
 $e has_lim0 g
@@ -350,6 +354,9 @@ $a ∂ f = (x ↦ lim0 (y ↦ (f(x + y) - f(x)) / y))
 
 $e f = ( y ↦ sin(y / 2) / y )
 $a lim0 f = 0.5
+
+$e f = ( y ↦ sin(y / 2) / y )
+$a (has_lim0 f) = True
 
 ############### Verify derivatives from limits:
 
@@ -419,7 +426,16 @@ $? lim0 (y ↦ cos (y / 2 + x))
 $= cos(x)
 
 $? lim0 (y ↦ 2 * cos (y))
-$= cos(x) * 2
+$= cos(0) * 2
+
+$? has_lim0 (y ↦ y + x)
+$= True
+
+$? has_lim0 (y ↦ (y / 2 + x))
+$= True
+
+$? has_lim0 (y ↦ cos (y / 2 + x))
+$= True
 
 $? lim0 (y ↦ 2 * cos (y / 2 + x))
 $= cos(x) * 2
@@ -474,7 +490,7 @@ $= 2 * cos(x) * cos(x)
 
 # The direct geometrical approximate proof of "∂ sin" is actually simpler than using difference of sinuses formula,
 # or even more so deriving that formula. So such geometrical proof was likely how people first calculated this derivative.
-$a? ∂ sin
+$a?focus ∂ sin
 $= x ↦ cos(x)
 
 ############### Derivatives:

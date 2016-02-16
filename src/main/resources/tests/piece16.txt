@@ -42,8 +42,5 @@ $a (has_lim0 f) = True
 $? lim0 ( y ↦ x )
 $= x
 
-$? lim0 ( x ↦ x )
-$= x
-
-$?focus lim0 (y ↦ 2 * cos (y))
-$= cos(x) * 2
+$? lim0 (y ↦ 2 * cos (y))
+$= cos(0) * 2
