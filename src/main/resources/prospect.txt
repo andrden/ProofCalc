@@ -1,3 +1,9 @@
 
 $? ( x * sh ψ + c * t * ch ψ ) ^ 2 - ( x * ch ψ + c * t * sh ψ ) ^ 2
 
+
+- adding extra problems is no problem. Yes, they lead probably too much the agent along the correct way.
+We we later can test for unneeded rules easily - just by trying to remove rules one by one and seeing if we can still
+run all the remaining rules in math.txt. Thus we can see which ones are still essential and which are disposable
+and could be derived easily by ProofCalc itself.
+

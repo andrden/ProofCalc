@@ -73,6 +73,7 @@ public class MainSupport {
 
         //System.out.println("Rules="+rules);
         for( Rule r : rulesAndQuests ){
+            final long t0 = System.currentTimeMillis();
             if( r instanceof QuestRule ){
                 QuestRule qrule = (QuestRule) r;
                 if( countFocus==1 && ! qrule.focus ){
@@ -88,6 +89,9 @@ public class MainSupport {
                     } else if (!ret.toLispString().equals(qruleAnswer.toLispString())) {
                         throw new IllegalStateException("Not reached answer=" + qrule.answer + "\nsrcLines=" + qrule.getSrcLines());
                     }
+                    long sec = (System.currentTimeMillis()-t0)/1000;
+                    String secS = sec==0 ? "" : " sec="+sec;
+                    System.out.println("FINISHED" + secS + " " + r);
                 }
 
                 if( qrule.answer!=null && qrule.reusable ){

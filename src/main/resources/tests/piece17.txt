@@ -1,0 +1,25 @@
+$e const f
+$a (has_lim0 f) = True
+
+$e const f
+$a (lim0 f) = f(0)
+
+$e has_lim0 g
+$e has_lim0 h
+$a lim0 ( x ↦ g ( x ) * h ( x ) ) = (lim0 g) * (lim0 h)
+
+$e f = ( y ↦ sin(y / 2) / y )
+$a lim0 f = 0.5
+
+$e f = ( y ↦ sin(y / 2) / y )
+$a (has_lim0 f) = True
+
+
+$? lim0 (y ↦ 2)
+$= 2
+
+$? has_lim0 (y ↦ 2)
+$= True
+
+$? lim0 (y ↦ 2 * sin (y / 2) / y)
+$= 0.5 * 2

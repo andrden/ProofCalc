@@ -153,25 +153,25 @@ public class Calc {
         System.out.println(indent + msg);
     }
 
-    FringeEl tryByPairs(FringeEl el){
-        while(true){
-            Expr enew = tryByPairsDeep(el.expr, Normalizer.plusMinus);
-            if( enew!=null ){
-                el = new FringeEl(enew, new NamedRule("tryByPairs+"), null, el);
-            }else{
-                break;
-            }
-        }
-        while(true){
-            Expr enew = tryByPairsDeep(el.expr, Normalizer.multDiv);
-            if( enew!=null ){
-                el = new FringeEl(enew, new NamedRule("tryByPairs*"), null, el);
-            }else{
-                break;
-            }
-        }
-        return el;
-    }
+//    FringeEl tryByPairs(FringeEl el){
+//        while(true){
+//            Expr enew = tryByPairsDeep(el.expr, Normalizer.plusMinus);
+//            if( enew!=null ){
+//                el = new FringeEl(enew, new NamedRule("tryByPairs+"), null, el);
+//            }else{
+//                break;
+//            }
+//        }
+//        while(true){
+//            Expr enew = tryByPairsDeep(el.expr, Normalizer.multDiv);
+//            if( enew!=null ){
+//                el = new FringeEl(enew, new NamedRule("tryByPairs*"), null, el);
+//            }else{
+//                break;
+//            }
+//        }
+//        return el;
+//    }
 
     void cacheResult(Expr origExpr, Expr res){
         if( subResults.containsKey(origExpr) ){
@@ -181,44 +181,44 @@ public class Calc {
         }
     }
 
-    Expr tryByPairsDeep(Expr expr, AssocCommutCancelRule assocCommutCancelRule){
-        Expr enew = tryByPairs(expr, assocCommutCancelRule);
-        if( enew!=null ){
-            return enew;
-        }
-        if( expr.hasChildren() ){
-            for(int i=0; i<expr.subCount(); i++ ){
-                Expr s = expr.child(i);
-                Expr sTry = tryByPairsDeep(s, assocCommutCancelRule);
-                if( sTry != null ){
-                    return expr.replaceChild(i, sTry);
-                }
-            }
-        }
-        return null;
-    }
+//    Expr tryByPairsDeep(Expr expr, AssocCommutCancelRule assocCommutCancelRule){
+//        Expr enew = tryByPairs(expr, assocCommutCancelRule);
+//        if( enew!=null ){
+//            return enew;
+//        }
+//        if( expr.hasChildren() ){
+//            for(int i=0; i<expr.subCount(); i++ ){
+//                Expr s = expr.child(i);
+//                Expr sTry = tryByPairsDeep(s, assocCommutCancelRule);
+//                if( sTry != null ){
+//                    return expr.replaceChild(i, sTry);
+//                }
+//            }
+//        }
+//        return null;
+//    }
 
-    private Expr tryByPairs(Expr expr, AssocCommutCancelRule assocCommutCancelRule) {
-        Set<Expr> splitPairs = assocCommutCancelRule.separateAllPossiblePairs(expr);
-        //System.out.println("split pairs size="+splitPairs.size());
-        for( Expr esplitPair : splitPairs ){
-
-            Expr pair = esplitPair.child(0);
-            Expr e1 = assocCommutCancelRule.optimizeDeep(pair);
-            pair = assocCommutCancelRule.optimizeDeep(Normalizer.multDiv.optimizeDeep(e1));
-            List<FringeEl> exprNew = exprSimplifyDeep(pair, new Scope());
-            //System.out.println("   split pair: simplNew.size="+exprNew.size()+" "+esplitPair.toMathString());
-            for( FringeEl fe : exprNew ){
-                if( fe.expr.toLispString().length()<pair.toLispString().length() ){
-                    //System.out.println(""+e+" "+pair);
-                    expr = new Expr(assocCommutCancelRule.getRolePlus(), fe.expr , esplitPair.child(1));
-                    expr = assocCommutCancelRule.optimizeDeep(Normalizer.multDiv.optimizeDeep(assocCommutCancelRule.optimizeDeep(expr)));
-                    return expr;
-                }
-            }
-        }
-        return null;
-    }
+//    private Expr tryByPairs(Expr expr, AssocCommutCancelRule assocCommutCancelRule) {
+//        Set<Expr> splitPairs = assocCommutCancelRule.separateAllPossiblePairs(expr);
+//        //System.out.println("split pairs size="+splitPairs.size());
+//        for( Expr esplitPair : splitPairs ){
+//
+//            Expr pair = esplitPair.child(0);
+//            Expr e1 = assocCommutCancelRule.optimizeDeep(pair);
+//            pair = assocCommutCancelRule.optimizeDeep(Normalizer.multDiv.optimizeDeep(e1));
+//            List<FringeEl> exprNew = exprSimplifyDeep(pair, new Scope());
+//            //System.out.println("   split pair: simplNew.size="+exprNew.size()+" "+esplitPair.toMathString());
+//            for( FringeEl fe : exprNew ){
+//                if( fe.expr.toLispString().length()<pair.toLispString().length() ){
+//                    //System.out.println(""+e+" "+pair);
+//                    expr = new Expr(assocCommutCancelRule.getRolePlus(), fe.expr , esplitPair.child(1));
+//                    expr = assocCommutCancelRule.optimizeDeep(Normalizer.multDiv.optimizeDeep(assocCommutCancelRule.optimizeDeep(expr)));
+//                    return expr;
+//                }
+//            }
+//        }
+//        return null;
+//    }
 
     FringeEl shortest(Collection<FringeEl> fringe){
         FringeEl sh=null;
@@ -269,8 +269,8 @@ public class Calc {
         for (Rule r : rules) {
             if (r.assertion.node.equals("=")) {
                 Expr template = r.assertion.child(0);
-                Map<String, Expr> unifMap = template.unify(expr);
-                if( unifMap!=null ) {
+                List<Map<String,Expr>> cases = template.unifyOptions(expr);
+                for( Map<String, Expr> unifMap : cases ){
                     if( expr.toString().equals("(apply (apply ∂ (func x (+ (^ x 2) 7))) x)") ){
                         breakpoint();
                     }
