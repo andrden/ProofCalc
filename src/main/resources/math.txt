@@ -421,6 +421,7 @@ $= x * x
 
 $? ∂ ( x ↦ x * x )
 $= (x ↦ 2 * x)
+# at this point we don't yet have convenient rules for derivatives, so we compute directly from definition (using limits)
 
 $? lim0 (y ↦ cos (y / 2 + x))
 $= cos(x)
@@ -773,7 +774,7 @@ $? (∂ ff) ( x )
 $= - 0.25 * (x ^ (- 1.5))
 
 $e ff = (x ↦ √ x)
-$?focus (∂ (∂ ff)) ( x )
+$? (∂ (∂ ff)) ( x )
 $= - 0.25 * (x ^ (- 1.5))
 
 $e ff = ( x ↦ √ (x + 1) )
@@ -791,6 +792,19 @@ $= 2
 $e ff = ( x ↦ (1 + x) ^ 2 )
 $? (∂ ff) ( x )
 $= (1 + x) * 2
+
+$? (∂ ( x ↦ x * x )) ( x )
+$= 2 * x
+
+$? (∂ ( x ↦ sin(x) * sin(x) )) ( x )
+$= cos(x) * sin(x) * 2
+
+$? (∂ ( x ↦ x * sin(x) )) ( x )
+$= cos(x) * x + sin(x)
+
+$e ff = ( x ↦ 2 * (1 + x) ^ 2 )
+$?focus (∂ ff)
+$= (1 + x) * 4
 
 $e ff = ( x ↦ 2 * (1 + x) ^ 2 )
 $? (∂ ff) ( x )

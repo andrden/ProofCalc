@@ -56,6 +56,7 @@ public class Calc {
             return subResults.get(expr);
         }
         final Expr origExpr = expr;
+        cacheResult(origExpr, origExpr); // protection against self-recursive calls and StackOverflow
         String indent = (checkIfAnswer==null ? null/*"    "*/:"");
         println(indent, "\n");
         println(indent, "================QUEST:\n" + expr + "\n");
@@ -174,8 +175,8 @@ public class Calc {
 //    }
 
     void cacheResult(Expr origExpr, Expr res){
-        if( subResults.containsKey(origExpr) ){
-            throw new IllegalStateException();
+        if( subResults.containsKey(origExpr) && ! origExpr.equals(subResults.get(origExpr)) ){
+            throw new IllegalStateException("different non-identical transformation");
         }else{
             subResults.put(origExpr, res);
         }
