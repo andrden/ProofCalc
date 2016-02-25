@@ -516,6 +516,7 @@ $a ∂ f = ( x ↦ ( ∂ g ) (x) + ( ∂ h ) (x) )
 $e f = ( x ↦ a(x) + b(x) + c(x) )
 $a ∂ f = ( x ↦ ( ∂ a ) (x) + ( ∂ b ) (x) + ( ∂ c ) (x) )
 
+$name deriv*
 $e f = ( x ↦ g(x) * h(x) )
 $a ∂ f = ( x ↦ ( ∂ g )(x) * h(x) + g(x) * ( ∂ h )(x) )
 
@@ -802,8 +803,7 @@ $= cos(x) * sin(x) * 2
 $? (∂ ( x ↦ x * sin(x) )) ( x )
 $= cos(x) * x + sin(x)
 
-$e ff = ( x ↦ 2 * (1 + x) ^ 2 )
-$?focus (∂ ff)
+$?focus (∂ ( x ↦ 2 * (1 + x) ^ 2 ))
 $= (1 + x) * 4
 
 $e ff = ( x ↦ 2 * (1 + x) ^ 2 )

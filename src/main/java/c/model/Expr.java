@@ -9,6 +9,7 @@ public class Expr {
     public final String node;
     final Expr[] sub;
     private String lispString;
+    int minElems;
 
     public static Expr True = node("True");
     public static Expr False = node("False");
@@ -20,6 +21,7 @@ public class Expr {
     public Expr(String node) {
         this.node = node;
         sub = null;
+        validate();
     }
 
     public Expr(String node, Expr a1) {
@@ -92,6 +94,14 @@ public class Expr {
         }
         if( node.equals("func") && ! sub[0].isVar() ){
             throw new IllegalStateException(""+this);
+        }
+        minElems = 1;
+        if( sub!=null && ! node.equals("apply") && ! node.equals("func")){
+            // Note for apply: "x ↦ cos(g(x))" can be unified with "x ↦ cos(x)" using "{g=(func x x)}
+            // Note for func: "x ↦ cos(g(x))" can be unified with "cos" using "{g=(func x x)}"
+            for( Expr e : sub ){
+                minElems += e.minElems;
+            }
         }
     }
 
@@ -179,6 +189,9 @@ public class Expr {
     }
 
     public List<Map<String,Expr>> unifyOptions(Expr concrete) {
+        if( minElems > concrete.minElems){
+            return Collections.emptyList();
+        }
         List<Map<String,Expr>> cases = unifyImpl(concrete);
         if( ! cases.isEmpty() ){
             return cases;

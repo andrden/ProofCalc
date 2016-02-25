@@ -51,6 +51,16 @@ public class Calc {
         }
     }
 
+    List<FringeEl> findChildren(Set<FringeEl> set, FringeEl parent){
+        List<FringeEl> list = new ArrayList<>();
+        for( FringeEl e : set ){
+            if( e.parent==parent ){
+                list.add(e);
+            }
+        }
+        return list;
+    }
+
     public Expr quest(Expr expr, Predicate<Expr> checkIfAnswer, int maxOps){
         if( subResults.containsKey(expr) ){
             return subResults.get(expr);
@@ -68,7 +78,7 @@ public class Calc {
 //            System.out.println("QUEST try: "+expr.toMathString());
 //        }
 
-        Set<FringeEl> fringe = new HashSet<>();
+        Set<FringeEl> fringe = new LinkedHashSet<>();
         fringe.add(new FringeEl(expr, null, null));
 
         Set<FringeEl> visited = new LinkedHashSet<>(); // for avoiding loops
@@ -270,7 +280,15 @@ public class Calc {
         for (Rule r : rules) {
             if (r.assertion.node.equals("=")) {
                 Expr template = r.assertion.child(0);
-                List<Map<String,Expr>> cases = template.unifyOptions(expr);
+                List<Map<String,Expr>> cases;
+                if( r.freeVariables.isEmpty() && ! template.equals(expr) ){
+                    cases = Collections.emptyList(); // no way it can be unified
+                }else {
+                    cases = template.unifyOptions(expr);
+                }
+                if( r.hasName() && expr.toString().contains("∂") ){
+                    breakpoint();
+                }
                 for( Map<String, Expr> unifMap : cases ){
                     if( expr.toString().equals("(apply (apply ∂ (func x (+ (^ x 2) 7))) x)") ){
                         breakpoint();
@@ -280,8 +298,10 @@ public class Calc {
                         if( r.freeVariables.containsAll(m.keySet()) ){
                             Expr exprNew = r.assertion.child(1).substitute(m);
                             //System.out.println(expr + " ==simplified==> " + exprNew);
-                            FringeEl fe = new FringeEl(exprNew, r, m);
-                            ways.add(fe);
+                            if( ! exprNew.toLispString().contains(expr.toLispString()) ) { // if we are not actually complicating
+                                FringeEl fe = new FringeEl(exprNew, r, m);
+                                ways.add(fe);
+                            }
                         }
                     }
                 }

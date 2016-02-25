@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
  * Created by denny on 8/6/15.
  */
 public class Rule {
+    String name;
     List<String> srcLines;
 
     public List<Expr> cond;
@@ -23,6 +24,13 @@ public class Rule {
         this.cond = cond;
         this.srcLines = srcLines;
         freeVariables = assertion==null ? null : assertion.freeVariables();
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+    public boolean hasName(){
+        return name != null;
     }
 
     @Override

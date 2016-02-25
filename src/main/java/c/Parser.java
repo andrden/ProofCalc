@@ -79,9 +79,12 @@ public class Parser {
                 answer = parse(line);
             }
         }
+        String ruleName = null;
         for( String l : lines ){
             LinkedList<String> line = new LinkedList<>(splitLine(l));
-            if( line.get(0).equals("$e") ){
+            if( line.get(0).equals("$name") ){
+                ruleName = line.get(1);
+            }else if( line.get(0).equals("$e") ){
                 line.remove(0);
                 Expr e = parse(line);
                 cond.add(e);
@@ -91,7 +94,9 @@ public class Parser {
                 if( answer!=null ){
                     throw new IllegalStateException();
                 }
-                return new Rule(assertion, cond, new ArrayList<>(lines));
+                Rule rule = new Rule(assertion, cond, new ArrayList<>(lines));
+                rule.setName(ruleName);
+                return rule;
             } else if( line.get(0).equals("$?")
                     || line.get(0).equals("$a?")
                     || line.get(0).equals("$a?focus")
@@ -102,6 +107,7 @@ public class Parser {
                 line.remove(0);
                 Expr assertion = parse(line);
                 QuestRule qr = new QuestRule(assertion, cond, answer, new ArrayList<>(lines));
+                qr.setName(ruleName);
                 qr.focus = focus;
                 if( reusable ){
                     qr.reusable = true;

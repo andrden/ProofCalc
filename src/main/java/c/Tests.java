@@ -66,6 +66,7 @@ public class Tests {
     static void testUnify(){
 
         UTest[] rarr = {
+                new UTest( "x ↦ cos(g(x))", "cos", "{g=(func x x)}"),
                 new UTest( "lim0 ( y ↦ x )", "lim0 ( x ↦ x )", "null"),
                 new UTest( "( ∂ ( x ↦ x ^ n ) )(x)", "( ∂ ( x ↦ x ^ 4 ) )(x)", "{n=4, x=x}"),
                 new UTest("const (x ↦ y)", "const (x ↦ x * x * x)", "null"),
@@ -73,7 +74,6 @@ public class Tests {
                 new UTest("x ↦ g( h(x) )", "x ↦ cos(sin(x))", "{h=sin, g=cos}"),
                 new UTest( "x", "x + 1", "{x=(+ x 1)}"),
                 new UTest( "x ↦ cos(g(x))", "x ↦ cos(x)", "{g=(func x x)}"),
-                new UTest( "x ↦ cos(g(x))", "cos", "{g=(func x x)}"),
                 new UTest( "x ↦ h(x)", "x ↦ cos(sin(x))", "{h=(func x (apply cos (apply sin x)))}"),
                 new UTest( "x ↦ g( h(x) )", "x ↦ sin(cos(sin(x)))", "{h=(func x (apply cos (apply sin x))), g=sin}"),
                 new UTest( "x ↦ g( h(x) )", "x ↦ 1 - sin(sin(x)) * sin(sin(x))",
