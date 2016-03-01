@@ -10,3 +10,8 @@ $a ( ∂ f ) ( x ) = 0
 $e ff ( x ) = 5
 $? ( ∂ ff ) ( x )
 $= 0
+
+#$e ff ( x ) = 5 * x
+#$? const ff
+#$= False - can't be sure, maybe 'const' predicate means 'const-like, not exponential, for example'
+

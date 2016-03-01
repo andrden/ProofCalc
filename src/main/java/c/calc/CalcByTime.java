@@ -55,10 +55,41 @@ public class CalcByTime {
     }
     class ExprTreeEl{
         Expr expr;
+        int opIdx=0;
         List<ChangeTreeEl> changes;
+        List<ChangeTreeEl> changesLeft;
+        Expr res;
+        boolean stalled = false;
+
 
         ExprTreeEl(Expr expr) {
             this.expr = expr;
+        }
+
+        void doOper(){
+            if( stalled ){
+                return;
+            }
+            populateChildren();
+            ChangeTreeEl ch = changesLeft.get(opIdx);
+
+            ch.doOper();
+            if( ch.stalled ){
+                changesLeft.remove(opIdx); // dead end
+            }else if( ch.exprFromRule!=null ) {
+                if (expr.equals(ch.exprFromRule)) {
+                    res = Expr.True;
+                } else if (ch.exprFromRule.node.equals("=") && expr.equals(ch.exprFromRule.child(0))){
+                    res = ch.exprFromRule.child(1);
+                }else{
+                    changesLeft.remove(opIdx); // dead end
+                }
+            }
+            if( changesLeft.isEmpty() ){
+                stalled = true;
+            }else {
+                opIdx = (opIdx + 1) % changesLeft.size();
+            }
         }
 
         void populateChildren(){
@@ -66,15 +97,50 @@ public class CalcByTime {
                 return;
             }
             changes = exprSimplifyDeep(expr, new Scope());
+            changesLeft = new ArrayList<>(changes);
         }
     }
     class ChangeTreeEl{
         Rule r;
         Map<String, Expr> unifMap;
+        Expr condSubs;
+        ExprTreeEl condCheck;
+        Expr exprFromRule;
+        boolean stalled = false;
 
         ChangeTreeEl(Rule r, Map<String, Expr> unifMap) {
             this.r = r;
             this.unifMap = unifMap;
+            if( ! r.cond.isEmpty() ) {
+                Expr cond = r.cond.iterator().next();
+                condSubs = cond.substitute(unifMap);
+                condCheck = new ExprTreeEl(condSubs);
+            }
+        }
+        void doOper() {
+            if( condCheck!=null ) {
+                condCheck.doOper();
+                if( condCheck.stalled ){
+                    stalled = true;
+                    return;
+                }
+                if( condCheck.res==Expr.True ){
+                    condCheck=null;
+                }
+            }
+
+            if( condCheck==null ){
+                if (r.freeVariables.containsAll(unifMap.keySet())) {
+                    //exprNew = r.assertion.child(1).substitute(unifMap);
+                    exprFromRule = r.assertion.substitute(unifMap);
+
+                    //System.out.println(expr + " ==simplified==> " + exprNew);
+                    //                if( ! exprNew.toLispString().contains(expr.toLispString()) ) { // if we are not actually complicating
+                    //                    FringeEl fe = new FringeEl(exprNew, r, m);
+                    //                    ways.add(fe);
+                    //                }
+                }
+            }
         }
     }
 
@@ -89,9 +155,18 @@ public class CalcByTime {
         println(indent, "================QUEST:\n" + expr + "\n");
 
 
+        FringeEl resultPath = null;
+
         expr = Normalizer.normalize(expr);
         ExprTreeEl exprTreeEl = new ExprTreeEl(expr);
-        exprTreeEl.populateChildren();
+        int step=0;
+        for(; step<100 && !exprTreeEl.stalled; step++){
+            exprTreeEl.doOper();
+            if( exprTreeEl.res!=null ){
+                resultPath = new FringeEl(exprTreeEl.res, null, null);
+                break;
+            }
+        }
 
         Set<FringeEl> fringe = new LinkedHashSet<>();
         fringe.add(new FringeEl(expr, null, null));
@@ -99,61 +174,59 @@ public class CalcByTime {
         Set<FringeEl> visited = new LinkedHashSet<>(); // for avoiding loops
         visited.addAll(fringe);
 
-        FringeEl resultPath = null;
-        int step=0;
-        while (++step<maxOps && ! fringe.isEmpty() ) {
-            FringeEl el = shortest(fringe);
-            if( ! el.expr.hasChildren() ){
-                resultPath = el;
-                break; // single term cannot be simplified
-            }
-            if( el.toString().contains("(+ (* (^ x 2) (apply cos x)) (* (apply sin x) 2 x))") ){
-                breakpoint();
-            }
-            if( checkIfAnswer!=null && checkIfAnswer.test(el.expr) ){ // answer reached, no more work required
-                resultPath = el;
-                break;
-            }
-//            if( el.expr.toLispString().length()<q.assertion.toLispString().length() ){
+//        while (++step<maxOps && ! fringe.isEmpty() ) {
+//            FringeEl el = shortest(fringe);
+//            if( ! el.expr.hasChildren() ){
+//                resultPath = el;
+//                break; // single term cannot be simplified
+//            }
+//            if( el.toString().contains("(+ (* (^ x 2) (apply cos x)) (* (apply sin x) 2 x))") ){
+//                breakpoint();
+//            }
+//            if( checkIfAnswer!=null && checkIfAnswer.test(el.expr) ){ // answer reached, no more work required
+//                resultPath = el;
 //                break;
 //            }
-            fringe.remove(el);
-            String exprString = el.expr.toMathString();
-            println(indent, "QUEST try #" + step + ": " + exprString);
-            if( exprString.contains("(lim0 (func y ((cos ((y * (/ 2)) + x)) * (sin (y * (/ 2))) * 2 * (/ y))))") ){
-                breakpoint();
-            }
-            //el = tryByPairs(el);
-            el = el.newExpr(Normalizer.normalize(el.expr));
-            if( ! visited.contains(el) ){
-                visited.add(el);
-                fringe.add(el);
-            }
-
-//            List<FringeEl> exprNew = exprSimplifyDeep(el.expr, new Scope());
-//            for( FringeEl feNew : exprNew ){
-//                Expr e = feNew.expr;
-//                e = Normalizer.normalize(e);
-//                e = e.simplifyApplyFunc();
-//                e = Normalizer.normalize(e);
-//                feNew = feNew.newExpr(e);
-//                feNew.parent = el;
-//                if( ! visited.contains(feNew) ){
-//                    visited.add(feNew);
-//                    fringe.add(feNew);
+////            if( el.expr.toLispString().length()<q.assertion.toLispString().length() ){
+////                break;
+////            }
+//            fringe.remove(el);
+//            String exprString = el.expr.toMathString();
+//            println(indent, "QUEST try #" + step + ": " + exprString);
+//            if( exprString.contains("(lim0 (func y ((cos ((y * (/ 2)) + x)) * (sin (y * (/ 2))) * 2 * (/ y))))") ){
+//                breakpoint();
+//            }
+//            //el = tryByPairs(el);
+//            el = el.newExpr(Normalizer.normalize(el.expr));
+//            if( ! visited.contains(el) ){
+//                visited.add(el);
+//                fringe.add(el);
+//            }
+//
+////            List<FringeEl> exprNew = exprSimplifyDeep(el.expr, new Scope());
+////            for( FringeEl feNew : exprNew ){
+////                Expr e = feNew.expr;
+////                e = Normalizer.normalize(e);
+////                e = e.simplifyApplyFunc();
+////                e = Normalizer.normalize(e);
+////                feNew = feNew.newExpr(e);
+////                feNew.parent = el;
+////                if( ! visited.contains(feNew) ){
+////                    visited.add(feNew);
+////                    fringe.add(feNew);
+////                }
+////            }
+//        }
+//        if( resultPath==null ){
+//            resultPath = shortest(visited);
+//            if( checkIfAnswer!=null ){
+//                List<FringeEl> topShortest = topShortest(visited, 15);
+//                Collections.reverse(topShortest);
+//                for( FringeEl el : topShortest ){
+//                    println(indent, "Candidate: "+el.expr.toMathString());
 //                }
 //            }
-        }
-        if( resultPath==null ){
-            resultPath = shortest(visited);
-            if( checkIfAnswer!=null ){
-                List<FringeEl> topShortest = topShortest(visited, 15);
-                Collections.reverse(topShortest);
-                for( FringeEl el : topShortest ){
-                    println(indent, "Candidate: "+el.expr.toMathString());
-                }
-            }
-        }
+//        }
         Expr res = resultPath.expr;
         cacheResult(origExpr, res);
         if( checkIfAnswer!=null ){
@@ -244,9 +317,6 @@ public class CalcByTime {
                 }else {
                     cases = template.unifyOptions(expr);
                 }
-                if( r.hasName() && expr.toString().contains("∂") ){
-                    breakpoint();
-                }
                 for( Map<String, Expr> unifMap : cases ){
                     changes.add(new ChangeTreeEl(r, unifMap));
 
@@ -267,12 +337,13 @@ public class CalcByTime {
             }else{
                 Map<String, Expr> unifMap = r.assertion.unify(expr);
                 if( unifMap!=null ) {
-                    List<Map<String, Expr>> subDerivations = checkCanUseRule(r, unifMap, scope);
-                    boolean canUseRule = ! subDerivations.isEmpty();
-                    if( canUseRule ) {
-                        //System.out.println("ok");
-                        ways.add(new FringeEl(new Expr("True"), r, unifMap));
-                    }
+                    changes.add(new ChangeTreeEl(r, unifMap));
+//                    List<Map<String, Expr>> subDerivations = checkCanUseRule(r, unifMap, scope);
+//                    boolean canUseRule = ! subDerivations.isEmpty();
+//                    if( canUseRule ) {
+//                        //System.out.println("ok");
+//                        ways.add(new FringeEl(new Expr("True"), r, unifMap));
+//                    }
                 }
             }
         }
