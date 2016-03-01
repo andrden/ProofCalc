@@ -1,6 +1,7 @@
 package c;
 
 import c.calc.Calc;
+import c.calc.CalcByTime;
 import c.model.Expr;
 import c.model.Normalizer;
 import c.model.Rule;
@@ -79,7 +80,10 @@ public class MainSupport {
                 if( countFocus==1 && ! qrule.focus ){
                     System.out.println("skipped non-focus quest rule");
                 }else {
-                    Calc calc = new Calc(rules, qrule.localConditionsAsRules());
+
+                    //Calc calc = new Calc(rules, qrule.localConditionsAsRules());
+                    CalcByTime calc = new CalcByTime(rules, qrule.localConditionsAsRules());
+
                     Expr qruleAnswer = qrule.answer==null ? null : Normalizer.normalize(qrule.answer);
                     Expr ret = calc.quest(r.assertion,
                             e -> qruleAnswer != null && e.toLispString().equals(qruleAnswer.toLispString()),
