@@ -25,15 +25,15 @@ public class CalcByTime {
 //            if( ! r.assertion.equals(Normalizer.normalize(r.assertion)) ){
 //              r = new Rule(Normalizer.normalize(r.assertion), r.cond, r.getSrcLines());
 //            }
-            this.rules.add(r);
+            //this.rules.add(r);
             List<Expr> condsNorm = new ArrayList<>();
             for( Expr ce : r.cond ){
                 Expr ceNorm = Normalizer.normalize(ce);
                 condsNorm.add(ceNorm);
             }
-            if( ! r.cond.equals(condsNorm) ){
+            //if( ! r.cond.equals(condsNorm) ){
                 this.rules.add(new Rule(r.assertion, condsNorm, r.getSrcLines()));
-            }
+            //}
         }
 
         // need to try to optimize quest-local rules, i.e. preconditions for quest
@@ -50,27 +50,40 @@ public class CalcByTime {
 //        }
     }
 
-    class RuleAppl{
-
-    }
     class ExprTreeEl{
+        long ops=0;
+        final boolean canChooseParameters;
+        List<Map<String,Expr>> suggestedParameters;
+
         Expr expr;
         int opIdx=0;
         List<ChangeTreeEl> changes;
         List<ChangeTreeEl> changesLeft;
         Expr res;
-        boolean stalled = false;
 
-
-        ExprTreeEl(Expr expr) {
+        ExprTreeEl(Expr expr, boolean canChooseParameters) {
             this.expr = expr;
+            this.canChooseParameters = canChooseParameters;
+        }
+
+        @Override
+        public String toString() {
+            return ""+expr;
+        }
+
+        boolean finished(){
+            return changesLeft!=null && changesLeft.isEmpty();
         }
 
         void doOper(){
-            if( stalled ){
+            ops++;
+            if( finished() ){
                 return;
             }
             populateChildren();
+            if( finished() ){
+                return;
+            }
             ChangeTreeEl ch = changesLeft.get(opIdx);
 
             ch.doOper();
@@ -79,15 +92,17 @@ public class CalcByTime {
             }else if( ch.exprFromRule!=null ) {
                 if (expr.equals(ch.exprFromRule)) {
                     res = Expr.True;
-                } else if (ch.exprFromRule.node.equals("=") && expr.equals(ch.exprFromRule.child(0))){
+                } else if (ch.exprFromRule.node.equals("=") && expr.equals(ch.exprFromRule.child(0))) {
                     res = ch.exprFromRule.child(1);
-                }else{
-                    changesLeft.remove(opIdx); // dead end
+                } else if( canChooseParameters ){
+                    suggestedParameters = expr.unifyOptions(ch.exprFromRule);
+                    if( suggestedParameters.isEmpty() ){
+                        suggestedParameters = null;
+                    }
                 }
+                changesLeft.remove(opIdx); // dead end
             }
-            if( changesLeft.isEmpty() ){
-                stalled = true;
-            }else {
+            if( ! finished() ){
                 opIdx = (opIdx + 1) % changesLeft.size();
             }
         }
@@ -101,11 +116,13 @@ public class CalcByTime {
         }
     }
     class ChangeTreeEl{
+        long ops;
         Rule r;
         Map<String, Expr> unifMap;
-        Expr condSubs;
+        boolean condsOk = false;
         ExprTreeEl condCheck;
         Expr exprFromRule;
+        List<Map<String,Expr>> suggestedParameters;
         boolean stalled = false;
 
         ChangeTreeEl(Rule r, Map<String, Expr> unifMap) {
@@ -113,26 +130,34 @@ public class CalcByTime {
             this.unifMap = unifMap;
             if( ! r.cond.isEmpty() ) {
                 Expr cond = r.cond.iterator().next();
+                Expr condSubs;
                 condSubs = cond.substitute(unifMap);
-                condCheck = new ExprTreeEl(condSubs);
+                condCheck = new ExprTreeEl(condSubs, true);
+            }else{
+                condsOk = true;
             }
         }
         void doOper() {
-            if( condCheck!=null ) {
+            ops++;
+            if( ! condsOk && ! stalled ) {
                 condCheck.doOper();
-                if( condCheck.stalled ){
+                if( condCheck.res==Expr.True || condCheck.suggestedParameters!=null ){
+                    suggestedParameters = condCheck.suggestedParameters;
+                    condsOk = true;
+                }else if( condCheck.finished() ){
                     stalled = true;
                     return;
                 }
-                if( condCheck.res==Expr.True ){
-                    condCheck=null;
-                }
             }
 
-            if( condCheck==null ){
-                if (r.freeVariables.containsAll(unifMap.keySet())) {
+            if( condsOk ){
+                Map<String, Expr> subs = new HashMap<>(unifMap);
+                if( suggestedParameters!=null ){
+                    subs.putAll(suggestedParameters.get(0));
+                }
+                if (r.freeVariables.containsAll(subs.keySet())) {
                     //exprNew = r.assertion.child(1).substitute(unifMap);
-                    exprFromRule = r.assertion.substitute(unifMap);
+                    exprFromRule = r.assertion.substitute(subs);
 
                     //System.out.println(expr + " ==simplified==> " + exprNew);
                     //                if( ! exprNew.toLispString().contains(expr.toLispString()) ) { // if we are not actually complicating
@@ -158,9 +183,9 @@ public class CalcByTime {
         FringeEl resultPath = null;
 
         expr = Normalizer.normalize(expr);
-        ExprTreeEl exprTreeEl = new ExprTreeEl(expr);
+        ExprTreeEl exprTreeEl = new ExprTreeEl(expr, false);
         int step=0;
-        for(; step<100 && !exprTreeEl.stalled; step++){
+        for(; step<100 && !exprTreeEl.finished(); step++){
             exprTreeEl.doOper();
             if( exprTreeEl.res!=null ){
                 resultPath = new FringeEl(exprTreeEl.res, null, null);
