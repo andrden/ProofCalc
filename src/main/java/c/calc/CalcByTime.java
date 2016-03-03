@@ -50,15 +50,37 @@ public class CalcByTime {
 //        }
     }
 
+    class Results{
+        Set<Expr> set = new HashSet<>();
+        List<Expr> nextGroup = new ArrayList<>();
+        boolean add(Expr expr){
+            if( set.add(expr) ){
+                nextGroup.add(expr);
+                return true;
+            }else{
+                return false;
+            }
+        }
+        List<Expr> takeNextGroup(){
+            if( ! nextGroup.isEmpty() ){
+                List<Expr> ret = nextGroup;
+                nextGroup = new ArrayList<>();
+                return ret;
+            }
+            return Collections.emptyList();
+        }
+    }
+
     class ExprTreeEl{
+        Expr expr;
+        List<ChangeTreeEl> changes;
+
         long ops=0;
         final boolean canChooseParameters;
         List<Map<String,Expr>> suggestedParameters;
 
-        Expr expr;
         int opIdx=0;
-        List<ChangeTreeEl> changes;
-        List<ChangeTreeEl> changesLeft;
+        List<ChangeTreeEl> changesNotFinished;
         Expr res;
 
         ExprTreeEl(Expr expr, boolean canChooseParameters) {
@@ -72,10 +94,10 @@ public class CalcByTime {
         }
 
         boolean finished(){
-            return changesLeft!=null && changesLeft.isEmpty();
+            return changesNotFinished !=null && changesNotFinished.isEmpty();
         }
 
-        void doOper(){
+        void doOper(Results results){
             ops++;
             if( finished() ){
                 return;
@@ -84,11 +106,11 @@ public class CalcByTime {
             if( finished() ){
                 return;
             }
-            ChangeTreeEl ch = changesLeft.get(opIdx);
+            ChangeTreeEl ch = changesNotFinished.get(opIdx);
 
-            ch.doOper();
+            ch.doOper(results, expr);
             if( ch.stalled ){
-                changesLeft.remove(opIdx); // dead end
+                changesNotFinished.remove(opIdx); // dead end
             }else if( ch.exprFromRule!=null ) {
                 if (expr.equals(ch.exprFromRule)) {
                     res = Expr.True;
@@ -100,10 +122,12 @@ public class CalcByTime {
                         suggestedParameters = null;
                     }
                 }
-                changesLeft.remove(opIdx); // dead end
+                if( ch.finished() ) {
+                    changesNotFinished.remove(opIdx);
+                }
             }
             if( ! finished() ){
-                opIdx = (opIdx + 1) % changesLeft.size();
+                opIdx = (opIdx + 1) % changesNotFinished.size();
             }
         }
 
@@ -112,10 +136,13 @@ public class CalcByTime {
                 return;
             }
             changes = exprSimplifyDeep(expr, new Scope());
-            changesLeft = new ArrayList<>(changes);
+            changesNotFinished = new ArrayList<>(changes);
         }
     }
+
+
     class ChangeTreeEl{
+        ExprTreeEl next;
         long ops;
         Rule r;
         Map<String, Expr> unifMap;
@@ -124,6 +151,15 @@ public class CalcByTime {
         Expr exprFromRule;
         List<Map<String,Expr>> suggestedParameters;
         boolean stalled = false;
+
+        boolean finished(){
+            return stalled || (next!=null && next.finished());
+        }
+
+        @Override
+        public String toString() {
+            return (stalled ? "stalled  " : "") + r;
+        }
 
         ChangeTreeEl(Rule r, Map<String, Expr> unifMap) {
             this.r = r;
@@ -137,10 +173,14 @@ public class CalcByTime {
                 condsOk = true;
             }
         }
-        void doOper() {
+        void doOper(Results results, Expr origExpr) {
             ops++;
+            if( next!=null ){
+                next.doOper(results);
+                return;
+            }
             if( ! condsOk && ! stalled ) {
-                condCheck.doOper();
+                condCheck.doOper(null);
                 if( condCheck.res==Expr.True || condCheck.suggestedParameters!=null ){
                     suggestedParameters = condCheck.suggestedParameters;
                     condsOk = true;
@@ -158,6 +198,20 @@ public class CalcByTime {
                 if (r.freeVariables.containsAll(subs.keySet())) {
                     //exprNew = r.assertion.child(1).substitute(unifMap);
                     exprFromRule = r.assertion.substitute(subs);
+                    Expr subst;
+                    if( exprFromRule.node.equals("=") ) {
+                        subst = applySubstitution(origExpr, exprFromRule.child(0), exprFromRule.child(1));
+                    }else {
+                        subst = applySubstitution(origExpr, exprFromRule, Expr.True);
+                    }
+                    subst = subst.simplifyApplyFunc();
+                    if( results!=null ) {
+                        if (results.add(subst)) {
+                            next = new ExprTreeEl(subst, false);
+                        } else {
+                            stalled = true; // this is a duplicate branch
+                        }
+                    }
 
                     //System.out.println(expr + " ==simplified==> " + exprNew);
                     //                if( ! exprNew.toLispString().contains(expr.toLispString()) ) { // if we are not actually complicating
@@ -184,13 +238,21 @@ public class CalcByTime {
 
         expr = Normalizer.normalize(expr);
         ExprTreeEl exprTreeEl = new ExprTreeEl(expr, false);
+        Results results = new Results();
+        results.add(expr);
         int step=0;
         for(; step<100 && !exprTreeEl.finished(); step++){
-            exprTreeEl.doOper();
-            if( exprTreeEl.res!=null ){
-                resultPath = new FringeEl(exprTreeEl.res, null, null);
-                break;
+            exprTreeEl.doOper(results);
+            for( Expr e : results.takeNextGroup() ) {
+                e = Normalizer.normalize(e);
+                if (checkIfAnswer != null && checkIfAnswer.test(e)) { // answer reached, no more work required
+                    resultPath = new FringeEl(e, null, null);
+                    break;
+                }
             }
+        }
+        if( resultPath==null && exprTreeEl.res!=null ){
+            resultPath = new FringeEl(exprTreeEl.res, null, null);
         }
 
         Set<FringeEl> fringe = new LinkedHashSet<>();
@@ -299,6 +361,23 @@ public class CalcByTime {
         return fringe.stream().sorted((a,b) -> Long.compare(a.expr.toLispString().length(),b.expr.toLispString().length()) )
                 .limit(n)
                 .collect(Collectors.toList());
+    }
+
+    Expr applySubstitution(Expr expr, Expr from, Expr to){
+        if( expr.equals(from) ){
+            return to;
+        }
+        if( expr.hasChildren() ){
+            for (int i = 0; i < expr.subCount(); i++) {
+                Expr child = expr.child(i);
+                Expr subst = applySubstitution(child, from, to);
+                if( subst!=null ){
+                    Expr clone = expr.replaceChild(i, subst);
+                    return clone;
+                }
+            }
+        }
+        return null;
     }
 
     List<ChangeTreeEl> exprSimplifyDeep(Expr expr, Scope scope) {
