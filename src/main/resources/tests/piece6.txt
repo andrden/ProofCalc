@@ -41,7 +41,7 @@ $? ( ∂ ( x ↦ 1 ) ) ( x )
 $= 0
 
 $e ff = ( x ↦ x ^ 2 + 5 )
-$? ( ∂ ff ) ( x )
+$?focus ( ∂ ff ) ( x )
 $= 2 * x
 #DERIV path: ((∂ ff) x)
 #DERIV path: By $e f = ( x ↦ g ( x ) + h ( x ) )  $a ( ∂ f ) ( x ) = ( ∂ g ) ( x ) + ( ∂ h ) ( x ) {x=x} =>  (((∂ (func x (x ^ 2))) x) + ((∂ (func x 5)) x))

@@ -136,6 +136,15 @@ public class CalcByTime {
                 return;
             }
             changes = exprSimplifyDeep(expr, new Scope());
+            if( changes.isEmpty() && canChooseParameters ) {
+                for (Rule r : rules) {
+                    List<Map<String, Expr>> opts = expr.unifyOptions(r.assertion);
+                    if( ! opts.isEmpty() ){
+                        suggestedParameters = opts;
+                        break;
+                    }
+                }
+            }
             changesNotFinished = new ArrayList<>(changes);
         }
     }
