@@ -12,7 +12,7 @@ public class Main {
 
         //MainSupport.runMainFile();
         //MainSupport.runPieces();
-        MainSupport.runPiece("piece6.txt");
+        MainSupport.runPiece("piece8.txt");
 
     }
 

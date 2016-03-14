@@ -69,22 +69,28 @@ public class CalcByTime {
             }
             return Collections.emptyList();
         }
+
+        @Override
+        public String toString() {
+            return "count="+set.size();
+        }
     }
 
     class ExprTreeEl{
-        Expr expr;
+        final Expr expr;
+        final boolean canChooseParameters;
         List<ChangeTreeEl> changes;
 
         long ops=0;
-        final boolean canChooseParameters;
         List<Map<String,Expr>> suggestedParameters;
 
         int opIdx=0;
         List<ChangeTreeEl> changesNotFinished;
         Expr res;
+        ChangeTreeEl resDueTo;
 
         ExprTreeEl(Expr expr, boolean canChooseParameters) {
-            this.expr = expr;
+            this.expr = expr.simplifyFuncOrApply();
             this.canChooseParameters = canChooseParameters;
         }
 
@@ -114,8 +120,10 @@ public class CalcByTime {
             }else if( ch.exprFromRule!=null ) {
                 if (expr.equals(ch.exprFromRule)) {
                     res = Expr.True;
+                    resDueTo = ch;
                 } else if (ch.exprFromRule.node.equals("=") && expr.equals(ch.exprFromRule.child(0))) {
                     res = ch.exprFromRule.child(1);
+                    resDueTo = ch;
                 } else if( canChooseParameters ){
                     suggestedParameters = expr.unifyOptions(ch.exprFromRule);
                     if( suggestedParameters.isEmpty() ){
@@ -137,6 +145,14 @@ public class CalcByTime {
             }
             changes = exprSimplifyDeep(expr, new Scope());
             if( changes.isEmpty() && canChooseParameters ) {
+                if( expr.node.equals("=") ){
+                    Expr l = expr.child(0).simplifyApplyFunc();
+                    Expr r = expr.child(1);
+                    List<Map<String, Expr>> opts = r.unifyOptions(l);
+                    if( ! opts.isEmpty() ) {
+                        suggestedParameters = opts;
+                    }
+                }
                 for (Rule r : rules) {
                     List<Map<String, Expr>> opts = expr.unifyOptions(r.assertion);
                     if( ! opts.isEmpty() ){
@@ -250,7 +266,7 @@ public class CalcByTime {
         Results results = new Results();
         results.add(expr);
         int step=0;
-        for(; step<100 && !exprTreeEl.finished(); step++){
+        for(; step<1000 && !exprTreeEl.finished(); step++){
             exprTreeEl.doOper(results);
             for( Expr e : results.takeNextGroup() ) {
                 e = Normalizer.normalize(e);
@@ -260,6 +276,7 @@ public class CalcByTime {
                 }
             }
         }
+        System.out.println("STEP="+step);
         if( resultPath==null && exprTreeEl.res!=null ){
             resultPath = new FringeEl(exprTreeEl.res, null, null);
         }
