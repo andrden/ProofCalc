@@ -16,7 +16,7 @@ $a ( ∂ f ) ( x ) = ( ∂ g ) ( x ) + ( ∂ h ) ( x )
 
 
 $e ff = ( x ↦ (x + sin(x)) )
-$?focus ( ∂ ff ) ( x )
+$? ( ∂ ff ) ( x )
 $= cos(x) + 1
 #DERIV path: ((∂ ff) x)
 #DERIV path: By $e f = ( x ↦ g ( x ) + h ( x ) )  $a ( ∂ f ) ( x ) = ( ∂ g ) ( x ) + ( ∂ h ) ( x ) {x=x} =>  (((∂ (func x x)) x) + ((∂ sin) x))

@@ -154,10 +154,12 @@ public class CalcByTime {
                     }
                 }
                 for (Rule r : rules) {
-                    List<Map<String, Expr>> opts = expr.unifyOptions(r.assertion);
-                    if( ! opts.isEmpty() ){
-                        suggestedParameters = opts;
-                        break;
+                    if( r.cond.isEmpty() ) {
+                        List<Map<String, Expr>> opts = expr.unifyOptions(r.assertion);
+                        if (!opts.isEmpty()) {
+                            suggestedParameters = opts;
+                            break;
+                        }
                     }
                 }
             }
@@ -223,12 +225,15 @@ public class CalcByTime {
                 if (r.freeVariables.containsAll(subs.keySet())) {
                     //exprNew = r.assertion.child(1).substitute(unifMap);
                     exprFromRule = r.assertion.substitute(subs);
-                    Expr subst;
+                    Expr from, to;
                     if( exprFromRule.node.equals("=") ) {
-                        subst = applySubstitution(origExpr, exprFromRule.child(0), exprFromRule.child(1));
-                    }else {
-                        subst = applySubstitution(origExpr, exprFromRule, Expr.True);
+                        from = exprFromRule.child(0);
+                        to = exprFromRule.child(1);
+                    } else {
+                        from = exprFromRule;
+                        to = Expr.True;
                     }
+                    Expr subst = applySubstitution(origExpr.simplifyFuncOrApply(), from, to);
                     subst = subst.simplifyApplyFunc();
                     if( results!=null ) {
                         if (results.add(subst)) {
