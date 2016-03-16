@@ -171,6 +171,7 @@ public class CalcByTime {
     class ChangeTreeEl{
         ExprTreeEl next;
         long ops;
+        LinkedHashMap<Expr,Expr> initialSubstitutions;
         Rule r;
         Map<String, Expr> unifMap;
         boolean condsOk = false;
@@ -181,6 +182,12 @@ public class CalcByTime {
 
         boolean finished(){
             return stalled || (next!=null && next.finished());
+        }
+        void addInitialSubstitution(Expr from, Expr to){
+            if( initialSubstitutions == null ){
+                initialSubstitutions = new LinkedHashMap<>();
+            }
+            initialSubstitutions.put(from, to);
         }
 
         @Override
@@ -233,7 +240,13 @@ public class CalcByTime {
                         from = exprFromRule;
                         to = Expr.True;
                     }
-                    Expr subst = applySubstitution(origExpr.simplifyFuncOrApply(), from, to);
+                    Expr orig = origExpr.simplifyFuncOrApply();
+                    if( initialSubstitutions!=null ){
+                        for( Map.Entry<Expr,Expr> me : initialSubstitutions.entrySet() ){
+                            orig = applySubstitution(orig, me.getKey(), me.getValue());
+                        }
+                    }
+                    Expr subst = applySubstitution(orig, from, to);
                     subst = subst.simplifyApplyFunc();
                     if( results!=null ) {
                         if (results.add(subst)) {
@@ -414,10 +427,16 @@ public class CalcByTime {
     List<ChangeTreeEl> exprSimplifyDeep(Expr expr, Scope scope) {
         List<ChangeTreeEl> ways = exprSimplify(expr, scope);
         for( Expr splitPair : Normalizer.plusMinus.separateAllPossiblePairs(expr) ){
-            ways.addAll(exprSimplifyDeep(splitPair, scope));
+            for( ChangeTreeEl i : exprSimplifyDeep(splitPair, scope) ) {
+                i.addInitialSubstitution(expr, splitPair);
+                ways.add(i);
+            }
         }
         for( Expr splitPair : Normalizer.multDiv.separateAllPossiblePairs(expr) ){
-            ways.addAll(exprSimplifyDeep(splitPair, scope));
+            for( ChangeTreeEl i : exprSimplifyDeep(splitPair, scope) ) {
+                i.addInitialSubstitution(expr, splitPair);
+                ways.add(i);
+            }
         }
         if( expr.hasChildren() ) {
             int start = 0;
