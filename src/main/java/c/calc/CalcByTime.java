@@ -248,6 +248,7 @@ public class CalcByTime {
                     }
                     Expr subst = applySubstitution(orig, from, to);
                     subst = subst.simplifyApplyFunc();
+                    subst = Normalizer.normalize(subst);
                     if( results!=null ) {
                         if (results.add(subst)) {
                             next = new ExprTreeEl(subst, false);
