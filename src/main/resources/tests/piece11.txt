@@ -13,7 +13,7 @@ $a lim0 (x ↦ 2) = 2
 $? lim0 cos
 $= cos(0)
 
-$?focus lim0 (y ↦ cos (y))
+$? lim0 (y ↦ cos (y))
 $= cos(0)
 
 $? lim0 (y ↦ 2 * cos (y))

@@ -22,11 +22,13 @@ public class Tests {
 
         Parser parser = new Parser();
 
+        Expr e2 = parser.parse("lim0 (y ↦ cos(y))");
+        assertEq("(apply lim0 cos)", e2.simplifyFuncOrApply().toLispString());
+
         Expr e = parser.parse("(x ↦ ( (x ↦ x ^ 3) ((x ↦ 1 + x) (x)) ) )");
         assertEq("(func x (^ (+ 1 x) 3))", e.simplifyApplyFunc().toLispString());
 
-        Expr e2 = parser.parse("lim0 (y ↦ cos(y))");
-        assertEq("lim0 cos", e2.simplifyFuncOrApply().toLispString());
+
         assertTrue(parser.parse("x ↦ (1 + x)").equals(parser.parse("y ↦ (1 + y)")));
     }
 

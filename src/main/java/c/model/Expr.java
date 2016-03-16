@@ -1,6 +1,7 @@
 package c.model;
 
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * Created by denny on 8/10/15.
@@ -221,44 +222,63 @@ public class Expr {
         }
     }
 
-
-    public Expr simplifyFuncApply(){
-        // (func x (apply cos x)) -> cos
+    Expr simplifier(Function<Expr,Expr> shallowSimplifyOper){
         if( sub==null ){
             return this;
         }
 
-        if( node.equals("func") && rightChild().node.equals("apply") && sub[0].equals(rightChild().rightChild()) ){
-            return rightChild().sub[0];
+        Expr enew = shallowSimplifyOper.apply(this);
+        if( enew != this ){
+            return enew;
+        }
+
+        boolean change = false;
+        for( Expr s : sub ){
+            if( s != s.simplifier(shallowSimplifyOper) ){
+                change = true;
+                break;
+            }
+        }
+        if( ! change ){
+            return this;
         }
 
         List<Expr> subList = new ArrayList<>();
         for( Expr s : sub ){
-            subList.add(s.simplifyApplyFunc());
+            subList.add(s.simplifier(shallowSimplifyOper));
         }
         Expr n = new Expr(node, subList);
         return n;
     }
 
-    public Expr simplifyApplyFunc(){
-        //(func x (+ (apply (func x (^ x 2)) x) (apply (func x 7) x)))    ->   (func x (+ (^ x 2) 7))
-        if( sub==null ){
-            return this;
+    static final Function<Expr,Expr> simpFuncApply = (e) -> {
+        // (func x (apply cos x)) -> cos
+        if( e.node.equals("func") && e.rightChild().node.equals("apply") && e.sub[0].equals(e.rightChild().rightChild()) ){
+            return e.rightChild().sub[0];
         }
+        return e;
+    };
 
-        if( node.equals("apply") && sub[0].node.equals("func") ){
-            Expr func = sub[0];
+    static final Function<Expr,Expr> simpApplyFunc = (e) -> {
+        //(func x (+ (apply (func x (^ x 2)) x) (apply (func x 7) x)))    ->   (func x (+ (^ x 2) 7))
+        if( e.node.equals("apply") && e.sub[0].node.equals("func") ){
+            Expr func = e.sub[0];
             String funcVar = (String)(func.sub[0].node);
-            Expr subs = func.rightChild().substitute(Collections.singletonMap(funcVar, rightChild()));
+            Expr subs = func.rightChild().substitute(Collections.singletonMap(funcVar, e.rightChild()));
             return subs.simplifyApplyFunc(); // maybe there are several nested functions
         }
+        return e;
+    };
 
-        List<Expr> subList = new ArrayList<>();
-        for( Expr s : sub ){
-            subList.add(s.simplifyApplyFunc());
-        }
-        Expr n = new Expr(node, subList);
-        return n;
+
+    public Expr simplifyFuncApply(){
+        // (func x (apply cos x)) -> cos
+        return simplifier(simpFuncApply);
+    }
+
+    public Expr simplifyApplyFunc(){
+        //(func x (+ (apply (func x (^ x 2)) x) (apply (func x 7) x)))    ->   (func x (+ (^ x 2) 7))
+        return simplifier(simpApplyFunc);
     }
 
     boolean disjoint(Set<String> a, Set<String> b){
