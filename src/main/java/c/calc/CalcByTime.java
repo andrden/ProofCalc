@@ -174,6 +174,7 @@ public class CalcByTime {
         LinkedHashMap<Expr,Expr> initialSubstitutions;
         Rule r;
         Map<String, Expr> unifMap;
+        Set<Expr> scope;
         boolean condsOk = false;
         ExprTreeEl condCheck;
         Expr exprFromRule;
@@ -195,14 +196,19 @@ public class CalcByTime {
             return (stalled ? "stalled  " : "") + r;
         }
 
-        ChangeTreeEl(Rule r, Map<String, Expr> unifMap) {
+        ChangeTreeEl(Rule r, Map<String, Expr> unifMap, Set<Expr> scope) {
             this.r = r;
             this.unifMap = unifMap;
+            this.scope = scope;
             if( ! r.cond.isEmpty() ) {
                 Expr cond = r.cond.iterator().next();
                 Expr condSubs;
                 condSubs = cond.substitute(unifMap);
-                condCheck = new ExprTreeEl(condSubs, true);
+                if( scope.contains(condSubs) ){
+                    condsOk = true;
+                }else {
+                    condCheck = new ExprTreeEl(condSubs, true);
+                }
             }else{
                 condsOk = true;
             }
@@ -461,8 +467,8 @@ public class CalcByTime {
 
     List<ChangeTreeEl> exprSimplify(Expr expr, Scope scope) {
         List<ChangeTreeEl> changes = new ArrayList<>();
-        List<FringeEl> ways = new ArrayList<>();
-        ways.addAll(new CodedRules(expr).getWays());
+//        List<FringeEl> ways = new ArrayList<>();
+//        ways.addAll(new CodedRules(expr).getWays());
         for (Rule r : rules) {
             if (r.assertion.node.equals("=")) {
                 Expr template = r.assertion.child(0);
@@ -473,7 +479,7 @@ public class CalcByTime {
                     cases = template.unifyOptions(expr);
                 }
                 for( Map<String, Expr> unifMap : cases ){
-                    changes.add(new ChangeTreeEl(r, unifMap));
+                    changes.add(new ChangeTreeEl(r, unifMap, scope.all()));
 
                     /*
                     List<Map<String, Expr>> options = checkCanUseRule(r, unifMap, scope);
@@ -492,7 +498,7 @@ public class CalcByTime {
             }else{
                 Map<String, Expr> unifMap = r.assertion.unify(expr);
                 if( unifMap!=null ) {
-                    changes.add(new ChangeTreeEl(r, unifMap));
+                    changes.add(new ChangeTreeEl(r, unifMap, scope.all()));
 //                    List<Map<String, Expr>> subDerivations = checkCanUseRule(r, unifMap, scope);
 //                    boolean canUseRule = ! subDerivations.isEmpty();
 //                    if( canUseRule ) {
