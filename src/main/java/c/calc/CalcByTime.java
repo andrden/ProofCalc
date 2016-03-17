@@ -172,7 +172,7 @@ public class CalcByTime {
         ExprTreeEl next;
         long ops;
         LinkedHashMap<Expr,Expr> initialSubstitutions;
-        Rule r;
+        Rule rule;
         Map<String, Expr> unifMap;
         Set<Expr> scope;
         boolean condsOk = false;
@@ -193,11 +193,17 @@ public class CalcByTime {
 
         @Override
         public String toString() {
-            return (stalled ? "stalled  " : "") + r;
+            return (stalled ? "stalled  " : "") + rule;
+        }
+
+        ChangeTreeEl(Rule r, Expr exprFromRule){
+            this.rule = r;
+            this.exprFromRule = exprFromRule;
+            condsOk = true;
         }
 
         ChangeTreeEl(Rule r, Map<String, Expr> unifMap, Set<Expr> scope) {
-            this.r = r;
+            this.rule = r;
             this.unifMap = unifMap;
             this.scope = scope;
             if( ! r.cond.isEmpty() ) {
@@ -231,13 +237,17 @@ public class CalcByTime {
             }
 
             if( condsOk ){
-                Map<String, Expr> subs = new HashMap<>(unifMap);
-                if( suggestedParameters!=null ){
-                    subs.putAll(suggestedParameters.get(0));
+                if( exprFromRule==null ) { // if not direct result from CodedRules
+                    Map<String, Expr> subs = new HashMap<>(unifMap);
+                    if (suggestedParameters != null) {
+                        subs.putAll(suggestedParameters.get(0));
+                    }
+                    if (rule.freeVariables.containsAll(subs.keySet())) {
+                        //exprNew = r.assertion.child(1).substitute(unifMap);
+                        exprFromRule = rule.assertion.substitute(subs);
+                    }
                 }
-                if (r.freeVariables.containsAll(subs.keySet())) {
-                    //exprNew = r.assertion.child(1).substitute(unifMap);
-                    exprFromRule = r.assertion.substitute(subs);
+                if( exprFromRule!=null ){
                     Expr from, to;
                     if( exprFromRule.node.equals("=") ) {
                         from = exprFromRule.child(0);
@@ -467,8 +477,11 @@ public class CalcByTime {
 
     List<ChangeTreeEl> exprSimplify(Expr expr, Scope scope) {
         List<ChangeTreeEl> changes = new ArrayList<>();
-//        List<FringeEl> ways = new ArrayList<>();
-//        ways.addAll(new CodedRules(expr).getWays());
+        List<FringeEl> ways = new ArrayList<>();
+        ways.addAll(new CodedRules(expr).getWays());
+        for( FringeEl e : ways ){
+            changes.add(new ChangeTreeEl(e.byRule, new Expr("=",expr,e.expr)));
+        }
         for (Rule r : rules) {
             if (r.assertion.node.equals("=")) {
                 Expr template = r.assertion.child(0);
