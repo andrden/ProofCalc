@@ -301,13 +301,15 @@ public class CalcByTime {
         Results results = new Results();
         results.add(expr);
         int step=0;
+        label_steps:
         for(; step<1000 && !exprTreeEl.finished(); step++){
             exprTreeEl.doOper(results);
             for( Expr e : results.takeNextGroup() ) {
                 e = Normalizer.normalize(e);
-                if (checkIfAnswer != null && checkIfAnswer.test(e)) { // answer reached, no more work required
+                if (e.equals(Expr.True) || e.equals(Expr.False) ||
+                      (checkIfAnswer != null && checkIfAnswer.test(e)) ) { // answer reached, no more work required
                     resultPath = new FringeEl(e, null, null);
-                    break;
+                    break label_steps;
                 }
             }
         }
