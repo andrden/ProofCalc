@@ -15,7 +15,7 @@ $a lim0 (x ↦ 2) = 2
 
 
 
-$? lim0 (y ↦ cos(x + y / 2) * sin(y / 2) * 2 / y)
+$?focus lim0 (y ↦ cos(x + y / 2) * sin(y / 2) * 2 / y)
 $= cos(x) * 0.5 * 2
 
 $? ∂ sin

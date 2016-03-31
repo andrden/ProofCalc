@@ -440,22 +440,37 @@ public class Expr {
 
     public Set<String> freeVariables(){
         Set<String> set = new HashSet<>();
+        Set<String> bound = new HashSet<>();
         if( isVar() ){
             set.add(node);
         }else {
-            freeVariables(set);
+            freeVariables(set, bound);
         }
         return set;
     }
 
-    private void freeVariables(Set<String> fillSet){
+    boolean isFunc(){
+        return node.equals("func");
+    }
+
+    private void freeVariables(Set<String> fillSet, Set<String> bound){
         if( sub==null ) return;
+        if( isFunc() ){
+            if( ! bound.add(child(0).node) ) { // func scope
+                throw new IllegalStateException("nested functions with same var.");
+            }
+        }
         for( Expr e : sub ){
             if( e.isVar() ){
-                fillSet.add(e.node);
+                if( ! bound.contains(e.node) ) {
+                    fillSet.add(e.node);
+                }
             }else{
-                e.freeVariables(fillSet);
+                e.freeVariables(fillSet, bound);
             }
+        }
+        if( isFunc() ){
+            bound.remove(child(0).node); // end func scope
         }
     }
 

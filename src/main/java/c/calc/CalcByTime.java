@@ -50,6 +50,10 @@ public class CalcByTime {
 //        }
     }
 
+    public List<Rule> getRules() {
+        return rules;
+    }
+
     class Results{
         Set<Expr> set = new HashSet<>();
         List<Expr> nextGroup = new ArrayList<>();
@@ -76,212 +80,6 @@ public class CalcByTime {
         }
     }
 
-    class ExprTreeEl{
-        final Expr expr;
-        final boolean canChooseParameters;
-        List<ChangeTreeEl> changes;
-
-        long ops=0;
-        List<Map<String,Expr>> suggestedParameters;
-
-        int opIdx=0;
-        List<ChangeTreeEl> changesNotFinished;
-        Expr res;
-        ChangeTreeEl resDueTo;
-
-        ExprTreeEl(Expr expr, boolean canChooseParameters) {
-            this.expr = expr.simplifyFuncOrApply();
-            this.canChooseParameters = canChooseParameters;
-        }
-
-        @Override
-        public String toString() {
-            return ""+expr;
-        }
-
-        boolean finished(){
-            return changesNotFinished !=null && changesNotFinished.isEmpty();
-        }
-
-        void doOper(Results results){
-            ops++;
-            if( finished() ){
-                return;
-            }
-            populateChildren();
-            if( finished() ){
-                return;
-            }
-            ChangeTreeEl ch = changesNotFinished.get(opIdx);
-
-            ch.doOper(results, expr);
-            if( ch.stalled ){
-                changesNotFinished.remove(opIdx); // dead end
-            }else if( ch.exprFromRule!=null ) {
-                if (expr.equals(ch.exprFromRule)) {
-                    res = Expr.True;
-                    resDueTo = ch;
-                } else if (ch.exprFromRule.node.equals("=") && expr.equals(ch.exprFromRule.child(0))) {
-                    res = ch.exprFromRule.child(1);
-                    resDueTo = ch;
-                } else if( canChooseParameters ){
-                    suggestedParameters = expr.unifyOptions(ch.exprFromRule);
-                    if( suggestedParameters.isEmpty() ){
-                        suggestedParameters = null;
-                    }
-                }
-                if( ch.finished() ) {
-                    changesNotFinished.remove(opIdx);
-                }
-            }
-            if( ! finished() ){
-                opIdx = (opIdx + 1) % changesNotFinished.size();
-            }
-        }
-
-        void populateChildren(){
-            if( changes!=null ){
-                return;
-            }
-            changes = exprSimplifyDeep(expr, new Scope());
-            if( changes.isEmpty() && canChooseParameters ) {
-                if( expr.node.equals("=") ){
-                    Expr l = expr.child(0).simplifyApplyFunc();
-                    Expr r = expr.child(1);
-                    List<Map<String, Expr>> opts = r.unifyOptions(l);
-                    if( ! opts.isEmpty() ) {
-                        suggestedParameters = opts;
-                    }
-                }
-                for (Rule r : rules) {
-                    if( r.cond.isEmpty() ) {
-                        List<Map<String, Expr>> opts = expr.unifyOptions(r.assertion);
-                        if (!opts.isEmpty()) {
-                            suggestedParameters = opts;
-                            break;
-                        }
-                    }
-                }
-            }
-            changesNotFinished = new ArrayList<>(changes);
-        }
-    }
-
-
-    class ChangeTreeEl{
-        ExprTreeEl next;
-        long ops;
-        LinkedHashMap<Expr,Expr> initialSubstitutions;
-        Rule rule;
-        Map<String, Expr> unifMap;
-        Set<Expr> scope;
-        boolean condsOk = false;
-        ExprTreeEl condCheck;
-        Expr exprFromRule;
-        List<Map<String,Expr>> suggestedParameters;
-        boolean stalled = false;
-
-        boolean finished(){
-            return stalled || (next!=null && next.finished());
-        }
-        void addInitialSubstitution(Expr from, Expr to){
-            if( initialSubstitutions == null ){
-                initialSubstitutions = new LinkedHashMap<>();
-            }
-            initialSubstitutions.put(from, to);
-        }
-
-        @Override
-        public String toString() {
-            return (stalled ? "stalled  " : "") + rule;
-        }
-
-        ChangeTreeEl(Rule r, Expr exprFromRule){
-            this.rule = r;
-            this.exprFromRule = exprFromRule;
-            condsOk = true;
-        }
-
-        ChangeTreeEl(Rule r, Map<String, Expr> unifMap, Set<Expr> scope) {
-            this.rule = r;
-            this.unifMap = unifMap;
-            this.scope = scope;
-            if( ! r.cond.isEmpty() ) {
-                Expr cond = r.cond.iterator().next();
-                Expr condSubs;
-                condSubs = cond.substitute(unifMap);
-                if( scope.contains(condSubs) ){
-                    condsOk = true;
-                }else {
-                    condCheck = new ExprTreeEl(condSubs, true);
-                }
-            }else{
-                condsOk = true;
-            }
-        }
-        void doOper(Results results, Expr origExpr) {
-            ops++;
-            if( next!=null ){
-                next.doOper(results);
-                return;
-            }
-            if( ! condsOk && ! stalled ) {
-                condCheck.doOper(null);
-                if( condCheck.res==Expr.True || condCheck.suggestedParameters!=null ){
-                    suggestedParameters = condCheck.suggestedParameters;
-                    condsOk = true;
-                }else if( condCheck.finished() ){
-                    stalled = true;
-                    return;
-                }
-            }
-
-            if( condsOk ){
-                if( exprFromRule==null ) { // if not direct result from CodedRules
-                    Map<String, Expr> subs = new HashMap<>(unifMap);
-                    if (suggestedParameters != null) {
-                        subs.putAll(suggestedParameters.get(0));
-                    }
-                    if (rule.freeVariables.containsAll(subs.keySet())) {
-                        //exprNew = r.assertion.child(1).substitute(unifMap);
-                        exprFromRule = rule.assertion.substitute(subs);
-                    }
-                }
-                if( exprFromRule!=null ){
-                    Expr from, to;
-                    if( exprFromRule.node.equals("=") ) {
-                        from = exprFromRule.child(0);
-                        to = exprFromRule.child(1);
-                    } else {
-                        from = exprFromRule;
-                        to = Expr.True;
-                    }
-                    Expr orig = origExpr.simplifyFuncOrApply();
-                    if( initialSubstitutions!=null ){
-                        for( Map.Entry<Expr,Expr> me : initialSubstitutions.entrySet() ){
-                            orig = applySubstitution(orig, me.getKey(), me.getValue());
-                        }
-                    }
-                    Expr subst = applySubstitution(orig, from, to);
-                    subst = subst.simplifyApplyFunc();
-                    subst = Normalizer.normalize(subst);
-                    if( results!=null ) {
-                        if (results.add(subst)) {
-                            next = new ExprTreeEl(subst, false);
-                        } else {
-                            stalled = true; // this is a duplicate branch
-                        }
-                    }
-
-                    //System.out.println(expr + " ==simplified==> " + exprNew);
-                    //                if( ! exprNew.toLispString().contains(expr.toLispString()) ) { // if we are not actually complicating
-                    //                    FringeEl fe = new FringeEl(exprNew, r, m);
-                    //                    ways.add(fe);
-                    //                }
-                }
-            }
-        }
-    }
 
     public Expr quest(Expr expr, Predicate<Expr> checkIfAnswer, int maxOps){
         if( subResults.containsKey(expr) ){
@@ -297,12 +95,12 @@ public class CalcByTime {
         FringeEl resultPath = null;
 
         expr = Normalizer.normalize(expr);
-        ExprTreeEl exprTreeEl = new ExprTreeEl(expr, false);
+        ExprTreeEl exprTreeEl = new ExprTreeEl(this, expr, false);
         Results results = new Results();
         results.add(expr);
         int step=0;
         label_steps:
-        for(; step<1000 && !exprTreeEl.finished(); step++){
+        for(; step<10000 && !exprTreeEl.finished(); step++){
             exprTreeEl.doOper(results);
             for( Expr e : results.takeNextGroup() ) {
                 e = Normalizer.normalize(e);
@@ -324,59 +122,6 @@ public class CalcByTime {
         Set<FringeEl> visited = new LinkedHashSet<>(); // for avoiding loops
         visited.addAll(fringe);
 
-//        while (++step<maxOps && ! fringe.isEmpty() ) {
-//            FringeEl el = shortest(fringe);
-//            if( ! el.expr.hasChildren() ){
-//                resultPath = el;
-//                break; // single term cannot be simplified
-//            }
-//            if( el.toString().contains("(+ (* (^ x 2) (apply cos x)) (* (apply sin x) 2 x))") ){
-//                breakpoint();
-//            }
-//            if( checkIfAnswer!=null && checkIfAnswer.test(el.expr) ){ // answer reached, no more work required
-//                resultPath = el;
-//                break;
-//            }
-////            if( el.expr.toLispString().length()<q.assertion.toLispString().length() ){
-////                break;
-////            }
-//            fringe.remove(el);
-//            String exprString = el.expr.toMathString();
-//            println(indent, "QUEST try #" + step + ": " + exprString);
-//            if( exprString.contains("(lim0 (func y ((cos ((y * (/ 2)) + x)) * (sin (y * (/ 2))) * 2 * (/ y))))") ){
-//                breakpoint();
-//            }
-//            //el = tryByPairs(el);
-//            el = el.newExpr(Normalizer.normalize(el.expr));
-//            if( ! visited.contains(el) ){
-//                visited.add(el);
-//                fringe.add(el);
-//            }
-//
-////            List<FringeEl> exprNew = exprSimplifyDeep(el.expr, new Scope());
-////            for( FringeEl feNew : exprNew ){
-////                Expr e = feNew.expr;
-////                e = Normalizer.normalize(e);
-////                e = e.simplifyApplyFunc();
-////                e = Normalizer.normalize(e);
-////                feNew = feNew.newExpr(e);
-////                feNew.parent = el;
-////                if( ! visited.contains(feNew) ){
-////                    visited.add(feNew);
-////                    fringe.add(feNew);
-////                }
-////            }
-//        }
-//        if( resultPath==null ){
-//            resultPath = shortest(visited);
-//            if( checkIfAnswer!=null ){
-//                List<FringeEl> topShortest = topShortest(visited, 15);
-//                Collections.reverse(topShortest);
-//                for( FringeEl el : topShortest ){
-//                    println(indent, "Candidate: "+el.expr.toMathString());
-//                }
-//            }
-//        }
         Expr res = resultPath.expr;
         cacheResult(origExpr, res);
         if( checkIfAnswer!=null ){
@@ -426,105 +171,7 @@ public class CalcByTime {
                 .collect(Collectors.toList());
     }
 
-    Expr applySubstitution(Expr expr, Expr from, Expr to){
-        if( expr.equals(from) ){
-            return to;
-        }
-        if( expr.hasChildren() ){
-            for (int i = 0; i < expr.subCount(); i++) {
-                Expr child = expr.child(i);
-                Expr subst = applySubstitution(child, from, to);
-                if( subst!=null ){
-                    Expr clone = expr.replaceChild(i, subst);
-                    return clone;
-                }
-            }
-        }
-        return null;
-    }
 
-    List<ChangeTreeEl> exprSimplifyDeep(Expr expr, Scope scope) {
-        List<ChangeTreeEl> ways = exprSimplify(expr, scope);
-        for( Expr splitPair : Normalizer.plusMinus.separateAllPossiblePairs(expr) ){
-            for( ChangeTreeEl i : exprSimplifyDeep(splitPair, scope) ) {
-                i.addInitialSubstitution(expr, splitPair);
-                ways.add(i);
-            }
-        }
-        for( Expr splitPair : Normalizer.multDiv.separateAllPossiblePairs(expr) ){
-            for( ChangeTreeEl i : exprSimplifyDeep(splitPair, scope) ) {
-                i.addInitialSubstitution(expr, splitPair);
-                ways.add(i);
-            }
-        }
-        if( expr.hasChildren() ) {
-            int start = 0;
-            Scope subScope = scope;
-            if( expr.isQuantified() ){
-                start = 2;
-                subScope = scope.push(new Expr("∈", expr.child(0), expr.child(1)));
-            }
-            for (int i = start; i < expr.subCount(); i++) {
-                Expr child = expr.child(i);
-                List<ChangeTreeEl> elist = exprSimplifyDeep(child, subScope);
-                ways.addAll(elist);
-//                for( FringeEl fe : elist ){
-//                    Expr clone = expr.replaceChild(i, fe.expr);
-//                    ways.add(fe.newExpr(clone));
-//                }
-            }
-        }
-        return ways;
-    }
-
-    List<ChangeTreeEl> exprSimplify(Expr expr, Scope scope) {
-        List<ChangeTreeEl> changes = new ArrayList<>();
-        List<FringeEl> ways = new ArrayList<>();
-        ways.addAll(new CodedRules(expr).getWays());
-        for( FringeEl e : ways ){
-            changes.add(new ChangeTreeEl(e.byRule, new Expr("=",expr,e.expr)));
-        }
-        for (Rule r : rules) {
-            if (r.assertion.node.equals("=")) {
-                Expr template = r.assertion.child(0);
-                List<Map<String,Expr>> cases;
-                if( r.freeVariables.isEmpty() && ! template.equals(expr) ){
-                    cases = Collections.emptyList(); // no way it can be unified
-                }else {
-                    cases = template.unifyOptions(expr);
-                }
-                for( Map<String, Expr> unifMap : cases ){
-                    changes.add(new ChangeTreeEl(r, unifMap, scope.all()));
-
-                    /*
-                    List<Map<String, Expr>> options = checkCanUseRule(r, unifMap, scope);
-                    for( Map<String, Expr> m : options ){
-                        if( r.freeVariables.containsAll(m.keySet()) ){
-                            Expr exprNew = r.assertion.child(1).substitute(m);
-                            //System.out.println(expr + " ==simplified==> " + exprNew);
-                            if( ! exprNew.toLispString().contains(expr.toLispString()) ) { // if we are not actually complicating
-                                FringeEl fe = new FringeEl(exprNew, r, m);
-                                ways.add(fe);
-                            }
-                        }
-                    }
-                    */
-                }
-            }else{
-                Map<String, Expr> unifMap = r.assertion.unify(expr);
-                if( unifMap!=null ) {
-                    changes.add(new ChangeTreeEl(r, unifMap, scope.all()));
-//                    List<Map<String, Expr>> subDerivations = checkCanUseRule(r, unifMap, scope);
-//                    boolean canUseRule = ! subDerivations.isEmpty();
-//                    if( canUseRule ) {
-//                        //System.out.println("ok");
-//                        ways.add(new FringeEl(new Expr("True"), r, unifMap));
-//                    }
-                }
-            }
-        }
-        return changes;
-    }
 
     private List<Map<String, Expr>> checkCanUseRule(Rule r, Map<String, Expr> unifMap, Scope scope) {
         List<Map<String, Expr>> cases = Collections.singletonList(unifMap);

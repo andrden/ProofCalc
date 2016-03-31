@@ -48,11 +48,11 @@ $= True
 $? has_lim0 ( y ↦ y * y )
 $= True
 
-$?focus has_lim0 ( y ↦ cos(y * y) )
-$= 5
+$? has_lim0 ( y ↦ cos(y * y) )
+$= True
 
 $? has_lim0 cos
-$= 5
+$= True
 
 $? lim0 (y ↦ 2 * cos (y))
 $= cos(0) * 2

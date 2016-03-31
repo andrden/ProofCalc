@@ -23,6 +23,7 @@ public class Tests {
         Parser parser = new Parser();
 
         Expr e2 = parser.parse("lim0 (y ↦ cos(y))");
+        assertTrue(e2.freeVariables().isEmpty());
         assertEq("(apply lim0 cos)", e2.simplifyFuncOrApply().toLispString());
 
         Expr e = parser.parse("(x ↦ ( (x ↦ x ^ 3) ((x ↦ 1 + x) (x)) ) )");
