@@ -17,6 +17,7 @@ class ChangeTreeEl {
     Rule rule;
     Map<String, Expr> unifMap;
     Set<Expr> scope;
+    Path path;
     boolean condsOk = false;
     ExprTreeEl condCheck;
     Expr exprFromRule;
@@ -38,18 +39,20 @@ class ChangeTreeEl {
         return (stalled ? "stalled  " : "") + rule;
     }
 
-    ChangeTreeEl(CalcByTime calc, Rule r, Expr exprFromRule){
+    ChangeTreeEl(CalcByTime calc, Rule r, Expr exprFromRule, Path path){
         this.calc = calc;
         this.rule = r;
+        this.path = path;
         this.exprFromRule = exprFromRule;
         condsOk = true;
     }
 
-    ChangeTreeEl(CalcByTime calc, Rule r, Map<String, Expr> unifMap, Set<Expr> scope) {
+    ChangeTreeEl(CalcByTime calc, Rule r, Map<String, Expr> unifMap, Set<Expr> scope, Path path) {
         this.calc = calc;
         this.rule = r;
         this.unifMap = unifMap;
         this.scope = scope;
+        this.path = path;
         if( ! r.cond.isEmpty() ) {
             Expr cond = r.cond.iterator().next();
             Expr condSubs;
@@ -109,7 +112,8 @@ class ChangeTreeEl {
                         orig = applySubstitution(orig, me.getKey(), me.getValue());
                     }
                 }
-                Expr subst = applySubstitution(orig, from, to);
+                //Expr subst = applySubstitution(orig, from, to);
+                Expr subst = applySubstitution(orig, path, to);
                 subst = subst.simplifyApplyFunc();
                 subst = Normalizer.normalize(subst);
                 if( results!=null ) {
@@ -129,7 +133,16 @@ class ChangeTreeEl {
         }
     }
 
-    Expr applySubstitution(Expr expr, Expr from, Expr to){
+    Expr applySubstitution(Expr expr, Path path, Expr to){
+        if( path.isEmpty() ){
+            return to;
+        }
+        int i = path.firstStep();
+        Expr newChild = applySubstitution(expr.child(i), path.tail(), to);
+        return expr.replaceChild(i, newChild);
+    }
+
+        Expr applySubstitution(Expr expr, Expr from, Expr to){
         if( expr.equals(from) ){
             return to;
         }

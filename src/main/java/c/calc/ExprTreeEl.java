@@ -81,7 +81,7 @@ class ExprTreeEl {
         if( changes!=null ){
             return;
         }
-        changes = exprSimplifyDeep(expr, new Scope());
+        changes = exprSimplifyDeep(expr, new Path(), new Scope());
         if( changes.isEmpty() && canChooseParameters ) {
             if( expr.node.equals("=") ){
                 Expr l = expr.child(0).simplifyApplyFunc();
@@ -104,16 +104,16 @@ class ExprTreeEl {
         changesNotFinished = new ArrayList<>(changes);
     }
 
-    List<ChangeTreeEl> exprSimplifyDeep(Expr expr, Scope scope) {
-        List<ChangeTreeEl> ways = exprSimplify(expr, scope);
+    List<ChangeTreeEl> exprSimplifyDeep(Expr expr, Path path, Scope scope) {
+        List<ChangeTreeEl> ways = exprSimplify(expr, path, scope);
         for( Expr splitPair : Normalizer.plusMinus.separateAllPossiblePairs(expr) ){
-            for( ChangeTreeEl i : exprSimplifyDeep(splitPair, scope) ) {
+            for( ChangeTreeEl i : exprSimplifyDeep(splitPair, path, scope) ) {
                 i.addInitialSubstitution(expr, splitPair);
                 ways.add(i);
             }
         }
         for( Expr splitPair : Normalizer.multDiv.separateAllPossiblePairs(expr) ){
-            for( ChangeTreeEl i : exprSimplifyDeep(splitPair, scope) ) {
+            for( ChangeTreeEl i : exprSimplifyDeep(splitPair, path, scope) ) {
                 i.addInitialSubstitution(expr, splitPair);
                 ways.add(i);
             }
@@ -127,7 +127,9 @@ class ExprTreeEl {
             }
             for (int i = start; i < expr.subCount(); i++) {
                 Expr child = expr.child(i);
-                List<ChangeTreeEl> elist = exprSimplifyDeep(child, subScope);
+                path.push(i);
+                List<ChangeTreeEl> elist = exprSimplifyDeep(child, path, subScope);
+                path.pop();
                 ways.addAll(elist);
 //                for( FringeEl fe : elist ){
 //                    Expr clone = expr.replaceChild(i, fe.expr);
@@ -138,12 +140,13 @@ class ExprTreeEl {
         return ways;
     }
 
-    List<ChangeTreeEl> exprSimplify(Expr expr, Scope scope) {
+    List<ChangeTreeEl> exprSimplify(Expr expr, Path path, Scope scope) {
         List<ChangeTreeEl> changes = new ArrayList<>();
         List<FringeEl> ways = new ArrayList<>();
         ways.addAll(new CodedRules(expr).getWays());
         for( FringeEl e : ways ){
-            changes.add(new ChangeTreeEl(calc, e.byRule, new Expr("=",expr,e.expr)));
+            //changes.add(new ChangeTreeEl(calc, e.byRule, new Expr("=",expr,e.expr)));
+            changes.add(new ChangeTreeEl(calc, e.byRule, new Expr("=",expr,e.expr), path));
         }
         for (Rule r : calc.getRules()) {
             if (r.assertion.node.equals("=")) {
@@ -155,7 +158,7 @@ class ExprTreeEl {
                     cases = template.unifyOptions(expr);
                 }
                 for( Map<String, Expr> unifMap : cases ){
-                    changes.add(new ChangeTreeEl(calc, r, unifMap, scope.all()));
+                    changes.add(new ChangeTreeEl(calc, r, unifMap, scope.all(), path.copy()));
 
                     /*
                     List<Map<String, Expr>> options = checkCanUseRule(r, unifMap, scope);
@@ -174,7 +177,7 @@ class ExprTreeEl {
             }else{
                 Map<String, Expr> unifMap = r.assertion.unify(expr);
                 if( unifMap!=null ) {
-                    changes.add(new ChangeTreeEl(calc, r, unifMap, scope.all()));
+                    changes.add(new ChangeTreeEl(calc, r, unifMap, scope.all(), path.copy()));
 //                    List<Map<String, Expr>> subDerivations = checkCanUseRule(r, unifMap, scope);
 //                    boolean canUseRule = ! subDerivations.isEmpty();
 //                    if( canUseRule ) {

@@ -1,5 +1,4 @@
-$e f = ( x ↦ g ( x ) * h ( x ) )
-$a lim0 f = (lim0 g) * (lim0 h)
+$a lim0 ( x ↦ g ( x ) * h ( x ) ) = (lim0 g) * (lim0 h)
 
 $a ∂ f = (x ↦ lim0 (y ↦ (f(x + y) - f(x)) / y))
 
@@ -15,7 +14,7 @@ $a lim0 (x ↦ 2) = 2
 
 
 
-$?focus lim0 (y ↦ cos(x + y / 2) * sin(y / 2) * 2 / y)
+$? lim0 (y ↦ cos(x + y / 2) * sin(y / 2) * 2 / y)
 $= cos(x) * 0.5 * 2
 
 $? ∂ sin
