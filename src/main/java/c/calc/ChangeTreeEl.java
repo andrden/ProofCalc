@@ -138,7 +138,8 @@ class ChangeTreeEl {
             return to;
         }
         int i = path.firstStep();
-        Expr newChild = applySubstitution(expr.child(i), path.tail(), to);
+        Expr child = expr.child(i);
+        Expr newChild = applySubstitution(child, path.tail(), to);
         return expr.replaceChild(i, newChild);
     }
 

@@ -38,6 +38,9 @@ class ExprTreeEl {
     }
 
     boolean finished(){
+        if( suggestedParameters!=null ){
+            return true;
+        }
         return changesNotFinished !=null && changesNotFinished.isEmpty();
     }
 
@@ -81,8 +84,7 @@ class ExprTreeEl {
         if( changes!=null ){
             return;
         }
-        changes = exprSimplifyDeep(expr, new Path(), new Scope());
-        if( changes.isEmpty() && canChooseParameters ) {
+        if( canChooseParameters ) {
             if( expr.node.equals("=") ){
                 Expr l = expr.child(0).simplifyApplyFunc();
                 Expr r = expr.child(1);
@@ -101,7 +103,10 @@ class ExprTreeEl {
                 }
             }
         }
-        changesNotFinished = new ArrayList<>(changes);
+        if( suggestedParameters==null ){
+            changes = exprSimplifyDeep(expr, new Path(), new Scope());
+            changesNotFinished = new ArrayList<>(changes);
+        }
     }
 
     List<ChangeTreeEl> exprSimplifyDeep(Expr expr, Path path, Scope scope) {

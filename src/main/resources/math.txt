@@ -86,7 +86,7 @@ $e yy = 2
 $? ff ( ff ( yy ) )
 $= 0
 
-$?focus 1 + 2
+$? 1 + 2
 $= 3
 
 $? 2 + 1
@@ -191,7 +191,7 @@ $a sh x = ( exp x - 1 / exp x ) / 2
 
 ############### Verify hyperbolic trigonometry:
 
-$a? ( ch x ) ^ 2 - ( sh x ) ^ 2
+$a?focus ( ch x ) ^ 2 - ( sh x ) ^ 2
 $= 1
 
 $? ( ( ch y ) ^ 2 - ( sh y ) ^ 2 ) * y

@@ -24,6 +24,9 @@ public class Rule {
         this.cond = cond;
         this.srcLines = srcLines;
         freeVariables = assertion==null ? null : assertion.freeVariables();
+//        if( toString().contains("(= x x)\n") ){
+//            System.currentTimeMillis();
+//        }
     }
 
     public void setName(String name) {
@@ -56,5 +59,10 @@ public class Rule {
 
     public List<String> getSrcLines() {
         return srcLines;
+    }
+
+    public boolean isTrivial(){
+        // (= x x) is not a useful rule
+        return assertion.node.equals("=") && assertion.child(0).equals(assertion.child(1));
     }
 }

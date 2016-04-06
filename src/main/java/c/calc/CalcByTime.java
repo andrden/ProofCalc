@@ -32,7 +32,14 @@ public class CalcByTime {
                 condsNorm.add(ceNorm);
             }
             //if( ! r.cond.equals(condsNorm) ){
-                this.rules.add(new Rule(r.assertion, condsNorm, r.getSrcLines()));
+            this.rules.add(new Rule(r.assertion, condsNorm, r.getSrcLines()));
+            Expr normalizedAssertion = Normalizer.normalize(r.assertion);
+            if( ! r.assertion.equals(normalizedAssertion) ) {
+                Rule rn = new Rule(normalizedAssertion, condsNorm, r.getSrcLines());
+                if( ! rn.isTrivial() ) {
+                    this.rules.add(rn);
+                }
+            }
             //}
         }
 
