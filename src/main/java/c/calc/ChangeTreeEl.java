@@ -108,7 +108,9 @@ class ChangeTreeEl {
                 }
                 Expr orig = origExpr.simplifyFuncOrApply();
                 if( initialSubstitutions!=null ){
-                    for( Map.Entry<Expr,Expr> me : initialSubstitutions.entrySet() ){
+                    List<Map.Entry<Expr,Expr>> initSub = new ArrayList<>(initialSubstitutions.entrySet());
+                    Collections.reverse(initSub);
+                    for( Map.Entry<Expr,Expr> me : initSub ){
                         orig = applySubstitution(orig, me.getKey(), me.getValue());
                     }
                 }

@@ -191,7 +191,7 @@ $a sh x = ( exp x - 1 / exp x ) / 2
 
 ############### Verify hyperbolic trigonometry:
 
-$a?focus ( ch x ) ^ 2 - ( sh x ) ^ 2
+$a? ( ch x ) ^ 2 - ( sh x ) ^ 2
 $= 1
 
 $? ( ( ch y ) ^ 2 - ( sh y ) ^ 2 ) * y
@@ -212,7 +212,7 @@ $= - ( c ^ 2 )
 $? (x - y) * ( ch ψ ) ^ 2 + (y - x) * ( sh ψ ) ^ 2
 $= x - y
 
-$? ( x * sh ψ + c * ch ψ ) ^ 2 - ( x * ch ψ + c * sh ψ ) ^ 2
+$?focus ( x * sh ψ + c * ch ψ ) ^ 2 - ( x * ch ψ + c * sh ψ ) ^ 2
 $= c ^ 2 - x ^ 2
 
 $? x * ( ch ψ ) ^ 2 - x * ( sh ψ ) ^ 2
