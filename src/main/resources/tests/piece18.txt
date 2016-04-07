@@ -1,0 +1,22 @@
+$a ( x + y ) ^ 2 = x ^ 2 + 2 * x * y + y ^ 2
+
+$a ( x - y ) ^ 2 = x ^ 2 - 2 * x * y + y ^ 2
+
+$a ( x * y ) ^  2 = x ^ 2 * y ^ 2
+
+# doesn't work directly for now
+#$a x * z + y * z = (x + y) * z
+
+$a x * z - y * z = (x - y) * z
+
+$a ( ch x ) ^ 2 - ( sh x ) ^ 2 = 1
+
+$a ( sh x ) ^ 2 - ( ch x ) ^ 2 = - 1
+
+
+
+$? ((ch ψ) ^ 2) * c ^ 2 - ((sh ψ) ^ 2) * c ^ 2
+$= ((ch ψ) ^ 2 - (sh ψ) ^ 2) * c ^ 2
+
+$? ( x * sh ψ + c * ch ψ ) ^ 2 - ( x * ch ψ + c * sh ψ ) ^ 2
+$= c ^ 2 - x ^ 2

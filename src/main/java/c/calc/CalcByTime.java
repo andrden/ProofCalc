@@ -80,6 +80,12 @@ public class CalcByTime {
             }
             return Collections.emptyList();
         }
+        List<Expr> topShortest(int n){
+            return set.stream().sorted((a,b) -> Long.compare(a.toLispString().length(),b.toLispString().length()) )
+                    .limit(n)
+                    .collect(Collectors.toList());
+        }
+
 
         @Override
         public String toString() {
@@ -121,6 +127,11 @@ public class CalcByTime {
         System.out.println("STEP="+step);
         if( resultPath==null && exprTreeEl.res!=null ){
             resultPath = new FringeEl(exprTreeEl.res, null, null);
+        }
+        if( resultPath==null ){
+            for( Expr e : results.topShortest(15) ){
+                System.out.println("Res: "+e.toMathString());
+            }
         }
 
         Set<FringeEl> fringe = new LinkedHashSet<>();

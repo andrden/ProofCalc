@@ -1,0 +1,33 @@
+$a ( x * y ) ^  2 = x ^ 2 * y ^ 2
+
+$a ( x + y ) ^ 2 = x ^ 2 + 2 * x * y + y ^ 2
+
+$a ( x - y ) ^ 2 = x ^ 2 - 2 * x * y + y ^ 2
+
+
+
+# Need to fix:
+# uncommenting any of the following explicit expressions for 'ch' or 'sh'
+# causes number of operations for CalcByTime to increase from 400
+# to 86634 or 62282 (so more than x150)
+# while uncommenting both causes to loop even more than 150k STEPs,
+# processing can't be finished
+#$a ch y = ( exp y + 1 / exp y ) / 2
+
+#$a sh x = ( exp x - 1 / exp x ) / 2
+
+
+$a x * z - y * z = (x - y) * z
+
+$a ( ch x ) ^ 2 - ( sh x ) ^ 2 = 1
+
+$a ( sh x ) ^ 2 - ( ch x ) ^ 2 = - 1
+
+
+
+$? ((ch ψ) ^ 2) * c ^ 2 - ((sh ψ) ^ 2) * c ^ 2
+$= ((ch ψ) ^ 2 - (sh ψ) ^ 2) * c ^ 2
+
+
+$?focus ( x * sh ψ + c * ch ψ ) ^ 2 - ( x * ch ψ + c * sh ψ ) ^ 2
+$= c ^ 2 - x ^ 2
