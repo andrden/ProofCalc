@@ -3,6 +3,8 @@ package sp;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.sql.SQLContext;
+
 /**
  * Created by denny on 4/21/16.
  */
@@ -10,6 +12,7 @@ public class SparkMain2 {
     public static void main(String[] args) {
         SparkConf conf = new SparkConf().setMaster("local").setAppName("My App2");
         JavaSparkContext sc = new JavaSparkContext(conf);
+        SQLContext sql = new org.apache.spark.sql.SQLContext(sc);
 
         JavaRDD<String> rrd1 = sc.textFile("/home/denny/tmp/1.php");
 
